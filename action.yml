@@ -1,0 +1,26 @@
+name: 'crda'
+description: 'Analyse Vulnerabilities in application dependencies'
+author: 'Red Hat'
+branding:
+  icon: circle
+  color: red
+inputs:
+  manifest-file-path:
+    description: Path of target manifest file to perform analysis.
+    required: true
+    default: requirements.txt
+  output-file-path:
+    description: Path of the file to save analysis report.
+    required: true
+    default: redhat-codeready-dependency-analysis-report.json
+  pkg-installation-directory-path:
+    description: Path of a directory in workspace, where dependencies are installed.
+    required: true
+    default: site-dir
+
+outputs:
+  output_file:
+    description: "JSON output file"
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
