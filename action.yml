@@ -5,18 +5,28 @@ branding:
   icon: circle
   color: red
 inputs:
-  manifest-file-path:
+  manifest_file_path:
     description: Path of target manifest file to perform analysis.
     required: true
     default: requirements.txt
-  output-file-path:
+  output_file_name:
     description: Path of the file to save analysis report.
-    required: true
+    required: false
     default: redhat-codeready-dependency-analysis-report.json
-  pkg-installation-directory-path:
+  pkg_installation_directory_path:
     description: Path of a directory in workspace, where dependencies are installed.
-    required: true
-    default: site-dir
+    required: false
+    default: .
+  snyk_token:
+    description: ""
+    required: false
+  crda_key:
+    description: ""
+    required: false
+  consent_telemetry:
+    description: ""
+    required: false
+    default: "true"
 
 outputs:
   output_file:

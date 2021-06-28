@@ -2,9 +2,9 @@ import Crda from "./crda";
 
 namespace Analyse {
 
-    export async function configSet(consentTelemetry: boolean) {
+    export async function configSet(configKey: string, configValue: string): Promise<void> {
         const crdaExecArgs = [
-            Crda.Commands.Config, Crda.SubCommands.set, Crda.ConfigKeys.ConsentTelemetry, consentTelemetry.toString()
+            Crda.Commands.Config, Crda.SubCommands.set, configKey, configValue,
         ];
 
         await Crda.exec(crdaExecArgs);
@@ -13,15 +13,18 @@ namespace Analyse {
         const crdaOptions = Crda.getOptions({ "snyk-token": snykToken });
         const crdaExecArgs = [ Crda.Commands.Auth, ...crdaOptions ];
 
-        await Crda.exec(crdaExecArgs);
+        // Hiding the output as it contains generated CRDA key
+        await Crda.exec(crdaExecArgs, { hideOutput: true });
     }
 
     export async function analyse(manifestPath: string): Promise<void> {
         const crdaOptions = Crda.getOptions({ json: "", verbose: "" });
         const crdaExecArgs = [ Crda.Commands.Analyse, manifestPath, ...crdaOptions ];
 
-        await Crda.exec(crdaExecArgs);
+        await Crda.exec(crdaExecArgs, { ignoreReturnCode: true, hideOutput: true });
+        // const analysisResult = execResult.stdout;
 
+        // return analysisResult;
     }
 }
 

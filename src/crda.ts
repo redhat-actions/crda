@@ -3,6 +3,7 @@ import * as ghExec from "@actions/exec";
 import * as ghCore from "@actions/core";
 import * as util from "./utils";
 import { ExecResult } from "./types";
+import CmdOutputHider from "./cmdOutputHider";
 
 const EXECUTABLE = util.getOS() === "windows" ? "crda.exe" : "crda";
 
@@ -24,6 +25,7 @@ namespace Crda {
     }
 
     export enum ConfigKeys {
+        CrdaKey = "crda_key",
         ConsentTelemetry = "consent_telemetry",
     }
 
@@ -73,55 +75,66 @@ namespace Crda {
      * @returns Exit code and the contents of stdout/stderr.
      */
      export async function exec(
-        args: string[],
-        execOptions: ghExec.ExecOptions & { group?: boolean } = {}
-    ):Promise<ExecResult> {
-        // ghCore.info(`${EXECUTABLE} ${args.join(" ")}`)
+         args: string[],
+         execOptions: ghExec.ExecOptions & { group?: boolean, hideOutput?: boolean } = {}
+     ):Promise<ExecResult> {
+         // ghCore.info(`${EXECUTABLE} ${args.join(" ")}`)
 
-        let stdout = "";
-        let stderr = "";
+         let stdout = "";
+         let stderr = "";
 
-        const finalExecOptions = { ...execOptions };
-        finalExecOptions.ignoreReturnCode = true;     // the return code is processed below
+         const finalExecOptions = { ...execOptions };
+         if (execOptions.hideOutput) {
+             // There is some bug here, only on Windows, where if the wrapped stream is NOT used,
+             // the output is not correctly captured into the execResult.
+             // so, if you have to use the contents of stdout, do not set hideOutput.
+             const wrappedOutStream = execOptions.outStream || process.stdout;
+             finalExecOptions.outStream = new CmdOutputHider(wrappedOutStream, stdout);
+         }
+         finalExecOptions.ignoreReturnCode = true;     // the return code is processed below
 
-        finalExecOptions.listeners = {
-            stdline: (line): void => {
-                stdout += line + os.EOL;
-            },
-            errline: (line): void => {
-                stderr += line + os.EOL;
-            },
-        };
+         finalExecOptions.listeners = {
+             stdline: (line): void => {
+                 stdout += line + os.EOL;
+             },
+             errline: (line): void => {
+                 stderr += line + os.EOL;
+             },
+         };
 
-        if (execOptions.group) {
-            const groupName = [ EXECUTABLE, ...args ].join(" ");
-            ghCore.startGroup(groupName);
-        }
+         if (execOptions.group) {
+             const groupName = [ EXECUTABLE, ...args ].join(" ");
+             ghCore.startGroup(groupName);
+         }
 
-        try {
-            const exitCode = await ghExec.exec(EXECUTABLE, args, finalExecOptions);
+         try {
+             const exitCode = await ghExec.exec(EXECUTABLE, args, finalExecOptions);
 
-            if (execOptions.ignoreReturnCode !== true && exitCode !== 0) {
-                // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
-                // which saves some clicking when debugging.
-                let error = `crda exited with code ${exitCode}`;
-                if (stderr) {
-                    error += `\n${stderr}`;
-                }
-                throw new Error(error);
-            }
+             if (execOptions.ignoreReturnCode !== true && exitCode !== 0) {
+                 // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
+                 // which saves some clicking when debugging.
+                 let error = `crda exited with code ${exitCode}`;
+                 if (stderr) {
+                     error += `\n${stderr}`;
+                 }
+                 throw new Error(error);
+             }
 
-            return {
-                exitCode, stdout, stderr,
-            };
-        }
+             if (finalExecOptions.outStream instanceof CmdOutputHider) {
+                 stdout = finalExecOptions.outStream.getContents();
+             }
 
-        finally {
-            if (execOptions.group) {
-                ghCore.endGroup();
-            }
-        }
-    }
+             return {
+                 exitCode, stdout, stderr,
+             };
+         }
+
+         finally {
+             if (execOptions.group) {
+                 ghCore.endGroup();
+             }
+         }
+     }
 
 }
 
