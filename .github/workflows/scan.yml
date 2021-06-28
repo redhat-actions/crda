@@ -51,6 +51,8 @@ jobs:
         uses: divyansh42/crda-action@main
         with:
           manifest-file-path: go.mod
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       # - name: redhat-codeready-dependency-analysis
       #   uses: fabric8-analytics/gh-actions/python-3.6@main

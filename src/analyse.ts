@@ -1,4 +1,3 @@
-import * as ghCore from "@actions/core";
 import Crda from "./crda";
 
 namespace Analyse {
