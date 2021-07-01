@@ -54,7 +54,7 @@ jobs:
           crda_key: ${{ secrets.CRDA_KEY }}
           snyk_token: ${{ secrets.SNYK_TOKEN }}
           consent_telemetry: true
-     
+
       # - name: redhat-codeready-dependency-analysis
       #   uses: fabric8-analytics/gh-actions/python-3.6@main
       #   with:
@@ -64,5 +64,5 @@ jobs:
       #   env:
       #     CRDA_KEY: ${{ secrets.CRDA_KEY }}
 
-      # - name: cat report
-      #   run: cat redhat-codeready-dependency-analysis-report.json
+      - name: cat report
+        run: cat crda_analysis_report.json

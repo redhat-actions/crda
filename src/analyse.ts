@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import Crda from "./crda";
 
 namespace Analyse {
@@ -17,14 +18,14 @@ namespace Analyse {
         await Crda.exec(crdaExecArgs, { hideOutput: true });
     }
 
-    export async function analyse(manifestPath: string): Promise<void> {
+    export async function analyse(manifestPath: string, analysisReportFileName: string): Promise<void> {
         const crdaOptions = Crda.getOptions({ json: "", verbose: "" });
         const crdaExecArgs = [ Crda.Commands.Analyse, manifestPath, ...crdaOptions ];
 
-        await Crda.exec(crdaExecArgs, { ignoreReturnCode: true, hideOutput: true });
-        // const analysisResult = execResult.stdout;
+        const execResult = await Crda.exec(crdaExecArgs, { ignoreReturnCode: true, hideOutput: true });
+        const analysisReportJson = execResult.stdout;
 
-        // return analysisResult;
+        fs.writeFileSync(analysisReportFileName, analysisReportJson, "utf8");
     }
 }
 
