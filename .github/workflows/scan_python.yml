@@ -10,13 +10,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          repository: Python-World/python-mini-projects
+          repository: kubernetes-client/python
 
       - uses: actions/setup-python@v2
         with:
           python-version: '3.7'
 
-      - run: pip3 install -r requirementsALL.txt
+      - run: pip install -r requirements.txt
 
       - name: Install CRDA
         uses: redhat-actions/openshift-tools-installer@v1
@@ -28,7 +28,7 @@ jobs:
       - name: CRDA Scan
         uses: divyansh42/crda-action@main
         with:
-          manifest_file_path: requirementsALL.txt
+          manifest_file_path: requirements.txt
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           consent_telemetry: true
