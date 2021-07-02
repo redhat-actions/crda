@@ -33,5 +33,5 @@ jobs:
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           consent_telemetry: true
 
-      - name: cat report
+      - name: Print Analysis Report
         run: cat crda_analysis_report.json
