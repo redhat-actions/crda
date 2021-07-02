@@ -1,0 +1,37 @@
+# CI Test - Build the action container
+# build test container which has default test files and validate
+name: CRDA scan Python Example
+on: [ push, workflow_dispatch ]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Analyse Python project
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          repository: Python-World/python-mini-projects
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - run: pip3 install -r requirementsALL.txt
+
+      - name: Install CRDA
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          source: github
+          github_pat: ${{ github.token }}
+          crda: "latest"
+
+      - name: CRDA Scan
+        uses: divyansh42/crda-action@main
+        with:
+          manifest_file_path: requirementsALL.txt
+          crda_key: ${{ secrets.CRDA_KEY }}
+          # snyk_token: ${{ secrets.SNYK_TOKEN }}
+          consent_telemetry: true
+
+      - name: cat report
+        run: cat crda_analysis_report.json

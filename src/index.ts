@@ -21,10 +21,10 @@ async function run(): Promise<void> {
     if (snykToken) {
         await Analyse.auth(snykToken);
     }
-    if (crdaKey) {
+    else if (crdaKey) {
         await Analyse.configSet(Crda.ConfigKeys.CrdaKey, crdaKey);
     }
-    if (!crdaKey && !snykToken) {
+    else {
         throw new Error(`❌ Input ${Inputs.CRDA_KEY} or ${Inputs.SNYK_TOKEN} must be provided.`);
     }
 

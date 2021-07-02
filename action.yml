@@ -18,13 +18,13 @@ inputs:
     required: false
     default: .
   snyk_token:
-    description: ""
+    description: "token for premium result"
     required: false
   crda_key:
-    description: ""
+    description: "crda key to uniquely identify"
     required: false
   consent_telemetry:
-    description: ""
+    description: "set it to false"
     required: false
     default: "true"
 

@@ -1,0 +1,40 @@
+# CI Test - Build the action container
+# build test container which has default test files and validate
+name: CRDA scan Node Example
+on: [ push, workflow_dispatch ]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Analyse Node project
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          repository: nodejs/examples
+
+      - name: Install npm
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Install CRDA
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          source: github
+          github_pat: ${{ github.token }}
+          crda: "latest"
+
+      - name: CRDA Scan
+        uses: divyansh42/crda-action@main
+        with:
+          manifest_file_path: package.json
+          crda_key: ${{ secrets.CRDA_KEY }}
+          # snyk_token: ${{ secrets.SNYK_TOKEN }}
+          consent_telemetry: true
+
+      - name: cat report
+        run: cat crda_analysis_report.json
