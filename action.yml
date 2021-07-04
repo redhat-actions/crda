@@ -29,8 +29,8 @@ inputs:
     default: "true"
 
 outputs:
-  output_file:
-    description: "JSON output file"
+  crda_key:
+    description: "Generated CRDA key for future use"
 runs:
   using: 'node12'
   main: 'dist/index.js'

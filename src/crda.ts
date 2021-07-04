@@ -36,6 +36,7 @@ namespace Crda {
         SnykToken = "snyk-token",
         Json = "json",
         Verbose = "verbose",
+        Client = "client",
     }
 
     export type Options = { [key in Flags]?: string };

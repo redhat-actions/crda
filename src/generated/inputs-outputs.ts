@@ -40,9 +40,9 @@ export enum Inputs {
 
 export enum Outputs {
     /**
-     * JSON output file
+     * Generated CRDA key for future use
      * Required: false
      * Default: None.
      */
-    OUTPUT_FILE = "output_file",
+    CRDA_KEY = "crda_key",
 }

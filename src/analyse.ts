@@ -19,7 +19,7 @@ namespace Analyse {
     }
 
     export async function analyse(manifestPath: string, analysisReportFileName: string): Promise<void> {
-        const crdaOptions = Crda.getOptions({ json: "", verbose: "" });
+        const crdaOptions = Crda.getOptions({ json: "", verbose: "", client: "gh-actions" });
         const crdaExecArgs = [ Crda.Commands.Analyse, manifestPath, ...crdaOptions ];
 
         const execResult = await Crda.exec(crdaExecArgs, { ignoreReturnCode: true, hideOutput: true });
