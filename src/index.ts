@@ -13,7 +13,12 @@ async function run(): Promise<void> {
     const crdaKey = ghCore.getInput(Inputs.CRDA_KEY);
     const consentTelemetry = ghCore.getInput(Inputs.CONSENT_TELEMETRY) || "true";
     const analysisReportFileName = ghCore.getInput(Inputs.ANALYSIS_REPORT_FILE_NAME) || "crda_analysis_report.json";
-    // const pkgInstallationDirectoryPath = ghCore.getInput(Inputs.PKG_INSTALLATION_DIRECTORY_PATH);
+    const pkgInstallationDirectoryPath = ghCore.getInput(Inputs.PKG_INSTALLATION_DIRECTORY_PATH);
+
+    if (pkgInstallationDirectoryPath) {
+        ghCore.info(`Setting up the PYTHONPATH to ${pkgInstallationDirectoryPath}`);
+        process.env.PYTHONPATH = pkgInstallationDirectoryPath;
+    }
 
     // Setting up consent_telemetry config to avoid prompt during auth command
     ghCore.info(`Setting up the ${Crda.ConfigKeys.ConsentTelemetry} to ${consentTelemetry}`);
@@ -22,10 +27,14 @@ async function run(): Promise<void> {
     // Auth using provided Synk Token
     if (snykToken) {
         ghCore.info(`⏳ Authenticating with the provided Snyk Token`);
+
         const authOutput = await Analyse.auth(snykToken);
+        const authOutputSplitted = authOutput.split("\n");
+        const generatedCrdaKey = authOutputSplitted[2].split(":")[1];
+
         ghCore.info(`✅ Sucessfully authenticated, generated CRDA key is stored in the output ${Outputs.CRDA_KEY}.`);
 
-        ghCore.setOutput(Outputs.CRDA_KEY, authOutput);
+        ghCore.setOutput(Outputs.CRDA_KEY, generatedCrdaKey);
     }
     else if (crdaKey) {
         ghCore.info(`Setting up the ${Crda.ConfigKeys.CrdaKey} with the provided value.`);

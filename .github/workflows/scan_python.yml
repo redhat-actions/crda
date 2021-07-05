@@ -16,8 +16,9 @@ jobs:
         with:
           python-version: '3.7'
 
-      - run: pip install -r requirements.txt
-
+      - run: |
+          pip install --target=site-dir -r requirements.txt
+          
       - name: Install CRDA
         uses: redhat-actions/openshift-tools-installer@v1
         with:
@@ -29,6 +30,7 @@ jobs:
         uses: divyansh42/crda-action@main
         with:
           manifest_file_path: requirements.txt
+          pkg_installation_directory_path: site-dir
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           consent_telemetry: true

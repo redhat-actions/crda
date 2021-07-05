@@ -55,8 +55,8 @@ jobs:
         uses: divyansh42/crda-action@main
         with:
           manifest_file_path: pom.xml
-          # crda_key: ${{ secrets.CRDA_KEY }}
-          snyk_token: ${{ secrets.SNYK_TOKEN }}
+          crda_key: ${{ secrets.CRDA_KEY }}
+          # snyk_token: ${{ secrets.SNYK_TOKEN }}
           consent_telemetry: true
 
       - name: Print Analysis Report

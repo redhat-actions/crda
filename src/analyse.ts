@@ -10,12 +10,13 @@ namespace Analyse {
 
         await Crda.exec(crdaExecArgs);
     }
-    export async function auth(snykToken: string): Promise<void> {
+    export async function auth(snykToken: string): Promise<string> {
         const crdaOptions = Crda.getOptions({ "snyk-token": snykToken });
         const crdaExecArgs = [ Crda.Commands.Auth, ...crdaOptions ];
 
         // Hiding the output as it contains generated CRDA key
-        await Crda.exec(crdaExecArgs, { hideOutput: true });
+        const authResult = await Crda.exec(crdaExecArgs, { hideOutput: true });
+        return authResult.stdout;
     }
 
     export async function analyse(manifestPath: string, analysisReportFileName: string): Promise<void> {

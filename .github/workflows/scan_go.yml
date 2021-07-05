@@ -27,11 +27,12 @@ jobs:
           crda: "latest"
 
       - name: CRDA Scan
+        id: scan
         uses: divyansh42/crda-action@main
         with:
           manifest_file_path: go.mod
-          crda_key: ${{ secrets.CRDA_KEY }}
-          # snyk_token: ${{ secrets.SNYK_TOKEN }}
+          # crda_key: ${{ secrets.CRDA_KEY }}
+          snyk_token: ${{ secrets.SNYK_TOKEN }}
           consent_telemetry: true
 
       - name: Print Analysis Report
