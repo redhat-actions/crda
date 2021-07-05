@@ -24,7 +24,7 @@ inputs:
     required: false
   consent_telemetry:
     description: |
-      "CRDA collects anonymous usage data, by default to enabled.
+      "CRDA collects anonymous usage data, and is enabled by default.
       If you don't want this behaviour set this to false."
     required: false
     default: "true"

@@ -7,7 +7,7 @@ export enum Inputs {
      */
     ANALYSIS_REPORT_FILE_NAME = "analysis_report_file_name",
     /**
-     * "CRDA collects anonymous usage data, by default to enabled.
+     * "CRDA collects anonymous usage data, and is enabled by default.
      * If you don't want this behaviour set this to false."
      * Required: false
      * Default: "true"
