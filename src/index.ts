@@ -32,7 +32,10 @@ async function run(): Promise<void> {
         const authOutputSplitted = authOutput.split("\n");
         const generatedCrdaKey = authOutputSplitted[2].split(":")[1];
 
-        ghCore.info(`✅ Sucessfully authenticated, generated CRDA key is stored in the output ${Outputs.CRDA_KEY}.`);
+        ghCore.setSecret(generatedCrdaKey);
+        ghCore.info(authOutput);
+
+        ghCore.info(`✅ Generated CRDA key is stored in the output ${Outputs.CRDA_KEY}.`);
 
         ghCore.setOutput(Outputs.CRDA_KEY, generatedCrdaKey);
     }
