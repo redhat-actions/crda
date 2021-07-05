@@ -1,4 +1,4 @@
-name: 'crda'
+name: 'CRDA'
 description: 'Analyse Vulnerabilities in application dependencies'
 author: 'Red Hat'
 branding:
@@ -8,9 +8,8 @@ inputs:
   manifest_file_path:
     description: Path of target manifest file to perform analysis.
     required: true
-    default: requirements.txt
   analysis_report_file_name:
-    description: Name of the file to save analysis report.
+    description: Name of the file to save the analysis report.
     required: false
     default: crda_analysis_report.json
   pkg_installation_directory_path:
@@ -18,13 +17,15 @@ inputs:
     required: false
     default: .
   snyk_token:
-    description: "token for premium result"
+    description: "Snyk token to be used to authenticate to CRDA."
     required: false
   crda_key:
-    description: "crda key to uniquely identify"
+    description: "Existing CRDA key to identify the existing user."
     required: false
   consent_telemetry:
-    description: "set it to false"
+    description: |
+      "CRDA collects anonymous usage data, by default to enabled.
+      If you don't want this behaviour set this to false."
     required: false
     default: "true"
 
