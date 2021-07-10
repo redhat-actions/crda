@@ -3,6 +3,8 @@ import { Inputs, Outputs } from "./generated/inputs-outputs";
 import * as utils from "./utils";
 import Analyse from "./analyse";
 import Crda from "./crda";
+import { convert } from "./convert";
+// import { convert } from "./convert";
 
 async function run(): Promise<void> {
     ghCore.debug(`Runner OS is ${utils.getOS()}`);
@@ -51,6 +53,8 @@ async function run(): Promise<void> {
     await Analyse.analyse(manifestFilePath, analysisReportFileName);
 
     ghCore.info(`✅ Analysis completed. Analysis report is available at ${analysisReportFileName}`);
+
+    convert(analysisReportFileName, manifestFilePath);
 }
 
 run()
