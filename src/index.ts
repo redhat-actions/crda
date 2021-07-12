@@ -54,6 +54,7 @@ async function run(): Promise<void> {
 
     ghCore.info(`✅ Analysis completed. Analysis report is available at ${analysisReportFileName}`);
 
+    ghCore.info(`⏳ Converting JSON output to Sarif format`);
     convert(analysisReportFileName, manifestFilePath);
 }
 
