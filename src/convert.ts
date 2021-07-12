@@ -44,6 +44,7 @@ function sresults(results?: sarif.Result[]): sarif.Result[] | undefined {
 }
 
 function crdaToRule(crdaSeverity: CrdaSeverityRule): sarif.ReportingDescriptor {
+    ghCore.info(`Crda severity: ${JSON.stringify(crdaSeverity, undefined, 4)}`);
     const id = crdaSeverity.id;
     const shortDescription: sarif.MultiformatMessageString = {
         text: crdaSeverity.title,
@@ -126,22 +127,27 @@ function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
     const crdaData = JSON.parse(crdaAnalysedData);
     const rules: sarif.ReportingDescriptor[] = [];
 
+    ghCore.info(`Crda severity: ${JSON.stringify(crdaData.severity, undefined, 4)}`);
     if (crdaData.severity.low) {
+        ghCore.info("low found");
         crdaData.severity.low.forEach((vulnerability: CrdaSeverityRule) => {
             rules.push(crdaToRule(vulnerability));
         });
     }
     if (crdaData.severity.medium) {
+        ghCore.info("medium found");
         crdaData.severity.medium.forEach((vulnerability: CrdaSeverityRule) => {
             rules.push(crdaToRule(vulnerability));
         });
     }
     if (crdaData.severity.high) {
+        ghCore.info("high found");
         crdaData.severity.high.forEach((vulnerability: CrdaSeverityRule) => {
             rules.push(crdaToRule(vulnerability));
         });
     }
     if (crdaData.severity.critical) {
+        ghCore.info("critical found");
         crdaData.severity.critical.forEach((vulnerability: CrdaSeverityRule) => {
             rules.push(crdaToRule(vulnerability));
         });

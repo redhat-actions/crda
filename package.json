@@ -22,8 +22,7 @@
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.4",
-    "@types/sarif": "^2.1.4",
-    "fs": "0.0.1-security"
+    "package.json": "^2.0.1"
   },
   "devDependencies": {
     "@redhat-actions/action-io-generator": "^1.5.0",
@@ -34,6 +33,7 @@
     "@typescript-eslint/parser": "^4.22.0",
     "@vercel/ncc": "^0.24.1",
     "eslint": "^7.15.0",
-    "typescript": "^4.0.5"
+    "typescript": "^4.3",
+    "@types/sarif": "^2.1.4"
   }
 }

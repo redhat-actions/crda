@@ -17,7 +17,7 @@ async function run(): Promise<void> {
     const analysisReportFileName = ghCore.getInput(Inputs.ANALYSIS_REPORT_FILE_NAME) || "crda_analysis_report.json";
     const pkgInstallationDirectoryPath = ghCore.getInput(Inputs.PKG_INSTALLATION_DIRECTORY_PATH);
 
-    if (pkgInstallationDirectoryPath) {
+    if (pkgInstallationDirectoryPath !== ".") {
         ghCore.info(`Setting up the PYTHONPATH to ${pkgInstallationDirectoryPath}`);
         process.env.PYTHONPATH = pkgInstallationDirectoryPath;
     }

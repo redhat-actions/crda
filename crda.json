@@ -1,0 +1,184 @@
+{
+	"analysed_dependencies": [
+		{
+			"name": "cryptography",
+			"version": "3.4.6",
+			"transitives": [
+				{
+					"name": "cffi",
+					"version": "1.14.6",
+					"transitives": null,
+					"latest_version": "",
+					"recommended_version": "",
+					"publicly_available_vulnerabilities": null,
+					"vulnerabilities_unique_with_snyk": null,
+					"vulnerable_transitives": null
+				},
+				{
+					"name": "pycparser",
+					"version": "2.20",
+					"transitives": null,
+					"latest_version": "",
+					"recommended_version": "",
+					"publicly_available_vulnerabilities": null,
+					"vulnerabilities_unique_with_snyk": null,
+					"vulnerable_transitives": null
+				}
+			],
+			"latest_version": "3.4.7",
+			"recommended_version": "3.4.7",
+			"publicly_available_vulnerabilities": [
+				{
+					"severity": "high",
+					"id": "SNYK-PYTHON-CRYPTOGRAPHY-1022152",
+					"title": "Timing Attack",
+					"url": "https://snyk.io/vuln/SNYK-PYTHON-CRYPTOGRAPHY-1022152"
+				}
+			],
+			"vulnerabilities_unique_with_snyk": null,
+			"vulnerable_transitives": null
+		},
+		{
+			"name": "jinja2",
+			"version": "2.10",
+			"transitives": [
+				{
+					"name": "markupsafe",
+					"version": "2.0.1",
+					"transitives": null,
+					"latest_version": "",
+					"recommended_version": "",
+					"publicly_available_vulnerabilities": null,
+					"vulnerabilities_unique_with_snyk": null,
+					"vulnerable_transitives": null
+				}
+			],
+			"latest_version": "3.0.1",
+			"recommended_version": "3.0.1",
+			"publicly_available_vulnerabilities": [
+				{
+					"severity": "medium",
+					"id": "SNYK-PYTHON-JINJA2-174126",
+					"title": "Sandbox Escape",
+					"url": "https://snyk.io/vuln/SNYK-PYTHON-JINJA2-174126"
+				},
+				{
+					"severity": "medium",
+					"id": "SNYK-PYTHON-JINJA2-1012994",
+					"title": "Regular Expression Denial of Service (ReDoS)",
+					"url": "https://snyk.io/vuln/SNYK-PYTHON-JINJA2-1012994"
+				}
+			],
+			"vulnerabilities_unique_with_snyk": null,
+			"vulnerable_transitives": null
+		},
+		{
+			"name": "pyyaml",
+			"version": "3.13",
+			"transitives": null,
+			"latest_version": "5.4.1",
+			"recommended_version": "5.4.1",
+			"publicly_available_vulnerabilities": [
+				{
+					"severity": "critical",
+					"id": "SNYK-PYTHON-PYYAML-42159",
+					"title": "Arbitrary Code Execution",
+					"url": "https://snyk.io/vuln/SNYK-PYTHON-PYYAML-42159"
+				},
+				{
+					"severity": "critical",
+					"id": "SNYK-PYTHON-PYYAML-590151",
+					"title": "Arbitrary Code Execution",
+					"url": "https://snyk.io/vuln/SNYK-PYTHON-PYYAML-590151"
+				},
+				{
+					"severity": "critical",
+					"id": "SNYK-PYTHON-PYYAML-559098",
+					"title": "Arbitrary Code Execution",
+					"url": "https://snyk.io/vuln/SNYK-PYTHON-PYYAML-559098"
+				}
+			],
+			"vulnerabilities_unique_with_snyk": null,
+			"vulnerable_transitives": null
+		}
+	],
+	"total_direct_vulnerabilities": 6,
+	"total_transitives_scanned": 3,
+	"transitive_vulnerabilities": 0,
+	"severity": {
+		"low": null,
+		"medium": [
+			{
+				"cve_ids": [
+					"CVE-2019-10906"
+				],
+				"cvss": 6,
+				"id": "SNYK-PYTHON-JINJA2-174126",
+				"severity": "medium",
+				"title": "Sandbox Escape",
+				"url": "https://snyk.io/vuln/SNYK-PYTHON-JINJA2-174126",
+				"kind": ""
+			},
+			{
+				"cve_ids": [
+					"CVE-2020-28493"
+				],
+				"cvss": 5.3,
+				"id": "SNYK-PYTHON-JINJA2-1012994",
+				"severity": "medium",
+				"title": "Regular Expression Denial of Service (ReDoS)",
+				"url": "https://snyk.io/vuln/SNYK-PYTHON-JINJA2-1012994",
+				"kind": ""
+			}
+		],
+		"high": [
+			{
+				"cve_ids": [
+					"CVE-2020-25659"
+				],
+				"cvss": 7.5,
+				"id": "SNYK-PYTHON-CRYPTOGRAPHY-1022152",
+				"severity": "high",
+				"title": "Timing Attack",
+				"url": "https://snyk.io/vuln/SNYK-PYTHON-CRYPTOGRAPHY-1022152",
+				"kind": ""
+			}
+		],
+		"critical": [
+			{
+				"cve_ids": [
+					"CVE-2017-18342"
+				],
+				"cvss": 9.8,
+				"id": "SNYK-PYTHON-PYYAML-42159",
+				"severity": "critical",
+				"title": "Arbitrary Code Execution",
+				"url": "https://snyk.io/vuln/SNYK-PYTHON-PYYAML-42159",
+				"kind": ""
+			},
+			{
+				"cve_ids": [
+					"CVE-2020-14343"
+				],
+				"cvss": 9.8,
+				"id": "SNYK-PYTHON-PYYAML-590151",
+				"severity": "critical",
+				"title": "Arbitrary Code Execution",
+				"url": "https://snyk.io/vuln/SNYK-PYTHON-PYYAML-590151",
+				"kind": ""
+			},
+			{
+				"cve_ids": [
+					"CVE-2020-1747"
+				],
+				"cvss": 9.8,
+				"id": "SNYK-PYTHON-PYYAML-559098",
+				"severity": "critical",
+				"title": "Arbitrary Code Execution",
+				"url": "https://snyk.io/vuln/SNYK-PYTHON-PYYAML-559098",
+				"kind": ""
+			}
+		]
+	},
+	"report_link": "https://recommender.api.openshift.io/api/v2/stack-report/895abcffa31c49bba1891789a3aaaa8f"
+}
