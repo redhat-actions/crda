@@ -10,7 +10,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          repository: golang/build
+          repository: rafiu007/golang-vuln-demo
 
       - name: Setup Go
         uses: actions/setup-go@v2

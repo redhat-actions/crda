@@ -13,7 +13,7 @@ export interface CrdaSeverityRule {
     kind: string,
 }
 
-export interface CrdaPubliclyKnownVulnerability {
+export interface CrdaPubliclyAvailableVulnerability {
     severity: string,
     id: string,
     title: string,
@@ -24,10 +24,10 @@ export interface CrdaPubliclyKnownVulnerability {
 export interface CrdaAnalysedDependency {
     name: string,
     version: string,
-    transitives: CrdaAnalysedDependency[],
+    transitives: CrdaAnalysedDependency[] | null,
     latest_version: string,
     recommended_version: string,
-    publicly_available_vulnerabilities: CrdaPubliclyKnownVulnerability[] | null,
-    vulnerabilities_unique_with_snyk: string,
-    vulnerable_transitives: CrdaPubliclyKnownVulnerability[],
+    publicly_available_vulnerabilities: CrdaPubliclyAvailableVulnerability[] | null,
+    vulnerabilities_unique_with_snyk: CrdaPubliclyAvailableVulnerability[] | null,
+    vulnerable_transitives: CrdaAnalysedDependency[] | null,
 }
