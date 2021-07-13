@@ -82,40 +82,45 @@ function crdaToRule(crdaSeverity: CrdaSeverityRule): sarif.ReportingDescriptor {
     return rule;
 }
 
-function crdaToResult(crdaAnalysedDependency: CrdaAnalysedDependency, manifestFile: string): sarif.Result | undefined {
+function crdaToResult(crdaAnalysedDependency: CrdaAnalysedDependency, manifestFile: string): sarif.Result[] | undefined {
     if (crdaAnalysedDependency.publicly_available_vulnerabilities !== null) {
+        const results: sarif.Result[] = [];
         const manifestData = fs.readFileSync(manifestFile, "utf-8");
         const lines = manifestData.split(/\r\n|\n/);
         const index = lines.findIndex((s) => {
             return s.includes(crdaAnalysedDependency.name);
         });
 
-        const ruleId = crdaAnalysedDependency.publicly_available_vulnerabilities[0].id;
-        const message: sarif.Message = {
-            text: crdaAnalysedDependency.publicly_available_vulnerabilities[0].title,
-        };
-        const artifactLocation: sarif.ArtifactLocation = {
-            uri: manifestFile,
-            uriBaseId: "PROJECTROOT",
-        };
-        const region: sarif.Region = {
-            startLine: index + 1,
-        };
-        const physicalLocation: sarif.PhysicalLocation = {
-            artifactLocation,
-            region,
-        };
-        const location: sarif.Location = {
-            physicalLocation,
-        };
+        crdaAnalysedDependency.publicly_available_vulnerabilities.forEach(publiclyAvailableVulnerabilities => {
+            const ruleId = publiclyAvailableVulnerabilities.id;
+            const message: sarif.Message = {
+                text: publiclyAvailableVulnerabilities.title,
+            };
+            const artifactLocation: sarif.ArtifactLocation = {
+                uri: manifestFile,
+                uriBaseId: "PROJECTROOT",
+            };
+            const region: sarif.Region = {
+                startLine: index + 1,
+            };
+            const physicalLocation: sarif.PhysicalLocation = {
+                artifactLocation,
+                region,
+            };
+            const location: sarif.Location = {
+                physicalLocation,
+            };
 
-        const result: sarif.Result = {
-            ruleId,
-            message,
-            locations: [ location ],
-        };
-        ghCore.info("Result generated");
-        return result;
+            const result: sarif.Result = {
+                ruleId,
+                message,
+                locations: [ location ],
+            };
+            ghCore.info("Result generated");
+
+            results.push(result);
+        });
+        return results;
     }
     return undefined;
 }
@@ -125,47 +130,47 @@ function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
     ghCore.info(`Initial results: ${JSON.stringify(sarifTemplate.runs[0].results)}`);
 
     const crdaData = JSON.parse(crdaAnalysedData);
-    const rules: sarif.ReportingDescriptor[] = [];
+    const finalRules: sarif.ReportingDescriptor[] = [];
 
     ghCore.info(`Crda severity: ${JSON.stringify(crdaData.severity, undefined, 4)}`);
     if (crdaData.severity.low) {
         ghCore.info("low found");
         crdaData.severity.low.forEach((vulnerability: CrdaSeverityRule) => {
-            rules.push(crdaToRule(vulnerability));
+            finalRules.push(crdaToRule(vulnerability));
         });
     }
     if (crdaData.severity.medium) {
         ghCore.info("medium found");
         crdaData.severity.medium.forEach((vulnerability: CrdaSeverityRule) => {
-            rules.push(crdaToRule(vulnerability));
+            finalRules.push(crdaToRule(vulnerability));
         });
     }
     if (crdaData.severity.high) {
         ghCore.info("high found");
         crdaData.severity.high.forEach((vulnerability: CrdaSeverityRule) => {
-            rules.push(crdaToRule(vulnerability));
+            finalRules.push(crdaToRule(vulnerability));
         });
     }
     if (crdaData.severity.critical) {
         ghCore.info("critical found");
         crdaData.severity.critical.forEach((vulnerability: CrdaSeverityRule) => {
-            rules.push(crdaToRule(vulnerability));
+            finalRules.push(crdaToRule(vulnerability));
         });
     }
-    ghCore.info(`Number of rules combined is: ${rules.length}`);
-    srules(rules);
+    ghCore.info(`Number of rules combined is: ${finalRules.length}`);
+    srules(finalRules);
 
-    const results: sarif.Result[] = [];
+    const finalResults: sarif.Result[] = [];
     crdaData.analysed_dependencies.forEach(
         (e: CrdaAnalysedDependency) => {
-            const result = crdaToResult(e, manifestFile);
-            if (result) {
-                results.push(result);
+            const results = crdaToResult(e, manifestFile);
+            if (results) {
+                finalResults.push(...results);
             }
         }
     );
-    ghCore.info(`Number of results combined is: ${results.length}`);
-    sresults(results);
+    ghCore.info(`Number of results combined is: ${finalResults.length}`);
+    sresults(finalResults);
     // ghCore.info(JSON.stringify(sarifTemplate.runs[0].results));
     return sarifTemplate;
 }
