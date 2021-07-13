@@ -5,8 +5,8 @@
 			"version": "1.1.0",
 			"transitives": [
 				{
-					"name": "aiohttp",
-					"version": "3.7.4.post0",
+					"name": "markupsafe",
+					"version": "1.1.0",
 					"transitives": null,
 					"latest_version": "",
 					"recommended_version": "",
@@ -16,7 +16,7 @@
 				},
 				{
 					"name": "jinja2",
-					"version": "3.0.1",
+					"version": "2.10",
 					"transitives": null,
 					"latest_version": "",
 					"recommended_version": "",
@@ -35,38 +35,8 @@
 					"vulnerable_transitives": null
 				},
 				{
-					"name": "idna",
-					"version": "3.2",
-					"transitives": null,
-					"latest_version": "",
-					"recommended_version": "",
-					"publicly_available_vulnerabilities": null,
-					"vulnerabilities_unique_with_snyk": null,
-					"vulnerable_transitives": null
-				},
-				{
-					"name": "typing-extensions",
-					"version": "3.10.0.0",
-					"transitives": null,
-					"latest_version": "",
-					"recommended_version": "",
-					"publicly_available_vulnerabilities": null,
-					"vulnerabilities_unique_with_snyk": null,
-					"vulnerable_transitives": null
-				},
-				{
-					"name": "markupsafe",
-					"version": "2.0.1",
-					"transitives": null,
-					"latest_version": "",
-					"recommended_version": "",
-					"publicly_available_vulnerabilities": null,
-					"vulnerabilities_unique_with_snyk": null,
-					"vulnerable_transitives": null
-				},
-				{
-					"name": "multidict",
-					"version": "5.1.0",
+					"name": "chardet",
+					"version": "3.0.4",
 					"transitives": null,
 					"latest_version": "",
 					"recommended_version": "",
@@ -76,7 +46,7 @@
 				},
 				{
 					"name": "attrs",
-					"version": "21.2.0",
+					"version": "18.2.0",
 					"transitives": null,
 					"latest_version": "",
 					"recommended_version": "",
@@ -85,8 +55,18 @@
 					"vulnerable_transitives": null
 				},
 				{
-					"name": "chardet",
-					"version": "4.0.0",
+					"name": "multidict",
+					"version": "4.5.2",
+					"transitives": null,
+					"latest_version": "",
+					"recommended_version": "",
+					"publicly_available_vulnerabilities": null,
+					"vulnerabilities_unique_with_snyk": null,
+					"vulnerable_transitives": null
+				},
+				{
+					"name": "aiohttp",
+					"version": "3.5.3",
 					"transitives": null,
 					"latest_version": "",
 					"recommended_version": "",
@@ -103,42 +83,64 @@
 					"publicly_available_vulnerabilities": null,
 					"vulnerabilities_unique_with_snyk": null,
 					"vulnerable_transitives": null
+				},
+				{
+					"name": "idna",
+					"version": "2.8",
+					"transitives": null,
+					"latest_version": "",
+					"recommended_version": "",
+					"publicly_available_vulnerabilities": null,
+					"vulnerabilities_unique_with_snyk": null,
+					"vulnerable_transitives": null
 				}
 			],
 			"latest_version": "1.4.2",
 			"recommended_version": "1.4.2",
 			"publicly_available_vulnerabilities": null,
 			"vulnerabilities_unique_with_snyk": null,
-			"vulnerable_transitives": null
-		},
-		{
-			"name": "pyyaml",
-			"version": "3.13",
-			"transitives": null,
-			"latest_version": "5.4.1",
-			"recommended_version": "5.4.1",
-			"publicly_available_vulnerabilities": [
+			"vulnerable_transitives": [
 				{
-					"severity": "critical",
-					"id": "SNYK-PYTHON-PYYAML-42159",
-					"title": "Arbitrary Code Execution",
-					"url": "https://snyk.io/vuln/SNYK-PYTHON-PYYAML-42159"
+					"name": "jinja2",
+					"version": "2.10",
+					"transitives": null,
+					"latest_version": "3.0.1",
+					"recommended_version": "3.0.1",
+					"publicly_available_vulnerabilities": [
+						{
+							"severity": "medium",
+							"id": "SNYK-PYTHON-JINJA2-174126",
+							"title": "Sandbox Escape",
+							"url": "https://snyk.io/vuln/SNYK-PYTHON-JINJA2-174126"
+						},
+						{
+							"severity": "medium",
+							"id": "SNYK-PYTHON-JINJA2-1012994",
+							"title": "Regular Expression Denial of Service (ReDoS)",
+							"url": "https://snyk.io/vuln/SNYK-PYTHON-JINJA2-1012994"
+						}
+					],
+					"vulnerabilities_unique_with_snyk": null,
+					"vulnerable_transitives": null
 				},
 				{
-					"severity": "critical",
-					"id": "SNYK-PYTHON-PYYAML-590151",
-					"title": "Arbitrary Code Execution",
-					"url": "https://snyk.io/vuln/SNYK-PYTHON-PYYAML-590151"
-				},
-				{
-					"severity": "critical",
-					"id": "SNYK-PYTHON-PYYAML-559098",
-					"title": "Arbitrary Code Execution",
-					"url": "https://snyk.io/vuln/SNYK-PYTHON-PYYAML-559098"
+					"name": "aiohttp",
+					"version": "3.5.3",
+					"transitives": null,
+					"latest_version": "3.7.4.post0",
+					"recommended_version": "3.7.4.post0",
+					"publicly_available_vulnerabilities": [
+						{
+							"severity": "medium",
+							"id": "SNYK-PYTHON-AIOHTTP-1079232",
+							"title": "Open Redirect",
+							"url": "https://snyk.io/vuln/SNYK-PYTHON-AIOHTTP-1079232"
+						}
+					],
+					"vulnerabilities_unique_with_snyk": null,
+					"vulnerable_transitives": null
 				}
-			],
-			"vulnerabilities_unique_with_snyk": null,
-			"vulnerable_transitives": null
+			]
 		},
 		{
 			"name": "trafaret-config",
@@ -202,6 +204,35 @@
 			]
 		},
 		{
+			"name": "pyyaml",
+			"version": "3.13",
+			"transitives": null,
+			"latest_version": "5.4.1",
+			"recommended_version": "5.4.1",
+			"publicly_available_vulnerabilities": [
+				{
+					"severity": "critical",
+					"id": "SNYK-PYTHON-PYYAML-42159",
+					"title": "Arbitrary Code Execution",
+					"url": "https://snyk.io/vuln/SNYK-PYTHON-PYYAML-42159"
+				},
+				{
+					"severity": "critical",
+					"id": "SNYK-PYTHON-PYYAML-590151",
+					"title": "Arbitrary Code Execution",
+					"url": "https://snyk.io/vuln/SNYK-PYTHON-PYYAML-590151"
+				},
+				{
+					"severity": "critical",
+					"id": "SNYK-PYTHON-PYYAML-559098",
+					"title": "Arbitrary Code Execution",
+					"url": "https://snyk.io/vuln/SNYK-PYTHON-PYYAML-559098"
+				}
+			],
+			"vulnerabilities_unique_with_snyk": null,
+			"vulnerable_transitives": null
+		},
+		{
 			"name": "trafaret",
 			"version": "1.2.0",
 			"transitives": null,
@@ -217,7 +248,7 @@
 			"transitives": [
 				{
 					"name": "idna",
-					"version": "3.2",
+					"version": "2.8",
 					"transitives": null,
 					"latest_version": "",
 					"recommended_version": "",
@@ -227,7 +258,7 @@
 				},
 				{
 					"name": "multidict",
-					"version": "5.1.0",
+					"version": "4.5.2",
 					"transitives": null,
 					"latest_version": "",
 					"recommended_version": "",
@@ -244,11 +275,45 @@
 		}
 	],
 	"total_direct_vulnerabilities": 3,
-	"total_transitives_scanned": 14,
-	"transitive_vulnerabilities": 3,
+	"total_transitives_scanned": 13,
+	"transitive_vulnerabilities": 6,
 	"severity": {
 		"low": null,
-		"medium": null,
+		"medium": [
+			{
+				"cve_ids": [
+					"CVE-2019-10906"
+				],
+				"cvss": 6,
+				"id": "SNYK-PYTHON-JINJA2-174126",
+				"severity": "medium",
+				"title": "Sandbox Escape",
+				"url": "https://snyk.io/vuln/SNYK-PYTHON-JINJA2-174126",
+				"kind": ""
+			},
+			{
+				"cve_ids": [
+					"CVE-2020-28493"
+				],
+				"cvss": 5.3,
+				"id": "SNYK-PYTHON-JINJA2-1012994",
+				"severity": "medium",
+				"title": "Regular Expression Denial of Service (ReDoS)",
+				"url": "https://snyk.io/vuln/SNYK-PYTHON-JINJA2-1012994",
+				"kind": ""
+			},
+			{
+				"cve_ids": [
+					"CVE-2021-21330"
+				],
+				"cvss": 4.2,
+				"id": "SNYK-PYTHON-AIOHTTP-1079232",
+				"severity": "medium",
+				"title": "Open Redirect",
+				"url": "https://snyk.io/vuln/SNYK-PYTHON-AIOHTTP-1079232",
+				"kind": ""
+			}
+		],
 		"high": null,
 		"critical": [
 			{
@@ -319,5 +384,5 @@
 			}
 		]
 	},
-	"report_link": "https://recommender.api.openshift.io/api/v2/stack-report/e2901eece8b34be98dda48311d4201b3"
+	"report_link": "https://recommender.api.openshift.io/api/v2/stack-report/9e9a91a95a9b4301a62e08f445af7ca2"
 }

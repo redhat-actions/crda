@@ -43,6 +43,8 @@ function sresults(results?: sarif.Result[]): sarif.Result[] | undefined {
     return sarifTemplate.runs[0].results;
 }
 
+let count = 1;
+
 function crdaToRule(crdaSeverity: CrdaSeverityRule): sarif.ReportingDescriptor {
     ghCore.info(`Crda severity: ${JSON.stringify(crdaSeverity, undefined, 4)}`);
     const id = crdaSeverity.id;
@@ -54,7 +56,7 @@ function crdaToRule(crdaSeverity: CrdaSeverityRule): sarif.ReportingDescriptor {
     };
     const help: sarif.MultiformatMessageString = {
         text: "text for help",
-        markdown: "markdown ***text for help",
+        markdown: `markdown ***text for help ${count++}`,
     };
 
     let sev: sarif.ReportingConfiguration.level = "none";
