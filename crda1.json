@@ -1,0 +1,13 @@
+{
+	"total_scanned_dependencies": 5,
+	"total_scanned_transitives": 14,
+	"total_vulnerabilities": 6,
+	"publicly_available_vulnerabilities": 6,
+	"vulnerabilities_unique_to_synk": 0,
+	"direct_vulnerable_dependencies": 1,
+	"low_vulnerabilities": 0,
+	"medium_vulnerabilities": 0,
+	"high_vulnerabilities": 0,
+	"critical_vulnerabilities": 6,
+	"report_link": "https://recommender.api.openshift.io/api/v2/stack-report/19459d7466f34e178cdef3e466bc7f8f"
+}

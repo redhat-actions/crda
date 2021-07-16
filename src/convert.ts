@@ -1,24 +1,19 @@
 import * as fs from "fs";
 import * as sarif from "sarif";
 import * as ghCore from "@actions/core";
-import { CrdaAnalysedDependency, CrdaPubliclyAvailableVulnerability, CrdaSeverityRule } from "./types";
+import {
+    CrdaAnalysedDependency, CrdaPubliclyAvailableVulnerability,
+    CrdaSeverity, CrdaSeverityKinds, TransitiveVulRuleIdsDepName,
+} from "./types";
 
 const sarifTemplate: sarif.Log = {
     $schema: "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
     version: "2.1.0",
     runs: [
         {
-            originalUriBaseIds: {
-                PROJECTROOT: {
-                    uri: "file:///github/workspace/",
-                    description: {
-                        text: "The root directory for all project files.",
-                    },
-                },
-            },
             tool: {
                 driver: {
-                    name: "CRDA",
+                    name: "Code Ready Dependency Analytics",
                     rules: [],
                 },
             },
@@ -43,81 +38,149 @@ function sresults(results?: sarif.Result[]): sarif.Result[] | undefined {
     return sarifTemplate.runs[0].results;
 }
 
-let count = 1;
+function crdaToRules(
+    crdaSeverityKinds: CrdaSeverityKinds, tranVulRuleIdsWithDepName: TransitiveVulRuleIdsDepName
+): sarif.ReportingDescriptor[] {
+    const rules: sarif.ReportingDescriptor[] = [];
+    if (crdaSeverityKinds.low !== null) {
+        ghCore.info("low found");
+        const fetchedRules: sarif.ReportingDescriptor[] = fetchRules(
+            crdaSeverityKinds.low, tranVulRuleIdsWithDepName
+        );
+        rules.push(...fetchedRules);
+    }
+    if (crdaSeverityKinds.medium !== null) {
+        ghCore.info("medium found");
+        const fetchedRules: sarif.ReportingDescriptor[] = fetchRules(
+            crdaSeverityKinds.medium, tranVulRuleIdsWithDepName
+        );
+        rules.push(...fetchedRules);
+    }
+    if (crdaSeverityKinds.high !== null) {
+        ghCore.info("high found");
+        const fetchedRules: sarif.ReportingDescriptor[] = fetchRules(
+            crdaSeverityKinds.high, tranVulRuleIdsWithDepName
+        );
+        rules.push(...fetchedRules);
+    }
+    if (crdaSeverityKinds.critical !== null) {
+        ghCore.info("critical found");
+        const fetchedRules: sarif.ReportingDescriptor[] = fetchRules(
+            crdaSeverityKinds.critical, tranVulRuleIdsWithDepName
+        );
+        rules.push(...fetchedRules);
+    }
 
-function crdaToRule(crdaSeverity: CrdaSeverityRule): sarif.ReportingDescriptor {
-    ghCore.info(`Crda severity: ${JSON.stringify(crdaSeverity, undefined, 4)}`);
-    const id = crdaSeverity.id;
-    const shortDescription: sarif.MultiformatMessageString = {
-        text: crdaSeverity.title,
-    };
-    const fullDescription: sarif.MultiformatMessageString = {
-        text: crdaSeverity.title,
-    };
-    const help: sarif.MultiformatMessageString = {
-        text: "text for help",
-        markdown: `markdown ***text for help ${count++}`,
-    };
-
-    let sev: sarif.ReportingConfiguration.level = "none";
-    if (crdaSeverity.severity === "medium") sev = "warning";
-    if (crdaSeverity.severity === "high") sev = "error";
-    if (crdaSeverity.severity === "critical") sev = "error";
-
-    const defaultConfiguration = {
-        level: sev,
-    };
-
-    const properties: sarif.PropertyBag = {
-        tags: [],
-    };
-
-    const rule: sarif.ReportingDescriptor = {
-        id,
-        shortDescription,
-        fullDescription,
-        help,
-        defaultConfiguration,
-        properties,
-    };
-
-    return rule;
+    return rules;
 }
 
-function crdaToResult(crdaAnalysedDependency: CrdaAnalysedDependency, manifestFile: string): sarif.Result[] {
+function fetchRules(
+    severities: CrdaSeverity[], tranVulRuleIdsWithDepName: TransitiveVulRuleIdsDepName
+): sarif.ReportingDescriptor[] {
+    const rules: sarif.ReportingDescriptor[] = [];
+    severities.forEach((severity: CrdaSeverity) => {
+        const id = severity.id;
+        const dependencyName: string[] = tranVulRuleIdsWithDepName[id];
+        const cveIds: string[] = severity.cve_ids;
+        const cvss: string = severity.cvss;
+        const shortDescription: sarif.MultiformatMessageString = {
+            text: severity.title,
+        };
+        const fullDescription: sarif.MultiformatMessageString = {
+            text: severity.title,
+        };
+        const help: sarif.MultiformatMessageString = {
+            text: "text for help",
+            markdown: `Introduced through ${dependencyName.join(", ")}`,
+        };
+
+        let sev: sarif.ReportingConfiguration.level = "none";
+        if (severity.severity === "medium") {
+            sev = "warning";
+        }
+        if (severity.severity === "high" || severity.severity === "critical") {
+            sev = "error";
+        }
+        const defaultConfiguration = {
+            level: sev,
+        };
+
+        const properties: sarif.PropertyBag = {
+            tags: [ "security", ...cveIds, `cvss:${cvss}` ],
+        };
+
+        const rule: sarif.ReportingDescriptor = {
+            id,
+            shortDescription,
+            fullDescription,
+            help,
+            defaultConfiguration,
+            properties,
+        };
+
+        rules.push(rule);
+    });
+
+    return rules;
+}
+
+let nestedVulnerabilitycount = 0;
+function crdaToResult(
+    crdaAnalysedDependency: CrdaAnalysedDependency, manifestFile: string, directDependencyName?: string
+): [ sarif.Result[], string[] ] {
     const results: sarif.Result[] = [];
     const manifestData = fs.readFileSync(manifestFile, "utf-8");
     const lines = manifestData.split(/\r\n|\n/);
+    let dependencyName: string = crdaAnalysedDependency.name;
+    if (directDependencyName) {
+        dependencyName = directDependencyName;
+    }
+    else {
+        nestedVulnerabilitycount = 0;
+    }
     const index = lines.findIndex((s) => {
-        return s.includes(crdaAnalysedDependency.name);
+        return s.includes(dependencyName);
     });
+
+    const vulnerableDependencyRuleIds: string[] = [];
+
     if (crdaAnalysedDependency.publicly_available_vulnerabilities !== null) {
-        const fetchedResults = fetchResult(
+        const fetchedResults = fetchResults(
             crdaAnalysedDependency.publicly_available_vulnerabilities, manifestFile, index
         );
-        results.push(...fetchedResults);
+        results.push(...fetchedResults[0]);
+        if (nestedVulnerabilitycount !== 0) {
+            vulnerableDependencyRuleIds.push(...fetchedResults[1]);
+        }
     }
+
     if (crdaAnalysedDependency.vulnerabilities_unique_with_snyk !== null) {
-        const fetchedResults = fetchResult(
+        const fetchedResults = fetchResults(
             crdaAnalysedDependency.vulnerabilities_unique_with_snyk, manifestFile, index
         );
-        results.push(...fetchedResults);
+        results.push(...fetchedResults[0]);
+        if (nestedVulnerabilitycount !== 0) {
+            vulnerableDependencyRuleIds.push(...fetchedResults[1]);
+        }
     }
 
     if (crdaAnalysedDependency.vulnerable_transitives !== null) {
-        crdaAnalysedDependency.vulnerable_transitives.forEach((transitive) => {
-            const result = crdaToResult(transitive, manifestFile);
-            results.push(...result);
+        nestedVulnerabilitycount++;
+        crdaAnalysedDependency.vulnerable_transitives.forEach((transitiveVulnerability) => {
+            const sarifResultData = crdaToResult(transitiveVulnerability, manifestFile, dependencyName);
+            results.push(...sarifResultData[0]);
+            vulnerableDependencyRuleIds.push(...sarifResultData[1]);
         });
     }
-
-    return results;
+    return [ results, vulnerableDependencyRuleIds ];
 }
 
-function fetchResult(
-    publiclyAvailableVulnerabilities: CrdaPubliclyAvailableVulnerability[], manifestFile: string, index: number
-): sarif.Result[] {
+function fetchResults(
+    publiclyAvailableVulnerabilities: CrdaPubliclyAvailableVulnerability[],
+    manifestFile: string, index: number,
+): [ sarif.Result[], string[] ] {
     const results: sarif.Result[] = [];
+    const ruleIds: string[] = [];
     publiclyAvailableVulnerabilities.forEach((publiclyAvailableVulnerability) => {
         const ruleId = publiclyAvailableVulnerability.id;
         const message: sarif.Message = {
@@ -146,9 +209,11 @@ function fetchResult(
         ghCore.info("Result generated");
 
         results.push(result);
+        ruleIds.push(ruleId);
+
     });
 
-    return results;
+    return [ results, ruleIds ];
 }
 
 function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
@@ -156,45 +221,31 @@ function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
     ghCore.info(`Initial results: ${JSON.stringify(sarifTemplate.runs[0].results)}`);
 
     const crdaData = JSON.parse(crdaAnalysedData);
-    const finalRules: sarif.ReportingDescriptor[] = [];
-
-    // ghCore.info(`Crda severity: ${JSON.stringify(crdaData.severity, undefined, 4)}`);
-    if (crdaData.severity.low) {
-        ghCore.info("low found");
-        crdaData.severity.low.forEach((vulnerability: CrdaSeverityRule) => {
-            finalRules.push(crdaToRule(vulnerability));
-        });
-    }
-    if (crdaData.severity.medium) {
-        ghCore.info("medium found");
-        crdaData.severity.medium.forEach((vulnerability: CrdaSeverityRule) => {
-            finalRules.push(crdaToRule(vulnerability));
-        });
-    }
-    if (crdaData.severity.high) {
-        ghCore.info("high found");
-        crdaData.severity.high.forEach((vulnerability: CrdaSeverityRule) => {
-            finalRules.push(crdaToRule(vulnerability));
-        });
-    }
-    if (crdaData.severity.critical) {
-        ghCore.info("critical found");
-        crdaData.severity.critical.forEach((vulnerability: CrdaSeverityRule) => {
-            finalRules.push(crdaToRule(vulnerability));
-        });
-    }
-    ghCore.info(`Number of rules combined is: ${finalRules.length}`);
-    srules(finalRules);
 
     const finalResults: sarif.Result[] = [];
+    const tranVulRuleIdsWithDepName: TransitiveVulRuleIdsDepName = {};
     crdaData.analysed_dependencies.forEach(
-        (e: CrdaAnalysedDependency) => {
-            const results = crdaToResult(e, manifestFile);
-            finalResults.push(...results);
+        (dependency: CrdaAnalysedDependency) => {
+            const resultsData = crdaToResult(dependency, manifestFile);
+            resultsData[1].forEach((ruleId) => {
+                const dependencyNameToAddToMap: string[] = [ dependency.name ];
+                if (ruleId in tranVulRuleIdsWithDepName) {
+                    const prevDependencyNames = tranVulRuleIdsWithDepName[ruleId];
+                    dependencyNameToAddToMap.push(...prevDependencyNames);
+                }
+                tranVulRuleIdsWithDepName[ruleId] = dependencyNameToAddToMap;
+            });
+            finalResults.push(...resultsData[0]);
+            tranVulRuleIdsWithDepName[dependency.name] = resultsData[1];
         }
     );
     ghCore.info(`Number of results combined is: ${finalResults.length}`);
     sresults(finalResults);
+
+    const finalRules = crdaToRules(crdaData.severity, tranVulRuleIdsWithDepName);
+    // ghCore.info(`Crda severity: ${JSON.stringify(crdaData.severity, undefined, 4)}`);
+    ghCore.info(`Number of rules combined is: ${finalRules.length}`);
+    srules(finalRules);
     // ghCore.info(JSON.stringify(sarifTemplate.runs[0].results));
     return sarifTemplate;
 }

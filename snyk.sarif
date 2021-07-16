@@ -1,0 +1,56 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Snyk Open Source",
+          "rules": [
+            {
+              "id": "SNYK-JS-GRY-566987",
+              "shortDescription": {
+                "text": "High severity - Command Injection vulnerability in gry"
+              },
+              "fullDescription": {
+                "text": "gry@5.0.8"
+              },
+              "help": {
+                "text": "",
+                "markdown": "* Package Manager: npm\n* Vulnerable module: gry\n* Introduced through: crda@1.0.0, package.json@2.0.1 and others\n### Detailed paths\n* _Introduced through_: crda@1.0.0 › package.json@2.0.1 › git-package-json@1.4.10 › gry@5.0.8\n# Overview\n[gry](https://www.npmjs.com/package/gry) is a minimalist NodeJS wrapper for the git commands. `gry` stands for the Git Repository.\n\nAffected versions of this package are vulnerable to Command Injection in `lib/index.js` and `example.js`\r\n\r\n## PoC\r\n```\r\n// poc.js\r\nconst Repo = require(\"gry\");\r\nvar myRepo = new Repo(\".\");\r\nmyRepo.pull('test; touch HACKED; #', function(){console.log('Finished!')})\r\n```\n# Remediation\nUpgrade `gry` to version 6.0.0 or higher.\n# References\n- [GitHub Fix Commit](https://github.com/IonicaBizau/node-gry/commit/5108446c1e23960d65e8b973f1d9486f9f9dbd6c)\n- [GitHub Issue](https://github.com/IonicaBizau/node-gry/issues/21)\n- [GitHub PR](https://github.com/IonicaBizau/node-gry/pull/22)\n"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "CWE-78",
+                  "npm"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "SNYK-JS-GRY-566987",
+          "level": "error",
+          "message": {
+            "text": "This file introduces a vulnerable gry package with a high severity vulnerability."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "package.json"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -4,13 +4,22 @@ export type ExecResult = {
     stderr: string;
 };
 
-export interface CrdaSeverityRule {
+/* eslint-disable camelcase */
+export interface CrdaSeverity {
+    cve_ids: string[],
     cvss: string,
     id: string,
     severity: string,
     title: string,
     url: string,
     kind: string,
+}
+
+export interface CrdaSeverityKinds {
+    low: CrdaSeverity[] | null,
+    medium: CrdaSeverity[] | null,
+    high: CrdaSeverity[] | null,
+    critical: CrdaSeverity[] | null,
 }
 
 export interface CrdaPubliclyAvailableVulnerability {
@@ -31,3 +40,5 @@ export interface CrdaAnalysedDependency {
     vulnerabilities_unique_with_snyk: CrdaPubliclyAvailableVulnerability[] | null,
     vulnerable_transitives: CrdaAnalysedDependency[] | null,
 }
+
+export type TransitiveVulRuleIdsDepName = { [key: string]: string[] };
