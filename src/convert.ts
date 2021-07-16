@@ -80,7 +80,11 @@ function fetchRules(
     const rules: sarif.ReportingDescriptor[] = [];
     severities.forEach((severity: CrdaSeverity) => {
         const id = severity.id;
-        const dependencyName: string[] = tranVulRuleIdsWithDepName[id];
+        let message = "";
+        if (id in tranVulRuleIdsWithDepName) {
+            const dependencyName: string[] = tranVulRuleIdsWithDepName[id];
+            message = `Introduced through ${dependencyName.join(", ")}`;
+        }
         const cveIds: string[] = severity.cve_ids;
         const cvss: string = severity.cvss;
         const shortDescription: sarif.MultiformatMessageString = {
@@ -91,7 +95,7 @@ function fetchRules(
         };
         const help: sarif.MultiformatMessageString = {
             text: "text for help",
-            markdown: `Introduced through ${dependencyName.join(", ")}`,
+            markdown: message,
         };
 
         let sev: sarif.ReportingConfiguration.level = "none";
@@ -141,7 +145,7 @@ function crdaToResult(
 
     const splittedDependencyName = dependencyName.split(":");
     const index = lines.findIndex((s) => {
-        return s.includes(splittedDependencyName[0]);
+        return s.includes(splittedDependencyName[1] ? splittedDependencyName[1] : splittedDependencyName[0]);
     });
 
     const vulnerableDependencyRuleIds: string[] = [];
