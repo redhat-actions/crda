@@ -138,8 +138,10 @@ function crdaToResult(
     else {
         nestedVulnerabilitycount = 0;
     }
+
+    const splittedDependencyName = dependencyName.split(":");
     const index = lines.findIndex((s) => {
-        return s.includes(dependencyName);
+        return s.includes(splittedDependencyName[0]);
     });
 
     const vulnerableDependencyRuleIds: string[] = [];
