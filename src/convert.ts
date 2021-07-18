@@ -138,7 +138,7 @@ function fetchRules(
     return [ rules, prevRuleIds ];
 }
 
-let nestedVulnerabilitycount = 0;
+// let nestedVulnerabilitycount = 0;
 function crdaToResult(
     crdaAnalysedDependency: CrdaAnalysedDependency, manifestFile: string, directDependencyName?: string
 ): [ sarif.Result[], string[] ] {
@@ -149,9 +149,9 @@ function crdaToResult(
     if (directDependencyName) {
         dependencyName = directDependencyName;
     }
-    else {
-        nestedVulnerabilitycount = 0;
-    }
+    // else {
+    //     nestedVulnerabilitycount = 0;
+    // }
 
     const splittedDependencyName = dependencyName.split(":");
     const startLine = lines.findIndex((s) => {
@@ -165,9 +165,10 @@ function crdaToResult(
             crdaAnalysedDependency.publicly_available_vulnerabilities, manifestFile, startLine
         );
         results.push(...fetchedResults[0]);
-        if (nestedVulnerabilitycount !== 0) {
-            vulnerableDependencyRuleIds.push(...fetchedResults[1]);
-        }
+        vulnerableDependencyRuleIds.push(...fetchedResults[1]);
+        // if (nestedVulnerabilitycount !== 0) {
+
+        // }
     }
 
     if (crdaAnalysedDependency.vulnerabilities_unique_with_snyk !== null) {
@@ -175,13 +176,14 @@ function crdaToResult(
             crdaAnalysedDependency.vulnerabilities_unique_with_snyk, manifestFile, startLine
         );
         results.push(...fetchedResults[0]);
-        if (nestedVulnerabilitycount !== 0) {
-            vulnerableDependencyRuleIds.push(...fetchedResults[1]);
-        }
+        vulnerableDependencyRuleIds.push(...fetchedResults[1]);
+        // if (nestedVulnerabilitycount !== 0) {
+        //     vulnerableDependencyRuleIds.push(...fetchedResults[1]);
+        // }
     }
 
     if (crdaAnalysedDependency.vulnerable_transitives !== null) {
-        nestedVulnerabilitycount++;
+        // nestedVulnerabilitycount++;
         crdaAnalysedDependency.vulnerable_transitives.forEach((transitiveVulnerability) => {
             const sarifResultData = crdaToResult(transitiveVulnerability, manifestFile, dependencyName);
             results.push(...sarifResultData[0]);
