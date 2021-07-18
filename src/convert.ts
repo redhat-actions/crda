@@ -42,44 +42,53 @@ function crdaToRules(
     crdaSeverityKinds: CrdaSeverityKinds, tranVulRuleIdsWithDepName: TransitiveVulRuleIdsDepName
 ): sarif.ReportingDescriptor[] {
     const rules: sarif.ReportingDescriptor[] = [];
+    const prevRulesIds: string[] = [];
+    ghCore.info(JSON.stringify(tranVulRuleIdsWithDepName));
     if (crdaSeverityKinds.low !== null) {
         ghCore.info("low found");
-        const fetchedRules: sarif.ReportingDescriptor[] = fetchRules(
-            crdaSeverityKinds.low, tranVulRuleIdsWithDepName
+        const fetchedRules = fetchRules(
+            crdaSeverityKinds.low, tranVulRuleIdsWithDepName, prevRulesIds
         );
-        rules.push(...fetchedRules);
+        rules.push(...fetchedRules[0]);
+        prevRulesIds.push(...fetchedRules[1]);
     }
     if (crdaSeverityKinds.medium !== null) {
         ghCore.info("medium found");
-        const fetchedRules: sarif.ReportingDescriptor[] = fetchRules(
-            crdaSeverityKinds.medium, tranVulRuleIdsWithDepName
+        const fetchedRules = fetchRules(
+            crdaSeverityKinds.medium, tranVulRuleIdsWithDepName, prevRulesIds
         );
-        rules.push(...fetchedRules);
+        rules.push(...fetchedRules[0]);
+        prevRulesIds.push(...fetchedRules[1]);
     }
     if (crdaSeverityKinds.high !== null) {
         ghCore.info("high found");
-        const fetchedRules: sarif.ReportingDescriptor[] = fetchRules(
-            crdaSeverityKinds.high, tranVulRuleIdsWithDepName
+        const fetchedRules = fetchRules(
+            crdaSeverityKinds.high, tranVulRuleIdsWithDepName, prevRulesIds
         );
-        rules.push(...fetchedRules);
+        rules.push(...fetchedRules[0]);
+        prevRulesIds.push(...fetchedRules[1]);
     }
     if (crdaSeverityKinds.critical !== null) {
         ghCore.info("critical found");
-        const fetchedRules: sarif.ReportingDescriptor[] = fetchRules(
-            crdaSeverityKinds.critical, tranVulRuleIdsWithDepName
+        const fetchedRules = fetchRules(
+            crdaSeverityKinds.critical, tranVulRuleIdsWithDepName, prevRulesIds
         );
-        rules.push(...fetchedRules);
+        rules.push(...fetchedRules[0]);
+        prevRulesIds.push(...fetchedRules[1]);
     }
 
     return rules;
 }
 
 function fetchRules(
-    severities: CrdaSeverity[], tranVulRuleIdsWithDepName: TransitiveVulRuleIdsDepName
-): sarif.ReportingDescriptor[] {
+    severities: CrdaSeverity[], tranVulRuleIdsWithDepName: TransitiveVulRuleIdsDepName, prevRuleIds: string[]
+): [ sarif.ReportingDescriptor[], string[] ] {
     const rules: sarif.ReportingDescriptor[] = [];
     severities.forEach((severity: CrdaSeverity) => {
         const id = severity.id;
+        if (prevRuleIds.includes(id)) {
+            return;
+        }
         let message = "";
         if (id in tranVulRuleIdsWithDepName) {
             const dependencyName: string[] = tranVulRuleIdsWithDepName[id];
@@ -123,9 +132,10 @@ function fetchRules(
         };
 
         rules.push(rule);
+        prevRuleIds.push(id);
     });
 
-    return rules;
+    return [ rules, prevRuleIds ];
 }
 
 let nestedVulnerabilitycount = 0;
@@ -144,7 +154,7 @@ function crdaToResult(
     }
 
     const splittedDependencyName = dependencyName.split(":");
-    const index = lines.findIndex((s) => {
+    const startLine = lines.findIndex((s) => {
         return s.includes(splittedDependencyName[1] ? splittedDependencyName[1] : splittedDependencyName[0]);
     });
 
@@ -152,7 +162,7 @@ function crdaToResult(
 
     if (crdaAnalysedDependency.publicly_available_vulnerabilities !== null) {
         const fetchedResults = fetchResults(
-            crdaAnalysedDependency.publicly_available_vulnerabilities, manifestFile, index
+            crdaAnalysedDependency.publicly_available_vulnerabilities, manifestFile, startLine
         );
         results.push(...fetchedResults[0]);
         if (nestedVulnerabilitycount !== 0) {
@@ -162,7 +172,7 @@ function crdaToResult(
 
     if (crdaAnalysedDependency.vulnerabilities_unique_with_snyk !== null) {
         const fetchedResults = fetchResults(
-            crdaAnalysedDependency.vulnerabilities_unique_with_snyk, manifestFile, index
+            crdaAnalysedDependency.vulnerabilities_unique_with_snyk, manifestFile, startLine
         );
         results.push(...fetchedResults[0]);
         if (nestedVulnerabilitycount !== 0) {
@@ -194,7 +204,7 @@ function fetchResults(
         };
         const artifactLocation: sarif.ArtifactLocation = {
             uri: manifestFile,
-            uriBaseId: "PROJECTROOT",
+            // uriBaseId: "PROJECTROOT",
         };
         const region: sarif.Region = {
             startLine: index + 1,
@@ -242,7 +252,6 @@ function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
                 tranVulRuleIdsWithDepName[ruleId] = dependencyNameToAddToMap;
             });
             finalResults.push(...resultsData[0]);
-            tranVulRuleIdsWithDepName[dependency.name] = resultsData[1];
         }
     );
     ghCore.info(`Number of results combined is: ${finalResults.length}`);
