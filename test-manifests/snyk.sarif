@@ -70,14 +70,14 @@
             {
               "id": "SNYK-PYTHON-PYYAML-42159",
               "shortDescription": {
-                "text": "Critical severity - Arbitrary Code Execution vulnerability in pyyaml"
+                "text": "Critical severity - Arbitrary Code Execution vulnerability in PyYaml"
               },
               "fullDescription": {
-                "text": "(CVE-2017-18342) pyyaml@3.13"
+                "text": "(CVE-2017-18342) PyYaml@3.13"
               },
               "help": {
                 "text": "",
-                "markdown": "* Package Manager: pip\n* Vulnerable module: pyyaml\n* Introduced through: test-manifests@0.0.0 and pyyaml@3.13\n### Detailed paths\n* _Introduced through_: test-manifests@0.0.0 › pyyaml@3.13\n# Overview\n[pyyaml](https://pypi.org/project/PyYAML/) is a YAML parser and emitter for Python.\n\nAffected versions of this package are vulnerable to Arbitrary Code Execution due to using the insecure `yaml.load()` function.\n# Remediation\nUpgrade `pyyaml` to version 4.2b1 or higher.\n# References\n- [GitHub Commit](https://github.com/yaml/pyyaml/commit/bbcf95fa051fdba9bbf879332e2f7999b195cf95)\n- [GitHub PR](https://github.com/yaml/pyyaml/pull/74)\n"
+                "markdown": "* Package Manager: pip\n* Vulnerable module: PyYaml\n* Introduced through: test-manifests@0.0.0, trafaret-config@2.0.2 and others\n### Detailed paths\n* _Introduced through_: test-manifests@0.0.0 › trafaret-config@2.0.2 › PyYaml@3.13\n# Overview\n[pyyaml](https://pypi.org/project/PyYAML/) is a YAML parser and emitter for Python.\n\nAffected versions of this package are vulnerable to Arbitrary Code Execution due to using the insecure `yaml.load()` function.\n# Remediation\nUpgrade `pyyaml` to version 4.2b1 or higher.\n# References\n- [GitHub Commit](https://github.com/yaml/pyyaml/commit/bbcf95fa051fdba9bbf879332e2f7999b195cf95)\n- [GitHub PR](https://github.com/yaml/pyyaml/pull/74)\n"
               },
               "properties": {
                 "tags": [
@@ -90,14 +90,14 @@
             {
               "id": "SNYK-PYTHON-PYYAML-559098",
               "shortDescription": {
-                "text": "Critical severity - Arbitrary Code Execution vulnerability in pyyaml"
+                "text": "Critical severity - Arbitrary Code Execution vulnerability in PyYaml"
               },
               "fullDescription": {
-                "text": "(CVE-2020-1747) pyyaml@3.13"
+                "text": "(CVE-2020-1747) PyYaml@3.13"
               },
               "help": {
                 "text": "",
-                "markdown": "* Package Manager: pip\n* Vulnerable module: pyyaml\n* Introduced through: test-manifests@0.0.0 and pyyaml@3.13\n### Detailed paths\n* _Introduced through_: test-manifests@0.0.0 › pyyaml@3.13\n# Overview\n[pyyaml](https://pypi.org/project/PyYAML/) is a YAML parser and emitter for Python.\n\nAffected versions of this package are vulnerable to Arbitrary Code Execution. It is susceptible to arbitrary code execution when it processes untrusted YAML files through the `full_load` method or with the `FullLoader` loader. Applications that use the library to process untrusted input may be vulnerable to this flaw. An attacker could use this flaw to execute arbitrary code on the system by abusing the python/object/new constructor.\n# Remediation\nUpgrade `pyyaml` to version 5.3.1 or higher.\n# References\n- [GitHub Commit](https://github.com/yaml/pyyaml/commit/5080ba513377b6355a0502104846ee804656f1e0)\n- [GitHub PR](https://github.com/yaml/pyyaml/pull/386)\n- [Redhat Bugzilla](https://bugzilla.redhat.com/show_bug.cgi?id=1807367)\n"
+                "markdown": "* Package Manager: pip\n* Vulnerable module: PyYaml\n* Introduced through: test-manifests@0.0.0, trafaret-config@2.0.2 and others\n### Detailed paths\n* _Introduced through_: test-manifests@0.0.0 › trafaret-config@2.0.2 › PyYaml@3.13\n# Overview\n[pyyaml](https://pypi.org/project/PyYAML/) is a YAML parser and emitter for Python.\n\nAffected versions of this package are vulnerable to Arbitrary Code Execution. It is susceptible to arbitrary code execution when it processes untrusted YAML files through the `full_load` method or with the `FullLoader` loader. Applications that use the library to process untrusted input may be vulnerable to this flaw. An attacker could use this flaw to execute arbitrary code on the system by abusing the python/object/new constructor.\n# Remediation\nUpgrade `pyyaml` to version 5.3.1 or higher.\n# References\n- [GitHub Commit](https://github.com/yaml/pyyaml/commit/5080ba513377b6355a0502104846ee804656f1e0)\n- [GitHub PR](https://github.com/yaml/pyyaml/pull/386)\n- [Redhat Bugzilla](https://bugzilla.redhat.com/show_bug.cgi?id=1807367)\n"
               },
               "properties": {
                 "tags": [
@@ -110,14 +110,14 @@
             {
               "id": "SNYK-PYTHON-PYYAML-590151",
               "shortDescription": {
-                "text": "Critical severity - Arbitrary Code Execution vulnerability in pyyaml"
+                "text": "Critical severity - Arbitrary Code Execution vulnerability in PyYaml"
               },
               "fullDescription": {
-                "text": "(CVE-2020-14343) pyyaml@3.13"
+                "text": "(CVE-2020-14343) PyYaml@3.13"
               },
               "help": {
                 "text": "",
-                "markdown": "* Package Manager: pip\n* Vulnerable module: pyyaml\n* Introduced through: test-manifests@0.0.0 and pyyaml@3.13\n### Detailed paths\n* _Introduced through_: test-manifests@0.0.0 › pyyaml@3.13\n# Overview\n[pyyaml](https://pypi.org/project/PyYAML/) is a YAML parser and emitter for Python.\n\nAffected versions of this package are vulnerable to Arbitrary Code Execution. It processes untrusted YAML files through the `full_load` method or with the `FullLoader` loader. This is due to an incomplete fix for CVE-2020-1747\n# Remediation\nUpgrade `pyyaml` to version 5.4 or higher.\n# References\n- [Exploit Writeup](https://hackmd.io/@harrier/uiuctf20)\n- [GitHub Commit](https://github.com/yaml/pyyaml/commit/a001f2782501ad2d24986959f0239a354675f9dc)\n- [GitHub Issue](https://github.com/yaml/pyyaml/issues/420)\n- [RedHat Bugzilla Bug](https://bugzilla.redhat.com/show_bug.cgi?id=1860466)\n- [Research Blog Post](https://blog.arxenix.dev/pyyaml-cve/)\n"
+                "markdown": "* Package Manager: pip\n* Vulnerable module: PyYaml\n* Introduced through: test-manifests@0.0.0, trafaret-config@2.0.2 and others\n### Detailed paths\n* _Introduced through_: test-manifests@0.0.0 › trafaret-config@2.0.2 › PyYaml@3.13\n# Overview\n[pyyaml](https://pypi.org/project/PyYAML/) is a YAML parser and emitter for Python.\n\nAffected versions of this package are vulnerable to Arbitrary Code Execution. It processes untrusted YAML files through the `full_load` method or with the `FullLoader` loader. This is due to an incomplete fix for CVE-2020-1747\n# Remediation\nUpgrade `pyyaml` to version 5.4 or higher.\n# References\n- [Exploit Writeup](https://hackmd.io/@harrier/uiuctf20)\n- [GitHub Commit](https://github.com/yaml/pyyaml/commit/a001f2782501ad2d24986959f0239a354675f9dc)\n- [GitHub Issue](https://github.com/yaml/pyyaml/issues/420)\n- [RedHat Bugzilla Bug](https://bugzilla.redhat.com/show_bug.cgi?id=1860466)\n- [Research Blog Post](https://blog.arxenix.dev/pyyaml-cve/)\n"
               },
               "properties": {
                 "tags": [
@@ -192,7 +192,7 @@
           "ruleId": "SNYK-PYTHON-PYYAML-42159",
           "level": "error",
           "message": {
-            "text": "This file introduces a vulnerable pyyaml package with a critical severity vulnerability."
+            "text": "This file introduces a vulnerable PyYaml package with a critical severity vulnerability."
           },
           "locations": [
             {
@@ -211,7 +211,7 @@
           "ruleId": "SNYK-PYTHON-PYYAML-559098",
           "level": "error",
           "message": {
-            "text": "This file introduces a vulnerable pyyaml package with a critical severity vulnerability."
+            "text": "This file introduces a vulnerable PyYaml package with a critical severity vulnerability."
           },
           "locations": [
             {
@@ -230,7 +230,7 @@
           "ruleId": "SNYK-PYTHON-PYYAML-590151",
           "level": "error",
           "message": {
-            "text": "This file introduces a vulnerable pyyaml package with a critical severity vulnerability."
+            "text": "This file introduces a vulnerable PyYaml package with a critical severity vulnerability."
           },
           "locations": [
             {
