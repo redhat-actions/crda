@@ -97,16 +97,6 @@ function fetchRules(
         }
         const cveIds: string[] = severity.cve_ids;
         const cvss: string = severity.cvss;
-        const shortDescription: sarif.MultiformatMessageString = {
-            text: severity.title,
-        };
-        const fullDescription: sarif.MultiformatMessageString = {
-            text: severity.title,
-        };
-        const help: sarif.MultiformatMessageString = {
-            text: "text for help",
-            markdown: message,
-        };
 
         let sev: sarif.ReportingConfiguration.level = "none";
         if (severity.severity === "medium") {
@@ -115,6 +105,18 @@ function fetchRules(
         if (severity.severity === "high" || severity.severity === "critical") {
             sev = "error";
         }
+
+        const shortDescription: sarif.MultiformatMessageString = {
+            text: `${severity.severity} severity - ${severity.title} vulnerability`,
+        };
+        const fullDescription: sarif.MultiformatMessageString = {
+            text: `${cveIds.join(" ,")}`,
+        };
+        const help: sarif.MultiformatMessageString = {
+            text: `${message}. ${severity.title} vulnerability with ${severity.severity} severity. `
+                + `More details are available at ${severity.url}`,
+        };
+
         const defaultConfiguration = {
             level: sev,
         };
@@ -191,7 +193,7 @@ function crdaToResult(
     }
 
     if (crdaAnalysedDependency.vulnerable_transitives !== null) {
-        // nestedVulnerabilitycount++;
+        nestedVulnerabilitycount++;
         crdaAnalysedDependency.vulnerable_transitives.forEach((transitiveVulnerability) => {
             const sarifResultData = crdaToResult(transitiveVulnerability, manifestFile, dependencyName);
             results.push(...sarifResultData[0]);
@@ -210,11 +212,11 @@ function fetchResults(
     publiclyAvailableVulnerabilities.forEach((publiclyAvailableVulnerability) => {
         const ruleId = publiclyAvailableVulnerability.id;
         const message: sarif.Message = {
-            text: publiclyAvailableVulnerability.title,
+            text: `This file introduces a ${publiclyAvailableVulnerability.title} vulnerability with `
+                + `${publiclyAvailableVulnerability.severity} severity.`,
         };
         const artifactLocation: sarif.ArtifactLocation = {
             uri: manifestFile,
-            // uriBaseId: "PROJECTROOT",
         };
         const region: sarif.Region = {
             startLine: startLine + 1,
@@ -277,7 +279,6 @@ function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
 
     // Filter result with same rule id captured by the direct and transitive dependency both.
     // Result describing transitive dependency will be removed.
-
     finalResults = finalResults.reduce((filteredResults: sarif.Result[], result: sarif.Result) => {
         const ruleId = result.ruleId;
         const isDirect = result.properties?.directDependency;
