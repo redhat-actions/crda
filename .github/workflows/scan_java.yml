@@ -52,7 +52,7 @@ jobs:
           crda: "latest"
 
       - name: CRDA Scan
-        uses: divyansh42/crda-action@test
+        uses: divyansh42/crda-action@update
         with:
           manifest_file_path: pom.xml
           crda_key: ${{ secrets.CRDA_KEY }}

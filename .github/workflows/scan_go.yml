@@ -17,7 +17,8 @@ jobs:
         with:
           go-version: '^1.13.1'
 
-      - run: go mod vendor
+      - run: |
+          go mod vendor
 
       - name: Install CRDA
         uses: redhat-actions/openshift-tools-installer@v1
@@ -28,7 +29,7 @@ jobs:
 
       - name: CRDA Scan
         id: scan
-        uses: divyansh42/crda-action@test
+        uses: divyanshu42/crda-action@update
         with:
           manifest_file_path: go.mod
           # crda_key: ${{ secrets.CRDA_KEY }}
@@ -36,6 +37,7 @@ jobs:
           consent_telemetry: true
 
       - name: Print Analysis Report
+        if: always()
         run: cat crda_analysis_report.json
 
       - name: Print Sarif
