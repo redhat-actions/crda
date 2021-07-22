@@ -5,40 +5,12 @@ import {
     CrdaAnalysedDependency, CrdaPubliclyAvailableVulnerability,
     CrdaSeverity, CrdaSeverityKinds, TransitiveVulRuleIdsDepName,
 } from "./types";
+import { capitalizeFirstLetter } from "./utils";
 
 const sarifSchemaUrl = "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json";
 const sarifSchemaVersion = "2.1.0";
-// const sarifTemplate: sarif.Log = {
-//     $schema: "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
-//     version: "2.1.0",
-//     runs: [
-//         {
-//             tool: {
-//                 driver: {
-//                     name: "Code Ready Dependency Analytics",
-//                     rules: [],
-//                 },
-//             },
-//             results: [],
-//         },
-//     ],
-// };
 
 const sarifOutputFile = "output.sarif";
-
-// set or get rules
-// function srules(rules?: sarif.ReportingDescriptor[]): sarif.ReportingDescriptor[] | undefined {
-//     if (rules) {
-//         sarifTemplate.runs[0].tool.driver.rules = rules;
-//     }
-//     return sarifTemplate.runs[0].tool.driver.rules;
-// }
-// function sresults(results?: sarif.Result[]): sarif.Result[] | undefined {
-//     if (results) {
-//         sarifTemplate.runs[0].results = results;
-//     }
-//     return sarifTemplate.runs[0].results;
-// }
 
 function crdaToRules(
     crdaSeverityKinds: CrdaSeverityKinds, tranVulRuleIdsWithDepName: TransitiveVulRuleIdsDepName
@@ -109,14 +81,13 @@ function fetchRules(
         }
 
         const shortDescription: sarif.MultiformatMessageString = {
-            text: `${severity.severity} severity - ${severity.title} vulnerability`,
+            text: `${capitalizeFirstLetter(severity.severity)} severity - ${severity.title} vulnerability`,
         };
         const fullDescription: sarif.MultiformatMessageString = {
             text: `${cveIds.join(" ,")}`,
         };
         const help: sarif.MultiformatMessageString = {
-            text: `${message}${severity.title} vulnerability with ${severity.severity} severity. `
-                + `More details are available at ${severity.url}`,
+            text: `${message}More details are available at ${severity.url}`,
         };
 
         const defaultConfiguration = {
@@ -161,8 +132,13 @@ function crdaToResult(
     }
 
     const splittedDependencyName = dependencyName.split(":");
+    let javaDependencySearchLine = "";
+
+    if (splittedDependencyName[1]) {
+        javaDependencySearchLine = `<artifactId>${splittedDependencyName[1]}</artifactId>`;
+    }
     const startLine = lines.findIndex((s) => {
-        return s.includes(splittedDependencyName[1] ? splittedDependencyName[1] : splittedDependencyName[0]);
+        return s.includes(javaDependencySearchLine !== "" ? javaDependencySearchLine : splittedDependencyName[0]);
     });
 
     const vulnerableTransitiveDependencyRuleIds: string[] = [];
@@ -199,7 +175,7 @@ function crdaToResult(
         crdaAnalysedDependency.vulnerable_transitives.forEach((transitiveVulnerability) => {
             const sarifResultData = crdaToResult(transitiveVulnerability, manifestFile, dependencyName);
             results.push(...sarifResultData[0]);
-            vulnerableTransitiveDependencyRuleIds.push(...sarifResultData[1]);
+            vulnerableTransitiveDependencyRuleIds.push(...sarifResultData[2]);
         });
     }
     return [ results, vulnerableDirectDependencyRuleIds, vulnerableTransitiveDependencyRuleIds ];
@@ -252,9 +228,6 @@ function fetchResults(
 }
 
 function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
-    // ghCore.info(`Initial rules: ${JSON.stringify(sarifTemplate.runs[0].tool.driver.rules)}`);
-    // ghCore.info(`Initial results: ${JSON.stringify(sarifTemplate.runs[0].results)}`);
-
     const crdaData = JSON.parse(crdaAnalysedData);
 
     let finalResults: sarif.Result[] = [];
@@ -292,13 +265,9 @@ function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
     }, new Array<sarif.Result>());
 
     ghCore.info(`Number of results combined is: ${finalResults.length}`);
-    // sresults(finalResults);
 
     const finalRules = crdaToRules(crdaData.severity, tranVulRuleIdsWithDepName);
-    // ghCore.info(`Crda severity: ${JSON.stringify(crdaData.severity, undefined, 4)}`);
     ghCore.info(`Number of rules combined is: ${finalRules.length}`);
-    // srules(finalRules);
-    // ghCore.info(JSON.stringify(sarifTemplate.runs[0].results));
     return {
         $schema: sarifSchemaUrl,
         version: sarifSchemaVersion,
@@ -324,12 +293,3 @@ export function convert(crdaJsonFile: string, manifestFile: string): void {
     }
     ghCore.info(`Created: ${sarifOutputFile}`);
 }
-
-// function writeJSON(sarifFile: string, value: sarif.Log): void {
-//     const stream = fs.createWriteStream(sarifFile);
-//     stream.once("open", () => {
-//         stream.write(JSON.stringify(value));
-//         stream.end();
-//         ghCore.info(`Created: ${sarifFile}`);
-//     });
-// }

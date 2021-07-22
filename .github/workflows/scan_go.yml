@@ -29,7 +29,7 @@ jobs:
 
       - name: CRDA Scan
         id: scan
-        uses: divyanshu42/crda-action@update
+        uses: divyansh42/crda-action@update
         with:
           manifest_file_path: go.mod
           # crda_key: ${{ secrets.CRDA_KEY }}
