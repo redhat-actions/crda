@@ -11,7 +11,7 @@ inputs:
   analysis_report_file_name:
     description: Name of the file to save the analysis report.
     required: false
-    default: crda_analysis_report.json
+    default: crda_analysis_report
   pkg_installation_directory_path:
     description: Path of a directory in workspace, where dependencies are installed.
     required: false
@@ -32,6 +32,11 @@ inputs:
 outputs:
   crda_key:
     description: "Generated CRDA key for future use"
+  crda_report_json:
+    description: "Generated CRDA Analysis Report in JSON format"
+  crda_report_sarif:
+    description: "Generated CRDA Analysis Report in Sarif format"
+
 runs:
   using: 'node12'
   main: 'dist/index.js'

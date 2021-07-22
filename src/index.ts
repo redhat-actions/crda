@@ -14,13 +14,16 @@ async function run(): Promise<void> {
     const snykToken = ghCore.getInput(Inputs.SNYK_TOKEN);
     const crdaKey = ghCore.getInput(Inputs.CRDA_KEY);
     const consentTelemetry = ghCore.getInput(Inputs.CONSENT_TELEMETRY) || "true";
-    const analysisReportFileName = ghCore.getInput(Inputs.ANALYSIS_REPORT_FILE_NAME) || "crda_analysis_report.json";
+    const analysisReportFileName = ghCore.getInput(Inputs.ANALYSIS_REPORT_FILE_NAME) || "crda_analysis_report";
     const pkgInstallationDirectoryPath = ghCore.getInput(Inputs.PKG_INSTALLATION_DIRECTORY_PATH);
 
     if (pkgInstallationDirectoryPath !== ".") {
         ghCore.info(`Setting up the PYTHONPATH to ${pkgInstallationDirectoryPath}`);
         process.env.PYTHONPATH = pkgInstallationDirectoryPath;
     }
+
+    const crdaReportJson = `${analysisReportFileName}.json` || "crda_analysis_report.json";
+    const crdaReportSarif = `${analysisReportFileName}.sarif` || "crda_analysis_report.sarif";
 
     // Setting up consent_telemetry config to avoid prompt during auth command
     ghCore.info(`Setting up the ${Crda.ConfigKeys.ConsentTelemetry} to ${consentTelemetry}`);
@@ -50,12 +53,15 @@ async function run(): Promise<void> {
     }
 
     ghCore.info(`⏳ Analysing your Dependency Stack! Please wait...`);
-    await Analyse.analyse(manifestFilePath, analysisReportFileName);
+    await Analyse.analyse(manifestFilePath, crdaReportJson);
 
-    ghCore.info(`✅ Analysis completed. Analysis report is available at ${analysisReportFileName}`);
+    ghCore.info(`✅ Analysis completed. Analysis report is available at ${crdaReportJson}`);
 
     ghCore.info(`⏳ Converting JSON output to Sarif format`);
-    convert(analysisReportFileName, manifestFilePath);
+    convert(crdaReportJson, manifestFilePath, crdaReportSarif);
+
+    ghCore.setOutput(Outputs.CRDA_REPORT_JSON, crdaReportJson);
+    ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
 }
 
 run()

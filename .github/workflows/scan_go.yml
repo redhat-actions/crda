@@ -33,17 +33,30 @@ jobs:
         with:
           manifest_file_path: go.mod
           # crda_key: ${{ secrets.CRDA_KEY }}
+          analysis_report_file_name: go
           snyk_token: ${{ secrets.SNYK_TOKEN }}
           consent_telemetry: true
 
-      - name: Print Analysis Report
-        if: always()
-        run: cat crda_analysis_report.json
+      # - name: Print Analysis Report
+      #   if: always()
+      #   run: cat crda_analysis_report.json
 
-      - name: Print Sarif
-        run: cat output.sarif
+      # - name: Print Sarif
+      #   run: cat output.sarif
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: output.sarif
+          sarif_file: ${{ steps.scan.outputs.crda_report_sarif }}
+
+      - name: Save intermediate files
+        run: |
+          mkdir -p uploads_java
+          mv ${{ steps.scan.outputs.crda_report_json }} uploads
+          mv ${{ steps.scan.outputs.crda_report_sarif }} uploads
+
+      - name: Upload merged Results
+        uses: actions/upload-artifact@v2
+        with:
+          name: workfiles_go
+          path: ./uploads

@@ -10,8 +10,6 @@ import { capitalizeFirstLetter } from "./utils";
 const sarifSchemaUrl = "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json";
 const sarifSchemaVersion = "2.1.0";
 
-const sarifOutputFile = "output.sarif";
-
 function crdaToRules(
     crdaSeverityKinds: CrdaSeverityKinds, tranVulRuleIdsWithDepName: TransitiveVulRuleIdsDepName
 ): sarif.ReportingDescriptor[] {
@@ -285,11 +283,11 @@ function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
     };
 }
 
-export function convert(crdaJsonFile: string, manifestFile: string): void {
-    const crdaAnalysedData = fs.readFileSync(crdaJsonFile, "utf-8");
+export function convert(crdaReportJson: string, manifestFile: string, crdaReportSarif: string): void {
+    const crdaAnalysedData = fs.readFileSync(crdaReportJson, "utf-8");
     const convertedSarif = getSarif(crdaAnalysedData, manifestFile);
     if (convertedSarif.$schema) {
-        fs.writeFileSync(sarifOutputFile, JSON.stringify(convertedSarif, undefined, 4), "utf-8");
+        fs.writeFileSync(crdaReportSarif, JSON.stringify(convertedSarif, undefined, 4), "utf-8");
     }
-    ghCore.info(`Created: ${sarifOutputFile}`);
+    ghCore.info(`Created: ${crdaReportSarif}`);
 }

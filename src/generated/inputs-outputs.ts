@@ -3,7 +3,7 @@ export enum Inputs {
     /**
      * Name of the file to save the analysis report.
      * Required: false
-     * Default: "crda_analysis_report.json"
+     * Default: "crda_analysis_report"
      */
     ANALYSIS_REPORT_FILE_NAME = "analysis_report_file_name",
     /**
@@ -46,4 +46,16 @@ export enum Outputs {
      * Default: None.
      */
     CRDA_KEY = "crda_key",
+    /**
+     * Generated CRDA Analysis Report in JSON format
+     * Required: false
+     * Default: None.
+     */
+    CRDA_REPORT_JSON = "crda_report_json",
+    /**
+     * Generated CRDA Analysis Report in Sarif format
+     * Required: false
+     * Default: None.
+     */
+    CRDA_REPORT_SARIF = "crda_report_sarif",
 }
