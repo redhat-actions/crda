@@ -57,10 +57,11 @@ async function run(): Promise<void> {
 
     ghCore.info(`✅ Analysis completed. Analysis report is available at ${crdaReportJson}`);
 
+    ghCore.setOutput(Outputs.CRDA_REPORT_JSON, crdaReportJson);
+
     ghCore.info(`⏳ Converting JSON output to Sarif format`);
     convert(crdaReportJson, manifestFilePath, crdaReportSarif);
 
-    ghCore.setOutput(Outputs.CRDA_REPORT_JSON, crdaReportJson);
     ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
 }
 
