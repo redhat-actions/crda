@@ -82,7 +82,7 @@ function fetchRules(
             text: `${capitalizeFirstLetter(severity.severity)} severity - ${severity.title} vulnerability`,
         };
         const fullDescription: sarif.MultiformatMessageString = {
-            text: `${cveIds.join(" ,")}`,
+            text: `${cveIds.join(", ")}`,
         };
         const help: sarif.MultiformatMessageString = {
             text: `${message}More details are available at ${severity.url}`,
@@ -114,22 +114,25 @@ function fetchRules(
 
 let nestedVulnerabilitycount = 0;
 function crdaToResult(
-    crdaAnalysedDependency: CrdaAnalysedDependency, manifestFile: string, directDependencyName?: string
+    crdaAnalysedDependency: CrdaAnalysedDependency, manifestFile: string, directDependencyName?: string,
 ): [ sarif.Result[], string[], string[] ] {
     let isDirect = true;
     const results: sarif.Result[] = [];
     const manifestData = fs.readFileSync(manifestFile, "utf-8");
     const lines = manifestData.split(/\r\n|\n/);
-    let dependencyName: string = crdaAnalysedDependency.name;
+    const dependencyName: string = crdaAnalysedDependency.name;
+    const dependencyVersion = crdaAnalysedDependency.version;
+
+    let splittedDependencyName: string[] = [];
     if (directDependencyName) {
-        dependencyName = directDependencyName;
+        splittedDependencyName = directDependencyName.split(":");
         isDirect = false;
     }
     else {
+        splittedDependencyName = dependencyName.split(":");
         nestedVulnerabilitycount = 0;
     }
 
-    const splittedDependencyName = dependencyName.split(":");
     let javaDependencySearchLine = "";
 
     if (splittedDependencyName[1]) {
@@ -144,7 +147,8 @@ function crdaToResult(
 
     if (crdaAnalysedDependency.publicly_available_vulnerabilities !== null) {
         const fetchedResults = fetchResults(
-            crdaAnalysedDependency.publicly_available_vulnerabilities, manifestFile, startLine, isDirect
+            crdaAnalysedDependency.publicly_available_vulnerabilities, manifestFile,
+            startLine, isDirect, dependencyName, dependencyVersion,
         );
         results.push(...fetchedResults[0]);
         if (nestedVulnerabilitycount === 0) {
@@ -157,7 +161,8 @@ function crdaToResult(
 
     if (crdaAnalysedDependency.vulnerabilities_unique_with_snyk !== null) {
         const fetchedResults = fetchResults(
-            crdaAnalysedDependency.vulnerabilities_unique_with_snyk, manifestFile, startLine, isDirect
+            crdaAnalysedDependency.vulnerabilities_unique_with_snyk, manifestFile,
+            startLine, isDirect, dependencyName, dependencyVersion,
         );
         results.push(...fetchedResults[0]);
         if (nestedVulnerabilitycount === 0) {
@@ -181,15 +186,18 @@ function crdaToResult(
 
 function fetchResults(
     publiclyAvailableVulnerabilities: CrdaPubliclyAvailableVulnerability[],
-    manifestFile: string, startLine: number, isTransitive: boolean
+    manifestFile: string, startLine: number, isTransitive: boolean,
+    dependencyName: string, dependencyVersion: string
 ): [ sarif.Result[], string[] ] {
     const results: sarif.Result[] = [];
     const ruleIds: string[] = [];
     publiclyAvailableVulnerabilities.forEach((publiclyAvailableVulnerability) => {
         const ruleId = publiclyAvailableVulnerability.id;
+        // TODO: convert text to markdown
         const message: sarif.Message = {
-            text: `This file introduces a ${publiclyAvailableVulnerability.title} vulnerability with `
-                + `${publiclyAvailableVulnerability.severity} severity.`,
+            text: `This file introduces a vulnerability ${publiclyAvailableVulnerability.title} with `
+                + `${publiclyAvailableVulnerability.severity} severity. `
+                + `Introduced through ${dependencyName}@${dependencyVersion}`,
         };
         const artifactLocation: sarif.ArtifactLocation = {
             uri: manifestFile,
