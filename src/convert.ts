@@ -15,9 +15,9 @@ function crdaToRules(
 ): sarif.ReportingDescriptor[] {
     const rules: sarif.ReportingDescriptor[] = [];
     const prevRulesIds: string[] = [];
-    ghCore.info(JSON.stringify(tranVulRuleIdsWithDepName));
+    // ghCore.info(JSON.stringify(tranVulRuleIdsWithDepName));
     if (crdaSeverityKinds.low !== null) {
-        ghCore.info("low found");
+        // ghCore.info("low found");
         const fetchedRules = fetchRules(
             crdaSeverityKinds.low, tranVulRuleIdsWithDepName, prevRulesIds
         );
@@ -25,7 +25,7 @@ function crdaToRules(
         prevRulesIds.push(...fetchedRules[1]);
     }
     if (crdaSeverityKinds.medium !== null) {
-        ghCore.info("medium found");
+        // ghCore.info("medium found");
         const fetchedRules = fetchRules(
             crdaSeverityKinds.medium, tranVulRuleIdsWithDepName, prevRulesIds
         );
@@ -33,7 +33,7 @@ function crdaToRules(
         prevRulesIds.push(...fetchedRules[1]);
     }
     if (crdaSeverityKinds.high !== null) {
-        ghCore.info("high found");
+        // ghCore.info("high found");
         const fetchedRules = fetchRules(
             crdaSeverityKinds.high, tranVulRuleIdsWithDepName, prevRulesIds
         );
@@ -41,7 +41,7 @@ function crdaToRules(
         prevRulesIds.push(...fetchedRules[1]);
     }
     if (crdaSeverityKinds.critical !== null) {
-        ghCore.info("critical found");
+        // ghCore.info("critical found");
         const fetchedRules = fetchRules(
             crdaSeverityKinds.critical, tranVulRuleIdsWithDepName, prevRulesIds
         );
@@ -197,7 +197,7 @@ function fetchResults(
         const message: sarif.Message = {
             text: `This file introduces a vulnerability ${publiclyAvailableVulnerability.title} with `
                 + `${publiclyAvailableVulnerability.severity} severity. `
-                + `Introduced through ${dependencyName}@${dependencyVersion}`,
+                + `Vulnerability present at ${dependencyName}@${dependencyVersion}`,
         };
         const artifactLocation: sarif.ArtifactLocation = {
             uri: manifestFile,
@@ -223,7 +223,7 @@ function fetchResults(
             locations: [ location ],
             properties: property,
         };
-        ghCore.info("Result generated");
+        // ghCore.info("Result generated");
 
         results.push(result);
         ruleIds.push(ruleId);

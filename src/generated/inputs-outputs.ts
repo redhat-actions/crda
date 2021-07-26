@@ -7,32 +7,26 @@ export enum Inputs {
      */
     ANALYSIS_REPORT_FILE_NAME = "analysis_report_file_name",
     /**
-     * "CRDA collects anonymous usage data, and is enabled by default.
-     * If you don't want this behaviour set this to false."
+     * CRDA collects anonymous usage data, and is enabled by default.
+     * If you don't want this behaviour set this to false
      * Required: false
      * Default: "true"
      */
     CONSENT_TELEMETRY = "consent_telemetry",
     /**
-     * Existing CRDA key to identify the existing user.
+     * Existing CRDA key to identify the existing user
      * Required: false
      * Default: None.
      */
     CRDA_KEY = "crda_key",
     /**
-     * Path of target manifest file to perform analysis.
+     * Path of the manifest file to use for analysis
      * Required: true
      * Default: None.
      */
     MANIFEST_FILE_PATH = "manifest_file_path",
     /**
-     * Path of a directory in workspace, where dependencies are installed.
-     * Required: false
-     * Default: "."
-     */
-    PKG_INSTALLATION_DIRECTORY_PATH = "pkg_installation_directory_path",
-    /**
-     * Snyk token to be used to authenticate to CRDA.
+     * Snyk token to be used to authenticate to CRDA
      * Required: false
      * Default: None.
      */

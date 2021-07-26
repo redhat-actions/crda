@@ -4,7 +4,6 @@ import * as utils from "./utils";
 import Analyse from "./analyse";
 import Crda from "./crda";
 import { convert } from "./convert";
-// import { convert } from "./convert";
 
 async function run(): Promise<void> {
     ghCore.debug(`Runner OS is ${utils.getOS()}`);
@@ -15,12 +14,12 @@ async function run(): Promise<void> {
     const crdaKey = ghCore.getInput(Inputs.CRDA_KEY);
     const consentTelemetry = ghCore.getInput(Inputs.CONSENT_TELEMETRY) || "true";
     const analysisReportFileName = ghCore.getInput(Inputs.ANALYSIS_REPORT_FILE_NAME) || "crda_analysis_report";
-    const pkgInstallationDirectoryPath = ghCore.getInput(Inputs.PKG_INSTALLATION_DIRECTORY_PATH);
+    // const pkgInstallationDirectoryPath = ghCore.getInput(Inputs.PKG_INSTALLATION_DIRECTORY_PATH);
 
-    if (pkgInstallationDirectoryPath !== ".") {
-        ghCore.info(`Setting up the PYTHONPATH to ${pkgInstallationDirectoryPath}`);
-        process.env.PYTHONPATH = pkgInstallationDirectoryPath;
-    }
+    // if (pkgInstallationDirectoryPath !== ".") {
+    //     ghCore.info(`Setting up the PYTHONPATH to ${pkgInstallationDirectoryPath}`);
+    //     process.env.PYTHONPATH = pkgInstallationDirectoryPath;
+    // }
 
     const crdaReportJson = `${analysisReportFileName}.json` || "crda_analysis_report.json";
     const crdaReportSarif = `${analysisReportFileName}.sarif` || "crda_analysis_report.sarif";
@@ -61,6 +60,9 @@ async function run(): Promise<void> {
 
     ghCore.info(`⏳ Converting JSON output to Sarif format`);
     convert(crdaReportJson, manifestFilePath, crdaReportSarif);
+
+    ghCore.info(`✅ Sucessfully converted analysis JSON to the Sarif format. `
+    + `Converted file is available at ${crdaReportSarif}`);
 
     ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
 }

@@ -6,26 +6,26 @@ branding:
   color: red
 inputs:
   manifest_file_path:
-    description: Path of target manifest file to perform analysis.
+    description: Path of the manifest file to use for analysis
     required: true
   analysis_report_file_name:
     description: Name of the file to save the analysis report.
     required: false
     default: crda_analysis_report
-  pkg_installation_directory_path:
-    description: Path of a directory in workspace, where dependencies are installed.
-    required: false
-    default: .
+  # pkg_installation_directory_path:
+  #   description: Path of a directory in workspace, where dependencies are installed.
+  #   required: false
+  #   default: .
   snyk_token:
-    description: "Snyk token to be used to authenticate to CRDA."
+    description: Snyk token to be used to authenticate to CRDA
     required: false
   crda_key:
-    description: "Existing CRDA key to identify the existing user."
+    description: Existing CRDA key to identify the existing user
     required: false
   consent_telemetry:
     description: |
-      "CRDA collects anonymous usage data, and is enabled by default.
-      If you don't want this behaviour set this to false."
+      CRDA collects anonymous usage data, and is enabled by default.
+      If you don't want this behaviour set this to false
     required: false
     default: "true"
 
