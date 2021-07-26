@@ -30,9 +30,9 @@ jobs:
         uses: ./
         with:
           manifest_file_path: test-manifests/requirements.txt
-          # crda_key: ${{ secrets.CRDA_KEY }}
+          crda_key: ${{ secrets.CRDA_KEY }}
           analysis_report_file_name: python
-          snyk_token: ${{ secrets.SNYK_TOKEN }}
+          # snyk_token: ${{ secrets.SNYK_TOKEN }}
           consent_telemetry: true
 
       - name: Print Analysis Report

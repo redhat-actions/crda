@@ -1,4 +1,5 @@
 import * as ghCore from "@actions/core";
+import * as fs from "fs";
 import { Inputs, Outputs } from "./generated/inputs-outputs";
 import * as utils from "./utils";
 import Analyse from "./analyse";
@@ -58,13 +59,24 @@ async function run(): Promise<void> {
 
     ghCore.setOutput(Outputs.CRDA_REPORT_JSON, crdaReportJson);
 
-    ghCore.info(`⏳ Converting JSON output to Sarif format`);
-    convert(crdaReportJson, manifestFilePath, crdaReportSarif);
+    const crdaAnalysedData = fs.readFileSync(crdaReportJson, "utf-8");
+    const crdaData = JSON.parse(crdaAnalysedData);
 
-    ghCore.info(`✅ Sucessfully converted analysis JSON to the Sarif format. `
-    + `Converted file is available at ${crdaReportSarif}`);
+    if (!crdaData.analysed_dependencies) {
+        ghCore.warning(`Cannot retrieve detailed analysis and report in sarif format. `
+            + `To get more detailed analysis and report in sarif format `
+            + `use input "${Inputs.SNYK_TOKEN}" or use CRDA key authenticated with the Snyk token. `
+            + `To get a Snyk token follow https://app.snyk.io/login?utm_campaign=Code-Ready-Analytics-2020&utm_source=code_ready&code_ready=FF1B53D9-57BE-4613-96D7-1D06066C38C9`);
+    }
+    else {
+        ghCore.info(`⏳ Converting JSON output to Sarif format`);
+        convert(crdaReportJson, manifestFilePath, crdaReportSarif);
 
-    ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
+        ghCore.info(`✅ Sucessfully converted analysis JSON to the Sarif format. `
+        + `Converted file is available at ${crdaReportSarif}`);
+
+        ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
+    }
 }
 
 run()

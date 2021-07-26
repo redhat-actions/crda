@@ -71,7 +71,7 @@ function fetchRules(
         const cvss: string = severity.cvss;
 
         let sev: sarif.ReportingConfiguration.level = "none";
-        if (severity.severity === "medium") {
+        if (severity.severity === "low" || severity.severity === "medium") {
             sev = "warning";
         }
         if (severity.severity === "high" || severity.severity === "critical") {
@@ -235,7 +235,6 @@ function fetchResults(
 
 function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
     const crdaData = JSON.parse(crdaAnalysedData);
-
     let finalResults: sarif.Result[] = [];
     const vulnerableDirectDependencyRuleIds: string[] = [];
     const vulnerableTransitiveDependencyRuleIds: string[] = [];
@@ -293,6 +292,7 @@ function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
 
 export function convert(crdaReportJson: string, manifestFile: string, crdaReportSarif: string): void {
     const crdaAnalysedData = fs.readFileSync(crdaReportJson, "utf-8");
+    ghCore.info(crdaAnalysedData);
     const convertedSarif = getSarif(crdaAnalysedData, manifestFile);
     if (convertedSarif.$schema) {
         fs.writeFileSync(crdaReportSarif, JSON.stringify(convertedSarif, undefined, 4), "utf-8");
