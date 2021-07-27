@@ -13,7 +13,7 @@ async function run(): Promise<void> {
     const manifestFilePath = ghCore.getInput(Inputs.MANIFEST_FILE_PATH);
     const snykToken = ghCore.getInput(Inputs.SNYK_TOKEN);
     const crdaKey = ghCore.getInput(Inputs.CRDA_KEY);
-    const consentTelemetry = ghCore.getInput(Inputs.CONSENT_TELEMETRY) || "true";
+    const consentTelemetry = ghCore.getInput(Inputs.CONSENT_TELEMETRY) || "false";
     const analysisReportFileName = ghCore.getInput(Inputs.ANALYSIS_REPORT_FILE_NAME) || "crda_analysis_report";
     // const pkgInstallationDirectoryPath = ghCore.getInput(Inputs.PKG_INSTALLATION_DIRECTORY_PATH);
 
