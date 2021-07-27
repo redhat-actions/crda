@@ -2,13 +2,18 @@ name: CRDA scan Golang Example
 on: [ push, workflow_dispatch ]
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     name: Analyse Golang project
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           repository: rafiu007/golang-vuln-demo
+
+      - name: Checkout action
+        uses: actions/checkout@v2
+        with:
+          path: crda
 
       - name: Setup Go
         uses: actions/setup-go@v2
@@ -27,7 +32,7 @@ jobs:
 
       - name: CRDA Scan
         id: scan
-        uses: divyansh42/crda-action@update
+        uses: ./crda
         with:
           manifest_file_path: go.mod
           # crda_key: ${{ secrets.CRDA_KEY }}
@@ -36,14 +41,15 @@ jobs:
           consent_telemetry: true
 
       - name: Print Analysis Report
-        if: always()
+        if: ${{ always() && steps.scan.outputs.crda_report_json }}
         run: cat ${{ steps.scan.outputs.crda_report_json }}
 
       - name: Print Sarif
-        if: always()
+        if: ${{ always() && steps.scan.outputs.crda_report_sarif }}
         run: cat ${{ steps.scan.outputs.crda_report_sarif }}
 
       - name: Upload result to GitHub Code Scanning
+        if: ${{ steps.scan.outputs.crda_report_sarif }}
         uses: github/codeql-action/upload-sarif@v1
         with:
           sarif_file: ${{ steps.scan.outputs.crda_report_sarif }}

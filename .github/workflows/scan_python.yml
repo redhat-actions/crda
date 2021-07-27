@@ -2,20 +2,18 @@ name: CRDA scan Python Example
 on: [ push, workflow_dispatch ]
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     name: Analyse Python project
     steps:
-      - name: Checkout
+
+      - name: Checkout action
         uses: actions/checkout@v2
-        # with:
-        #   repository: fportantier/vulpy
 
       - uses: actions/setup-python@v2
         with:
           python-version: '3.9.6'
 
       - run: |
-          # pip install --target=site-dir -r test-manifests/requirements.txt
           pip install -r test-manifests/requirements.txt
 
       - name: Install CRDA
@@ -36,11 +34,11 @@ jobs:
           consent_telemetry: true
 
       - name: Print Analysis Report
-        if: always()
+        if: ${{ always() && steps.scan.outputs.crda_report_json }}
         run: cat ${{ steps.scan.outputs.crda_report_json }}
 
       - name: Print Sarif
-        if: always()
+        if: ${{ always() && steps.scan.outputs.crda_report_sarif }}
         run: cat ${{ steps.scan.outputs.crda_report_sarif }}
 
       - name: Upload result to GitHub Code Scanning
