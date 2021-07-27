@@ -52,4 +52,10 @@ export enum Outputs {
      * Default: None.
      */
     CRDA_REPORT_SARIF = "crda_report_sarif",
+    /**
+     * CRDA analysis report link
+     * Required: false
+     * Default: None.
+     */
+    REPORT_LINK = "report_link",
 }

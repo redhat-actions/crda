@@ -48,6 +48,9 @@ jobs:
         if: ${{ always() && steps.scan.outputs.crda_report_sarif }}
         run: cat ${{ steps.scan.outputs.crda_report_sarif }}
 
+      - name: Print Report Link
+        run: echo ${{ steps.scan.outputs.report_link }}
+
       - name: Upload result to GitHub Code Scanning
         if: ${{ steps.scan.outputs.crda_report_sarif }}
         uses: github/codeql-action/upload-sarif@v1

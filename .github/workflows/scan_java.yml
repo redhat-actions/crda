@@ -66,11 +66,14 @@ jobs:
 
       - name: Print Analysis Report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}
-        run: cat ${{ steps.scan.outputs.crda_report_json }}
+        run: echo ${{ steps.scan.outputs.crda_report_json }}
 
       - name: Print Sarif
         if: ${{ always() && steps.scan.outputs.crda_report_sarif }}
         run: cat ${{ steps.scan.outputs.crda_report_sarif }}
+
+      - name: Print Report Link
+        run: cat ${{ steps.scan.outputs.report_link }}
 
       - name: Upload result to GitHub Code Scanning
         if: ${{ steps.scan.outputs.crda_report_sarif }}

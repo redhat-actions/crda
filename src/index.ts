@@ -55,12 +55,16 @@ async function run(): Promise<void> {
     ghCore.info(`⏳ Analysing your Dependency Stack! Please wait...`);
     await Analyse.analyse(manifestFilePath, crdaReportJson);
 
-    ghCore.info(`✅ Analysis completed. Analysis report is available at ${crdaReportJson}`);
+    ghCore.info(`✅ Analysis completed. Analysis JSON report is available at ${crdaReportJson}`);
 
     ghCore.setOutput(Outputs.CRDA_REPORT_JSON, crdaReportJson);
 
     const crdaAnalysedData = fs.readFileSync(crdaReportJson, "utf-8");
     const crdaData = JSON.parse(crdaAnalysedData);
+
+    const reportLink = crdaData.report_link;
+    ghCore.info(`For detailed analysis check ${reportLink}`);
+    ghCore.setOutput(Outputs.REPORT_LINK, reportLink);
 
     if (!crdaData.analysed_dependencies) {
         ghCore.warning(`Cannot retrieve detailed analysis and report in sarif format. `
