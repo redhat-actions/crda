@@ -19,14 +19,27 @@ namespace Analyse {
         return authResult.stdout;
     }
 
-    export async function analyse(manifestPath: string, analysisReportFileName: string): Promise<void> {
+    export async function analyse(
+        manifestPath: string, analysisReportFileName: string, failOnVulnerability: string
+    ): Promise<void> {
         const crdaOptions = Crda.getOptions({ json: "", verbose: "", client: "gh-actions" });
         const crdaExecArgs = [ Crda.Commands.Analyse, manifestPath, ...crdaOptions ];
 
-        const execResult = await Crda.exec(crdaExecArgs, { ignoreReturnCode: true, hideOutput: true });
+        const execResult = await Crda.exec(crdaExecArgs, { hideOutput: true });
         const analysisReportJson = execResult.stdout;
-
+        const crdaData = JSON.parse(analysisReportJson);
         fs.writeFileSync(analysisReportFileName, analysisReportJson, "utf8");
+
+        if (failOnVulnerability === "warning" && execResult.exitCode === 2) {
+            throw new Error(`Found vulnerabilities in the project. `
+            + `Detailed analysis report is available at ${analysisReportFileName}`);
+        }
+        else if (failOnVulnerability === "error"
+            && (crdaData.severity.high !== null || crdaData.severity.critical !== null)) {
+            throw new Error(`Found vulnerabilities in the project. `
+                + `Detailed analysis report is available at ${analysisReportFileName}`);
+        }
+
     }
 }
 

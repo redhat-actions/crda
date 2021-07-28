@@ -15,6 +15,7 @@ async function run(): Promise<void> {
     const crdaKey = ghCore.getInput(Inputs.CRDA_KEY);
     const consentTelemetry = ghCore.getInput(Inputs.CONSENT_TELEMETRY) || "false";
     const analysisReportFileName = ghCore.getInput(Inputs.ANALYSIS_REPORT_FILE_NAME) || "crda_analysis_report";
+    const failOnVulnerability = ghCore.getInput(Inputs.FAIL_ON_VULNERABILITY) || "error";
     // const pkgInstallationDirectoryPath = ghCore.getInput(Inputs.PKG_INSTALLATION_DIRECTORY_PATH);
 
     // if (pkgInstallationDirectoryPath !== ".") {
@@ -53,7 +54,7 @@ async function run(): Promise<void> {
     }
 
     ghCore.info(`⏳ Analysing your Dependency Stack! Please wait...`);
-    await Analyse.analyse(manifestFilePath, crdaReportJson);
+    await Analyse.analyse(manifestFilePath, crdaReportJson, failOnVulnerability);
 
     ghCore.info(`✅ Analysis completed. Analysis JSON report is available at ${crdaReportJson}`);
 

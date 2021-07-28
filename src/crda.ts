@@ -111,7 +111,8 @@ namespace Crda {
          try {
              const exitCode = await ghExec.exec(EXECUTABLE, args, finalExecOptions);
 
-             if (execOptions.ignoreReturnCode !== true && exitCode !== 0) {
+             // avoiding failure if exit code is 2 as if vulnerability is found exit code is 2
+             if (execOptions.ignoreReturnCode !== true && exitCode !== 0 && exitCode !== 2) {
                  // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
                  // which saves some clicking when debugging.
                  let error = `crda exited with code ${exitCode}`;
