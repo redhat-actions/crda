@@ -19,7 +19,6 @@
 | ----- | ----------- | ------- |
 | manifest_file_path | Path of target manifest file to perform analysis. | **Must be provided**
 | analysis_report_file_name | Name of the file to save the analysis report. | `crda_analysis_report.json`
-| pkg_installation_directory_path |  Path of a directory in workspace, where dependencies are installed. | `.`
 | snyk_token | Snyk token to be used to authenticate to CRDA. | None
 | crda_key | Existing CRDA key to identify the existing user. | None
 | consent_telemetry | CRDA collects anonymous usage data, and is enabled by default. If you don't want this behaviour set this to false. Go through [privacy statement](https://developers.redhat.com/article/tool-data-collection) for more details. | `true`

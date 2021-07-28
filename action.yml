@@ -12,10 +12,6 @@ inputs:
     description: Name of the file to save the analysis report.
     required: false
     default: crda_analysis_report
-  # pkg_installation_directory_path:
-  #   description: Path of a directory in workspace, where dependencies are installed.
-  #   required: false
-  #   default: .
   snyk_token:
     description: Snyk token to be used to authenticate to CRDA
     required: false

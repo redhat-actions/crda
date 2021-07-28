@@ -308,7 +308,6 @@ function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
 
 export function convert(crdaReportJson: string, manifestFile: string, crdaReportSarif: string): void {
     const crdaAnalysedData = fs.readFileSync(crdaReportJson, "utf-8");
-    ghCore.info(crdaAnalysedData);
     const convertedSarif = getSarif(crdaAnalysedData, manifestFile);
     if (convertedSarif.$schema) {
         fs.writeFileSync(crdaReportSarif, JSON.stringify(convertedSarif, undefined, 4), "utf-8");
