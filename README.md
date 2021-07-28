@@ -21,7 +21,7 @@
 | analysis_report_file_name | Name of the file to save the analysis report. | `crda_analysis_report`
 | snyk_token | Snyk token to be used to authenticate to CRDA. | None
 | crda_key | Existing CRDA key to identify the existing user. | None
-| consent_telemetry | CRDA collects anonymous usage data, and is diabled by default. If you don't want this behaviour set this to true. Go through [privacy statement](https://developers.redhat.com/article/tool-data-collection) for more details. | `false`
+| consent_telemetry | CRDA collects anonymous usage data, and is disabled by default. If you don't want this behaviour set this to true. Go through [privacy statement](https://developers.redhat.com/article/tool-data-collection) for more details. | `false`
 | fail_on_vulnerability | Fail the workflow if vulnerability is found in the project. This will lead to workflow failure and sarif file would not be obtained. To set failure when vulnerability severity level is either `error` or `warning` set this input to `error`. By default it is set to fail when severity level is `warning`, or if you don't want to fail the action set this input to `false` | `error`
 
 ## Action Outputs

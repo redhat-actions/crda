@@ -285,10 +285,10 @@ function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
         return filteredResults;
     }, new Array<sarif.Result>());
 
-    ghCore.info(`Number of results combined is: ${finalResults.length}`);
+    // ghCore.info(`Number of results combined is: ${finalResults.length}`);
 
     const finalRules = crdaToRules(crdaData.severity, tranVulRuleIdsWithDepName);
-    ghCore.info(`Number of rules combined is: ${finalRules.length}`);
+    // ghCore.info(`Number of rules combined is: ${finalRules.length}`);
     return {
         $schema: sarifSchemaUrl,
         version: sarifSchemaVersion,
