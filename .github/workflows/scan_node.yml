@@ -42,7 +42,7 @@ jobs:
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           analysis_report_file_name: node
           consent_telemetry: true
-          fail_on_vulnerability: "error"
+          fail_on_vulnerability: "false"
 
       - name: Print Analysis Report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}

@@ -122,6 +122,8 @@ function crdaToResult(
     const lines = manifestData.split(/\r\n|\n/);
     const dependencyName: string = crdaAnalysedDependency.name;
     const dependencyVersion = crdaAnalysedDependency.version;
+    const recommendedVersion = crdaAnalysedDependency.recommended_version;
+    const latestVersion = crdaAnalysedDependency.latest_version;
 
     let splittedDependencyName: string[] = [];
     if (directDependencyName) {
@@ -148,7 +150,7 @@ function crdaToResult(
     if (crdaAnalysedDependency.publicly_available_vulnerabilities !== null) {
         const fetchedResults = fetchResults(
             crdaAnalysedDependency.publicly_available_vulnerabilities, manifestFile,
-            startLine, isDirect, dependencyName, dependencyVersion,
+            startLine, isDirect, dependencyName, dependencyVersion, recommendedVersion, latestVersion
         );
         results.push(...fetchedResults[0]);
         if (nestedVulnerabilitycount === 0) {
@@ -162,7 +164,7 @@ function crdaToResult(
     if (crdaAnalysedDependency.vulnerabilities_unique_with_snyk !== null) {
         const fetchedResults = fetchResults(
             crdaAnalysedDependency.vulnerabilities_unique_with_snyk, manifestFile,
-            startLine, isDirect, dependencyName, dependencyVersion,
+            startLine, isDirect, dependencyName, dependencyVersion, recommendedVersion, latestVersion
         );
         results.push(...fetchedResults[0]);
         if (nestedVulnerabilitycount === 0) {
@@ -187,17 +189,31 @@ function crdaToResult(
 function fetchResults(
     publiclyAvailableVulnerabilities: CrdaPubliclyAvailableVulnerability[],
     manifestFile: string, startLine: number, isTransitive: boolean,
-    dependencyName: string, dependencyVersion: string
+    dependencyName: string, dependencyVersion: string, recommendedVersion: string,
+    latestVersion: string,
 ): [ sarif.Result[], string[] ] {
     const results: sarif.Result[] = [];
     const ruleIds: string[] = [];
     publiclyAvailableVulnerabilities.forEach((publiclyAvailableVulnerability) => {
         const ruleId = publiclyAvailableVulnerability.id;
-        // TODO: convert text to markdown
+        let textMessage = `This file introduces a vulnerability ${publiclyAvailableVulnerability.title} with `
+        + `${publiclyAvailableVulnerability.severity} severity.\n`
+        + `Vulnerability present at ${dependencyName}\n`
+        + `Version: ${dependencyVersion}\n`;
+
+        // let markdownMessage = `This file introduces a vulnerability ${publiclyAvailableVulnerability.title} with`
+        // + `${publiclyAvailableVulnerability.severity} severity\n`
+        // + `Vulnerability present at ${dependencyName}\n`
+        // + `*Version*: ${dependencyVersion}\n`;
+
+        if (recommendedVersion !== "") {
+            textMessage = `${textMessage}Recommended Version: ${recommendedVersion}\n`;
+        }
+        if (latestVersion !== "") {
+            textMessage = `${textMessage}Latest Version: ${latestVersion}`;
+        }
         const message: sarif.Message = {
-            text: `This file introduces a vulnerability ${publiclyAvailableVulnerability.title} with `
-                + `${publiclyAvailableVulnerability.severity} severity. `
-                + `Vulnerability present at ${dependencyName}@${dependencyVersion}`,
+            text: textMessage,
         };
         const artifactLocation: sarif.ArtifactLocation = {
             uri: manifestFile,
