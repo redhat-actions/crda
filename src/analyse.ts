@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as ghCore from "@actions/core";
 import Crda from "./crda";
 
 namespace Analyse {
@@ -22,10 +23,13 @@ namespace Analyse {
     export async function analyse(
         manifestPath: string, analysisReportFileName: string, failOnVulnerability: string
     ): Promise<void> {
-        const crdaOptions = Crda.getOptions({ json: "", verbose: "", client: "gh-actions" });
+        const crdaOptions = Crda.getOptions({ verbose: "", client: "gh-actions" });
         const crdaExecArgs = [ Crda.Commands.Analyse, manifestPath, ...crdaOptions ];
 
-        const execResult = await Crda.exec(crdaExecArgs, { hideOutput: true });
+        await Crda.exec(crdaExecArgs);
+
+        ghCore.info(`⏳ Collecting JSON data for the detailed analysis.`);
+        const execResult = await Crda.exec([ ...crdaExecArgs, "--json" ], { group: true });
         const analysisReportJson = execResult.stdout;
         const crdaData = JSON.parse(analysisReportJson);
         fs.writeFileSync(analysisReportFileName, analysisReportJson, "utf8");
@@ -39,7 +43,6 @@ namespace Analyse {
             throw new Error(`Found vulnerabilities in the project. `
                 + `Detailed analysis report is available at ${analysisReportFileName}`);
         }
-
     }
 }
 

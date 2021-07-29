@@ -27,12 +27,12 @@ async function run(): Promise<void> {
     const crdaReportSarif = `${analysisReportFileName}.sarif` || "crda_analysis_report.sarif";
 
     // Setting up consent_telemetry config to avoid prompt during auth command
-    ghCore.info(`Setting up the ${Crda.ConfigKeys.ConsentTelemetry} to ${consentTelemetry}`);
+    ghCore.info(`Setting up the ${Crda.ConfigKeys.ConsentTelemetry} to ${consentTelemetry}.`);
     await Analyse.configSet(Crda.ConfigKeys.ConsentTelemetry, consentTelemetry);
 
     // Auth using provided Synk Token
     if (snykToken) {
-        ghCore.info(`⏳ Authenticating with the provided Snyk Token`);
+        ghCore.info(`⏳ Authenticating with the provided Snyk Token.`);
 
         const authOutput = await Analyse.auth(snykToken);
         const authOutputSplitted = authOutput.split("\n");
@@ -51,10 +51,9 @@ async function run(): Promise<void> {
         throw new Error(`❌ Input ${Inputs.CRDA_KEY} or ${Inputs.SNYK_TOKEN} must be provided.`);
     }
 
-    ghCore.info(`⏳ Analysing your Dependency Stack! Please wait...`);
     await Analyse.analyse(manifestFilePath, crdaReportJson, failOnVulnerability);
 
-    ghCore.info(`✅ Analysis completed. Analysis JSON report is available at ${crdaReportJson}`);
+    ghCore.info(`✅ Analysis completed. Analysed JSON report is available at ${crdaReportJson}.`);
 
     ghCore.setOutput(Outputs.CRDA_REPORT_JSON, crdaReportJson);
 
@@ -62,7 +61,6 @@ async function run(): Promise<void> {
     const crdaData = JSON.parse(crdaAnalysedData);
 
     const reportLink = crdaData.report_link;
-    ghCore.info(`For detailed analysis check ${reportLink}`);
     ghCore.setOutput(Outputs.REPORT_LINK, reportLink);
 
     if (!crdaData.analysed_dependencies) {
@@ -72,11 +70,11 @@ async function run(): Promise<void> {
             + `To get a Snyk token follow https://app.snyk.io/login?utm_campaign=Code-Ready-Analytics-2020&utm_source=code_ready&code_ready=FF1B53D9-57BE-4613-96D7-1D06066C38C9`);
     }
     else {
-        ghCore.info(`⏳ Converting JSON output to Sarif format`);
+        ghCore.info(`⏳ Converting JSON analysed data to the Sarif format.`);
         convert(crdaReportJson, manifestFilePath, crdaReportSarif);
 
         ghCore.info(`✅ Sucessfully converted analysis JSON to the Sarif format. `
-        + `Converted file is available at ${crdaReportSarif}`);
+        + `Converted file is available at ${crdaReportSarif}.`);
 
         ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
     }

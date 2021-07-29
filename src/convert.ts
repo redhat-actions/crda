@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import * as sarif from "sarif";
-import * as ghCore from "@actions/core";
 import {
     CrdaAnalysedDependency, CrdaPubliclyAvailableVulnerability,
     CrdaSeverity, CrdaSeverityKinds, TransitiveVulRuleIdsDepName,
@@ -312,5 +311,4 @@ export function convert(crdaReportJson: string, manifestFile: string, crdaReport
     if (convertedSarif.$schema) {
         fs.writeFileSync(crdaReportSarif, JSON.stringify(convertedSarif, undefined, 4), "utf-8");
     }
-    ghCore.info(`Created: ${crdaReportSarif}`);
 }
