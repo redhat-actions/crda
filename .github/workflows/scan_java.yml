@@ -2,7 +2,14 @@ name: CRDA scan Java Example
 on: [ push, workflow_dispatch ]
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ "macos-latest", "windows-latest", "ubuntu-20.04" ]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     name: Analyse Java project
     env:
       MVN_REPO_DIR: ~/.m2/repository

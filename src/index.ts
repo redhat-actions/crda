@@ -73,7 +73,7 @@ async function run(): Promise<void> {
         ghCore.info(`⏳ Converting JSON analysed data to the Sarif format.`);
         convert(crdaReportJson, manifestFilePath, crdaReportSarif);
 
-        ghCore.info(`✅ Sucessfully converted analysis JSON to the Sarif format. `
+        ghCore.info(`✅ Successfully converted analysis JSON to the Sarif format. `
         + `Converted file is available at ${crdaReportSarif}.`);
 
         ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);

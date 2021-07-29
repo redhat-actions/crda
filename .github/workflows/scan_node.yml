@@ -2,7 +2,14 @@ name: CRDA scan Node Example
 on: [ push, workflow_dispatch ]
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ "macos-latest", "windows-latest", "ubuntu-20.04" ]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     name: Analyse Node project
     steps:
       - name: Checkout project
@@ -23,7 +30,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ls
           npm install
 
       - name: Install CRDA

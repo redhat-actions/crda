@@ -1,6 +1,6 @@
-import * as os from "os";
 import * as ghExec from "@actions/exec";
 import * as ghCore from "@actions/core";
+import * as path from "path";
 import * as util from "./utils";
 import { ExecResult } from "./types";
 import CmdOutputHider from "./cmdOutputHider";
@@ -95,11 +95,11 @@ namespace Crda {
          finalExecOptions.ignoreReturnCode = true;     // the return code is processed below
 
          finalExecOptions.listeners = {
-             stdline: (line): void => {
-                 stdout += line + os.EOL;
+             stdout: (chunk): void => {
+                 stdout += chunk.toString();
              },
-             errline: (line): void => {
-                 stderr += line + os.EOL;
+             stderr: (chunk): void => {
+                 stderr += chunk.toString();
              },
          };
 
@@ -115,7 +115,7 @@ namespace Crda {
              if (execOptions.ignoreReturnCode !== true && exitCode !== 0 && exitCode !== 2) {
                  // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
                  // which saves some clicking when debugging.
-                 let error = `crda exited with code ${exitCode}`;
+                 let error = `${path.basename(EXECUTABLE)} exited with code ${exitCode}`;
                  if (stderr) {
                      error += `\n${stderr}`;
                  }
