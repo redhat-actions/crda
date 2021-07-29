@@ -35,8 +35,6 @@ inputs:
     default: "error"
 
 outputs:
-  crda_key:
-    description: "Generated CRDA key for future use"
   crda_report_json:
     description: "Generated CRDA Analysis Report in JSON format"
   crda_report_sarif:

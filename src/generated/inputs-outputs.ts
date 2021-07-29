@@ -45,12 +45,6 @@ export enum Inputs {
 
 export enum Outputs {
     /**
-     * Generated CRDA key for future use
-     * Required: false
-     * Default: None.
-     */
-    CRDA_KEY = "crda_key",
-    /**
      * Generated CRDA Analysis Report in JSON format
      * Required: false
      * Default: None.

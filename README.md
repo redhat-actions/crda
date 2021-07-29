@@ -26,7 +26,6 @@
 
 ## Action Outputs
 
-- **crda_key**: In case if provided auth method is with `snyk_token`, this stores generated CRDA key.
 - **crda_report_json**: Generated CRDA Analysis Report in JSON format.
 - **crda_report_sarif**: Generated CRDA Analysis Report in Sarif format.
 - **report_link**: CRDA analysis report link.

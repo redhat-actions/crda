@@ -41,9 +41,7 @@ async function run(): Promise<void> {
         ghCore.setSecret(generatedCrdaKey);
         ghCore.info(authOutput);
 
-        ghCore.info(`✅ Generated CRDA key is stored in the output ${Outputs.CRDA_KEY}.`);
-
-        ghCore.setOutput(Outputs.CRDA_KEY, generatedCrdaKey);
+        ghCore.info(`✅ Successfully authenticated to CRDA with the provided Snyk Token.`);
     }
     else if (crdaKey) {
         ghCore.info(`Setting up the ${Crda.ConfigKeys.CrdaKey} with the provided value.`);
