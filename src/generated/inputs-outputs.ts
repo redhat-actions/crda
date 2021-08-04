@@ -7,6 +7,12 @@ export enum Inputs {
      */
     ANALYSIS_REPORT_FILE_NAME = "analysis_report_file_name",
     /**
+     * Path at which the repository which is to be analyzed is checked out
+     * Required: false
+     * Default: "${{ github.workspace }}"
+     */
+    CHECKOUT_PATH = "checkout_path",
+    /**
      * CRDA collects anonymous usage data, and is disabled by default.
      * If you want this behaviour set this to true
      * Required: false
@@ -30,6 +36,12 @@ export enum Inputs {
      */
     FAIL_ON_VULNERABILITY = "fail_on_vulnerability",
     /**
+     * Github personal access token to upload sarif to github
+     * Required: false
+     * Default: "${{ github.token }}"
+     */
+    GITHUB_PAT = "github_pat",
+    /**
      * Path of the manifest file to use for analysis
      * Required: true
      * Default: None.
@@ -41,6 +53,13 @@ export enum Inputs {
      * Default: None.
      */
     SNYK_TOKEN = "snyk_token",
+    /**
+     * Upload the Sarif file, by default it is set to true.
+     * If you don't want to upload sarif file set this input to "false"
+     * Required: false
+     * Default: "true"
+     */
+    UPLOAD_SARIF = "upload_sarif",
 }
 
 export enum Outputs {

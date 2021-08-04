@@ -33,6 +33,21 @@ inputs:
       or if you don't want to fail the action set this input to "false"
     required: false
     default: "error"
+  github_pat:
+    description: Github personal access token to upload sarif to github
+    required: false
+    default: ${{ github.token }}
+  upload_sarif:
+    description: |
+      Upload the Sarif file, by default it is set to true.
+      If you don't want to upload sarif file set this input to "false"
+    required: false
+    default: "true"
+  checkout_path:
+    description: |
+      Path at which the repository which is to be analyzed is checked out
+    required: false
+    default: ${{ github.workspace }}
 
 outputs:
   crda_report_json:

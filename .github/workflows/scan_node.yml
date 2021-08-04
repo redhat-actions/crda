@@ -61,11 +61,11 @@ jobs:
       - name: Print Report Link
         run: echo ${{ steps.scan.outputs.report_link }}
 
-      - name: Upload result to GitHub Code Scanning
-        if: ${{ steps.scan.outputs.crda_report_sarif }}
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: ${{ steps.scan.outputs.crda_report_sarif }}
+      # - name: Upload result to GitHub Code Scanning
+      #   if: ${{ steps.scan.outputs.crda_report_sarif }}
+      #   uses: github/codeql-action/upload-sarif@v1
+      #   with:
+      #     sarif_file: ${{ steps.scan.outputs.crda_report_sarif }}
 
       - name: Save intermediate files
         run: |
