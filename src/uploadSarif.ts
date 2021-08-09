@@ -3,7 +3,9 @@ import * as github from "@actions/github";
 import * as zlib from "zlib";
 import * as ghCore from "@actions/core";
 import * as fs from "fs";
+import * as io from "@actions/io";
 import { getEnvVariableValue, getBetterHttpError } from "./utils";
+import Crda from "./crda";
 
 export async function uploadSarifFile(
     githubPAT: string, sarifToUpload: string, checkoutPath: string, analysisStartTime: string
@@ -13,6 +15,10 @@ export async function uploadSarifFile(
     const zippedSarif = zlib.gzipSync(sarifContents).toString("base64");
     ghCore.debug(`Zipped upload size: ${zippedSarif.length} bytes`);
 
+    const commitSha = await getCommitSha();
+
+    ghCore.debug(`Commit Sha: ${commitSha}`);
+
     // API documentation: https://docs.github.com/en/rest/reference/code-scanning#update-a-code-scanning-alert
     const octokit = new Octokit({ auth: githubPAT });
     let sarifId = "";
@@ -20,7 +26,7 @@ export async function uploadSarifFile(
         const uploadResponse = await octokit.request("POST /repos/{owner}/{repo}/code-scanning/sarifs", {
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
-            commit_sha: getEnvVariableValue("GITHUB_SHA"),
+            commit_sha: commitSha,
             ref: getEnvVariableValue("GITHUB_REF"),
             sarif: zippedSarif,
             checkout_uri: checkoutPath,
@@ -30,7 +36,7 @@ export async function uploadSarifFile(
 
         ghCore.debug(JSON.stringify(uploadResponse));
         if (uploadResponse.data.id !== undefined) {
-            ghCore.info(uploadResponse.data.id);
+            ghCore.debug(uploadResponse.data.id);
             sarifId = uploadResponse.data.id;
         }
     }
@@ -73,5 +79,18 @@ async function waitForUploadToFinish(githubPAT: string, sarifId: string): Promis
         if (uploadStatus === "pending") {
             await new Promise((f) => setTimeout(f, 20000));
         }
+    }
+}
+
+async function getCommitSha(): Promise<string> {
+    try {
+        const gitPath = await io.which("git", true);
+        const execResult = await Crda.exec(gitPath, [ "rev-parse", "HEAD" ], { hideOutput: true });
+        return execResult.stdout.trim();
+    }
+    catch (e) {
+        ghCore.debug(`Failed to get current commit SHA using git. `
+            + `Using environment variable GITHUB_SHA to get the current commit SHA.`);
+        return getEnvVariableValue("GITHUB_SHA");
     }
 }

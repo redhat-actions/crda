@@ -76,9 +76,9 @@ namespace Crda {
      * @returns Exit code and the contents of stdout/stderr.
      */
      export async function exec(
-         args: string[],
+         executable: string = EXECUTABLE, args: string[],
          execOptions: ghExec.ExecOptions & { group?: boolean, hideOutput?: boolean } = {}
-     ):Promise<ExecResult> {
+     ): Promise<ExecResult> {
          // ghCore.info(`${EXECUTABLE} ${args.join(" ")}`)
 
          let stdout = "";
@@ -104,18 +104,18 @@ namespace Crda {
          };
 
          if (execOptions.group) {
-             const groupName = [ EXECUTABLE, ...args ].join(" ");
+             const groupName = [ executable, ...args ].join(" ");
              ghCore.startGroup(groupName);
          }
 
          try {
-             const exitCode = await ghExec.exec(EXECUTABLE, args, finalExecOptions);
+             const exitCode = await ghExec.exec(executable, args, finalExecOptions);
 
              // avoiding failure if exit code is 2 as if vulnerability is found exit code is 2
              if (execOptions.ignoreReturnCode !== true && exitCode !== 0 && exitCode !== 2) {
                  // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
                  // which saves some clicking when debugging.
-                 let error = `${path.basename(EXECUTABLE)} exited with code ${exitCode}`;
+                 let error = `${path.basename(executable)} exited with code ${exitCode}`;
                  if (stderr) {
                      error += `\n${stderr}`;
                  }

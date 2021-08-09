@@ -63,8 +63,7 @@ jobs:
 
       - name: CRDA Scan
         id: scan
-        # uses: redhat-actions/crda@main
-        uses: divyansh42/crda@add-upload-sarif
+        uses: redhat-actions/crda@main
         with:
           manifest_file_path: pom.xml
           crda_key: ${{ secrets.CRDA_KEY }}
@@ -72,6 +71,7 @@ jobs:
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           consent_telemetry: true
           fail_on_vulnerability: "false"
+          upload_sarif: false
 
       - name: Print Analysis Report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}

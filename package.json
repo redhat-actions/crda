@@ -23,6 +23,7 @@
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.4",
     "@actions/github": "^5.0.0",
+    "@actions/io": "^1.1.1",
     "@octokit/core": "^3.5.1",
     "package.json": "^2.0.1"
   },
