@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as sarif from "sarif";
+import * as ghCore from "@actions/core";
 import {
     CrdaAnalysedDependency, CrdaPubliclyAvailableVulnerability,
     CrdaSeverity, CrdaSeverityKinds, TransitiveVulRuleIdsDepName,
@@ -15,7 +16,6 @@ function crdaToRules(
     const rules: sarif.ReportingDescriptor[] = [];
     const prevRulesIds: string[] = [];
     if (crdaSeverityKinds.low !== null) {
-        // ghCore.info("low found");
         const fetchedRules = fetchRules(
             crdaSeverityKinds.low, tranVulRuleIdsWithDepName, prevRulesIds
         );
@@ -23,7 +23,6 @@ function crdaToRules(
         prevRulesIds.push(...fetchedRules[1]);
     }
     if (crdaSeverityKinds.medium !== null) {
-        // ghCore.info("medium found");
         const fetchedRules = fetchRules(
             crdaSeverityKinds.medium, tranVulRuleIdsWithDepName, prevRulesIds
         );
@@ -31,7 +30,6 @@ function crdaToRules(
         prevRulesIds.push(...fetchedRules[1]);
     }
     if (crdaSeverityKinds.high !== null) {
-        // ghCore.info("high found");
         const fetchedRules = fetchRules(
             crdaSeverityKinds.high, tranVulRuleIdsWithDepName, prevRulesIds
         );
@@ -39,7 +37,6 @@ function crdaToRules(
         prevRulesIds.push(...fetchedRules[1]);
     }
     if (crdaSeverityKinds.critical !== null) {
-        // ghCore.info("critical found");
         const fetchedRules = fetchRules(
             crdaSeverityKinds.critical, tranVulRuleIdsWithDepName, prevRulesIds
         );
@@ -126,6 +123,10 @@ function crdaToResult(
 
     let splittedDependencyName: string[] = [];
     if (directDependencyName) {
+        // This is to ensure that incase of transitive dependency is vulnerable
+        // then line number shown on GitHub is pointing on the direct dependency.
+        // Otherwise, it will not be able to find the dependency name in the
+        // provided manifest file.
         splittedDependencyName = directDependencyName.split(":");
         isDirect = false;
     }
@@ -136,6 +137,10 @@ function crdaToResult(
 
     let javaDependencySearchLine = "";
 
+    // In CRDA json analysis data, in the case of java dependency name
+    // is present as "org.springframework.boot:spring-boot-starter-actuator"
+    // i.e. colon seperated groupId and artifact ID so splitted that to check for
+    // the same and searching for "<artifactId>spring-boot-starter-actuator</artifactId>"
     if (splittedDependencyName[1]) {
         javaDependencySearchLine = `<artifactId>${splittedDependencyName[1]}</artifactId>`;
     }
@@ -200,6 +205,8 @@ function fetchResults(
         + `Vulnerability present at ${dependencyName}\n`
         + `Version: ${dependencyVersion}\n`;
 
+        // TODO: Add message in markdown format
+
         // let markdownMessage = `This file introduces a vulnerability ${publiclyAvailableVulnerability.title} with`
         // + `${publiclyAvailableVulnerability.severity} severity\n`
         // + `Vulnerability present at ${dependencyName}\n`
@@ -219,8 +226,6 @@ function fetchResults(
             // uri: manifestFile.slice(manifestFile.lastIndexOf("/") + 1),
             // uriBaseId: manifestFile.slice(0, manifestFile.lastIndexOf("/")),
         };
-
-        // ghCore.info(JSON.stringify(artifactLocation, undefined, 4));
         const region: sarif.Region = {
             startLine: startLine + 1,
         };
@@ -242,7 +247,6 @@ function fetchResults(
             locations: [ location ],
             properties: property,
         };
-        // ghCore.info("Result generated");
 
         results.push(result);
         ruleIds.push(ruleId);
@@ -288,10 +292,13 @@ function getSarif(crdaAnalysedData: string, checkoutPath: string, manifestFile: 
         return filteredResults;
     }, new Array<sarif.Result>());
 
-    // ghCore.info(`Number of results combined is: ${finalResults.length}`);
+    ghCore.debug(`Number of results: ${finalResults.length}`);
 
     const finalRules = crdaToRules(crdaData.severity, tranVulRuleIdsWithDepName);
-    // ghCore.info(`Number of rules combined is: ${finalRules.length}`);
+    ghCore.debug(`Number of rules: ${finalRules.length}`);
+
+    ghCore.debug(`Sarif schema version is ${sarifSchemaVersion}`);
+
     return {
         $schema: sarifSchemaUrl,
         version: sarifSchemaVersion,

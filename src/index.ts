@@ -49,14 +49,15 @@ async function run(): Promise<void> {
         ghCore.setSecret(generatedCrdaKey);
         ghCore.info(authOutput);
 
-        ghCore.info(`✅ Successfully authenticated to CRDA with the provided Snyk Token.`);
+        ghCore.info(`✅ Successfully authenticated to the CRDA with the provided Snyk Token.`);
     }
     else if (crdaKey) {
-        ghCore.info(`🖊️ Setting up the ${Crda.ConfigKeys.CrdaKey} with the provided value.`);
+        ghCore.info(`🖊️ Setting up the ${Crda.ConfigKeys.CrdaKey} with the provided CRDA key.`);
         await Analyse.configSet(Crda.ConfigKeys.CrdaKey, crdaKey);
     }
     else {
-        throw new Error(`❌ Input ${Inputs.CRDA_KEY} or ${Inputs.SNYK_TOKEN} must be provided.`);
+        throw new Error(`❌ Input ${Inputs.CRDA_KEY} or ${Inputs.SNYK_TOKEN} `
+        + `must be provided to authenticate to the CRDA.`);
     }
 
     await Analyse.analyse(`${checkoutPath}/${manifestFilePath}`, crdaReportJson, failOnVulnerability);
@@ -82,7 +83,7 @@ async function run(): Promise<void> {
         convert(crdaReportJson, checkoutPath, manifestFilePath, crdaReportSarif);
 
         ghCore.info(`✅ Successfully converted analysis JSON to the Sarif format. `
-        + `Converted file is available at ${crdaReportSarif}.`);
+        + `Sarif file is available at ${crdaReportSarif}.`);
 
         ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
     }
@@ -97,7 +98,7 @@ async function run(): Promise<void> {
         ghCore.info(`✅ Successfully uploaded sarif file to Github`);
     }
     else {
-        ghCore.info(`⏩ Input ${Inputs.UPLOAD_SARIF} is set to false, skipping sarif upload`);
+        ghCore.info(`⏩ Input ${Inputs.UPLOAD_SARIF} is set to false, skipping sarif upload.`);
     }
 
 }

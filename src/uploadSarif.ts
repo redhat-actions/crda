@@ -13,6 +13,7 @@ export async function uploadSarifFile(
     const zippedSarif = zlib.gzipSync(sarifContents).toString("base64");
     ghCore.debug(`Zipped upload size: ${zippedSarif.length} bytes`);
 
+    // API documentation: https://docs.github.com/en/rest/reference/code-scanning#update-a-code-scanning-alert
     const octokit = new Octokit({ auth: githubPAT });
     let sarifId = "";
     try {
@@ -38,12 +39,18 @@ export async function uploadSarifFile(
     }
 
     ghCore.info(`🕗 Sarif upload started. Waiting for upload to finish.`);
+    // Since sarif upload takes few seconds, so waiting for it to finish.
+    // Generally it takes less than a minute.
     await waitForUploadToFinish(githubPAT, sarifId);
 }
 
 async function waitForUploadToFinish(githubPAT: string, sarifId: string): Promise<void> {
     let uploadStatus = "pending";
+
+    // API documentation: https://docs.github.com/en/rest/reference/code-scanning#get-information-about-a-sarif-upload
     const octokit = new Octokit({ auth: githubPAT });
+
+    // TODO: Add a timeout for the case when status is "pending" for very long.
     while (uploadStatus !== "complete") {
         try {
             const response = await octokit.request("GET /repos/{owner}/{repo}/code-scanning/sarifs/{sarif_id}", {

@@ -6,10 +6,12 @@ branding:
   color: red
 inputs:
   manifest_file_path:
-    description: Path of the manifest file to use for analysis
+    description: |
+      Path of the manifest file to use for analysis.
+      This path should not included the path where you checkout the repository
     required: true
   analysis_report_file_name:
-    description: Name of the file to save the analysis report.
+    description: Name of the file to save the analysis report
     required: false
     default: crda_analysis_report
   snyk_token:
@@ -39,7 +41,7 @@ inputs:
     default: ${{ github.token }}
   upload_sarif:
     description: |
-      Upload the Sarif file, by default it is set to true.
+      Upload the generated sarif file, by default it is set to "true".
       If you don't want to upload sarif file set this input to "false"
     required: false
     default: "true"
