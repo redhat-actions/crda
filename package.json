@@ -4,7 +4,7 @@
   "engines": {
     "node": "12"
   },
-  "description": "Action for performing CRDA scan",
+  "description": "Analyse Vulnerabilities in application dependencies",
   "repository": {
     "type": "git",
     "url": "https://github.com/redhat-actions/crda"

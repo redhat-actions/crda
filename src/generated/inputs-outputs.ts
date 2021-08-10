@@ -7,14 +7,14 @@ export enum Inputs {
      */
     ANALYSIS_REPORT_FILE_NAME = "analysis_report_file_name",
     /**
-     * Path at which the repository which is to be analyzed is checked out
+     * Path at which the repository which is to be analyzed is checkedout
      * Required: false
      * Default: "${{ github.workspace }}"
      */
     CHECKOUT_PATH = "checkout_path",
     /**
      * CRDA collects anonymous usage data, and is disabled by default.
-     * If you want this behaviour set this to true
+     * If you want this behaviour set this to "true"
      * Required: false
      * Default: "false"
      */
@@ -36,14 +36,14 @@ export enum Inputs {
      */
     FAIL_ON_VULNERABILITY = "fail_on_vulnerability",
     /**
-     * Github personal access token to upload sarif to github
+     * Github personal access token to upload sarif file to the GitHub
      * Required: false
      * Default: "${{ github.token }}"
      */
     GITHUB_PAT = "github_pat",
     /**
      * Path of the manifest file to use for analysis.
-     * This path should not included the path where you checkout the repository
+     * This path should not include the path where you checkedout the repository
      * Required: true
      * Default: None.
      */

@@ -268,6 +268,8 @@ function getSarif(crdaAnalysedData: string, checkoutPath: string, manifestFile: 
             vulnerableDirectDependencyRuleIds.push(...resultsData[1]);
             vulnerableTransitiveDependencyRuleIds.push(...resultsData[2]);
 
+            // create a map of vulnerable dependency rule ids and its
+            // corresponding direct dependency name
             resultsData[2].forEach((ruleId) => {
                 const dependencyNameToAddToMap: string[] = [ dependency.name ];
                 if (ruleId in tranVulRuleIdsWithDepName) {
