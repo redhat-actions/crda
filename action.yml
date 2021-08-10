@@ -20,7 +20,7 @@ inputs:
     required: false
     default: crda_analysis_report
   snyk_token:
-    description: Snyk token to be used to authenticate to CRDA
+    description: Snyk token to be used to authenticate to the CRDA
     required: false
   crda_key:
     description: Existing CRDA key to identify the existing user

@@ -1,6 +1,6 @@
 # crda
 
-**crda** GitHub Action is an for analysing vulnerabilities in the project's dependency.
+**crda** GitHub Action is an for analysing vulnerabilities in the project's dependency and uploading the sarif result to the Github code scanning.
 
 <a id="prerequisites"></a>
 
@@ -17,11 +17,14 @@
 
 | Input | Description | Default |
 | ----- | ----------- | ------- |
-| manifest_file_path | Path of target manifest file to perform analysis. e.g. `requirements.txt`, `path/to/package.json` | **Must be provided**
-| analysis_report_file_name | Name of the file to save the analysis report. | `crda_analysis_report`
-| snyk_token | Snyk token to be used to authenticate to CRDA. | None
+| manifest_file_path | Path of the manifest file to use for analysis. This path should not include the path where you checkedout the repository e.g. `requirements.txt`, `path/to/package.json` | **Must be provided**
+| checkout_path | Path at which the repository which is to be analyzed is checkedout | `${{ github.workspace }}`
+| analysis_report_file_name | Name of the file to save the analysis report. By default generated file names will be `crda_analysis_report.json` and `crda_analysis_report.sarif` | `crda_analysis_report`
+| snyk_token | Snyk token to be used to authenticate to the CRDA | None
 | crda_key | Existing CRDA key to identify the existing user. | None
-| consent_telemetry | CRDA collects anonymous usage data, and is disabled by default. If you don't want this behaviour set this to true. Go through [privacy statement](https://developers.redhat.com/article/tool-data-collection) for more details. | `false`
+| github_pat | Github personal access token to upload sarif file to the GitHub. You must use an access token with the `security_events` write permission.  | `${{ github.token }}`
+| upload_sarif | Upload the generated sarif file, by default it is set to `true`. If you don't want to upload sarif file set this input to `false` | `true`
+| consent_telemetry | CRDA collects anonymous usage data, and is disabled by default. If you don't want this behaviour set this to `true`. Go through [privacy statement](https://developers.redhat.com/article/tool-data-collection) for more details. | `false`
 | fail_on_vulnerability | Fail the workflow if vulnerability is found in the project. This will lead to workflow failure and sarif file would not be obtained. To set failure when vulnerability severity level is either `error` or `warning` set this input to `error`. By default it is set to fail when severity level is `warning`, or if you don't want to fail the action set this input to `false` | `error`
 
 ## Action Outputs
@@ -39,7 +42,7 @@ In case you are using `snyk_token` this action outputs the generated CRDA key.
 
 ## Example
 
-The Example below shows how the **crda** action can be used to scan vulnerabilities in a node project.
+The Example below shows how the **crda** action can be used to scan vulnerabilities in a node project and upload the result to the Github code scanning.
 
 ```yaml
 steps:
@@ -61,7 +64,6 @@ steps:
   uses: redhat-actions/openshift-tools-installer@v1
   with:
     source: github
-    github_pat: ${{ github.token }}
     crda: "latest"
 
 - name: CRDA Scan
@@ -70,15 +72,9 @@ steps:
   with:
     manifest_file_path: package.json
     crda_key: ${{ secrets.CRDA_KEY }}
-    # snyk_token: ${{ secrets.SNYK_TOKEN }}
     consent_telemetry: true
-    fail_on_vulnerability: true
+    fail_on_vulnerability: false
 
 - name: Print Report Link
   run: echo ${{ steps.scan.outputs.report_link }}
-
-- name: Upload result to GitHub Code Scanning
-  uses: github/codeql-action/upload-sarif@v1
-  with:
-    sarif_file: ${{ steps.scan.outputs.crda_report_sarif }}
 ```

@@ -49,7 +49,7 @@ export enum Inputs {
      */
     MANIFEST_FILE_PATH = "manifest_file_path",
     /**
-     * Snyk token to be used to authenticate to CRDA
+     * Snyk token to be used to authenticate to the CRDA
      * Required: false
      * Default: None.
      */
