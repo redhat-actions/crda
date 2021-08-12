@@ -26,10 +26,17 @@ export enum Inputs {
      */
     CRDA_KEY = "crda_key",
     /**
+     * Command to use for dependencies installation instead of using the
+     * default commands.
+     * Required: false
+     * Default: None.
+     */
+    DEPENDENCY_INSTALLATION_CMD = "dependency_installation_cmd",
+    /**
      * Fail the workflow if vulnerability is found in the project.
      * This will lead to workflow failure and sarif file would not be obtained.
-     * To set failure when vulnerability severity level is either "error" or "warning" set this input to "error".
-     * By default it is set to fail when severity level is "warning",
+     * To set failure when vulnerability severity level is either "error" or "warning" set this input to "warning".
+     * By default it is set to fail when severity level is "error",
      * or if you don't want to fail the action set this input to "false"
      * Required: false
      * Default: "error"

@@ -1,4 +1,5 @@
 import * as ghCore from "@actions/core";
+import * as os from "os";
 
 type OS = "linux" | "macos" | "windows";
 
@@ -47,4 +48,15 @@ export function getBetterHttpError(err: any): Error {
         return new Error(`Received status ${status}: ${err.message}`);
     }
     return err;
+}
+
+export function getTmpDir(): string {
+    // this is what Actions runners use
+    const runnerTmp = process.env.RUNNER_TEMP;
+    if (runnerTmp) {
+        return runnerTmp;
+    }
+
+    // fallback
+    return os.tmpdir();
 }
