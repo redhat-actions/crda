@@ -5,7 +5,7 @@ import {
     CrdaAnalysedDependency, CrdaPubliclyAvailableVulnerability,
     CrdaSeverity, CrdaSeverityKinds, TransitiveVulRuleIdsDepName,
 } from "./types";
-import { capitalizeFirstLetter } from "./utils";
+import { capitalizeFirstLetter } from "./util/utils";
 
 const sarifSchemaUrl = "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json";
 const sarifSchemaVersion = "2.1.0";

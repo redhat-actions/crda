@@ -34,10 +34,16 @@ namespace Analyse {
         const crdaData = JSON.parse(analysisReportJson);
         fs.writeFileSync(analysisReportFileName, analysisReportJson, "utf8");
 
+        // https://github.com/fabric8-analytics/cli-tools/blob/main/docs/cli_README.md#exit-codes
+        // exit code is 2 when vulnerability is found
+        // if failOnVulnerability is "warning" then fail action if vulnerability
+        // is found irrespective of its severity
         if (failOnVulnerability === "warning" && execResult.exitCode === 2) {
             throw new Error(`Found vulnerabilities in the project. `
             + `Detailed analysis report is available at ${analysisReportFileName}`);
         }
+        // if failOnVulnerability is "error", fail only if severity of
+        // vulnerability is "high" and "critical" only
         else if (failOnVulnerability === "error"
             && (crdaData.severity.high !== null || crdaData.severity.critical !== null)) {
             throw new Error(`Found vulnerabilities in the project. `

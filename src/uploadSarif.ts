@@ -4,11 +4,12 @@ import * as zlib from "zlib";
 import * as ghCore from "@actions/core";
 import * as fs from "fs";
 import * as io from "@actions/io";
-import { getEnvVariableValue, getBetterHttpError } from "./utils";
+import * as utils from "./util/utils";
 import Crda from "./crda";
 
 export async function uploadSarifFile(
-    githubPAT: string, sarifToUpload: string, checkoutPath: string, analysisStartTime: string
+    githubPAT: string, sarifToUpload: string, checkoutPath: string,
+    analysisStartTime: string, ref?: string, sha?: string
 ): Promise<void> {
     const sarifContents = fs.readFileSync(sarifToUpload, "utf-8");
     ghCore.debug(`Raw upload size: ${sarifContents.length} bytes`);
@@ -17,7 +18,8 @@ export async function uploadSarifFile(
 
     const commitSha = await getCommitSha();
 
-    ghCore.debug(`Commit Sha: ${commitSha}`);
+    ghCore.debug(`Commit Sha: ${sha || commitSha}`);
+    ghCore.debug(`Ref: ${ref || utils.getEnvVariableValue("GITHUB_REF")} `);
 
     // API documentation: https://docs.github.com/en/rest/reference/code-scanning#update-a-code-scanning-alert
     const octokit = new Octokit({ auth: githubPAT });
@@ -26,8 +28,8 @@ export async function uploadSarifFile(
         const uploadResponse = await octokit.request("POST /repos/{owner}/{repo}/code-scanning/sarifs", {
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
-            commit_sha: commitSha,
-            ref: getEnvVariableValue("GITHUB_REF"),
+            commit_sha: sha || commitSha,
+            ref: ref || utils.getEnvVariableValue("GITHUB_REF"),
             sarif: zippedSarif,
             checkout_uri: checkoutPath,
             started_at: analysisStartTime,
@@ -41,7 +43,7 @@ export async function uploadSarifFile(
         }
     }
     catch (err) {
-        throw getBetterHttpError(err);
+        throw utils.getBetterHttpError(err);
     }
 
     ghCore.info(`🕗 Sarif upload started. Waiting for upload to finish.`);
@@ -73,7 +75,7 @@ async function waitForUploadToFinish(githubPAT: string, sarifId: string): Promis
 
         }
         catch (err) {
-            throw getBetterHttpError(err);
+            throw utils.getBetterHttpError(err);
         }
 
         if (uploadStatus === "pending") {
@@ -91,6 +93,6 @@ async function getCommitSha(): Promise<string> {
     catch (e) {
         ghCore.debug(`Failed to get current commit SHA using git. `
             + `Using environment variable GITHUB_SHA to get the current commit SHA.`);
-        return getEnvVariableValue("GITHUB_SHA");
+        return utils.getEnvVariableValue("GITHUB_SHA");
     }
 }

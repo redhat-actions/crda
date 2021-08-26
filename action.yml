@@ -15,6 +15,11 @@ inputs:
       Path at which the repository which is to be analyzed is checkedout
     required: false
     default: ${{ github.workspace }}
+  dependency_installation_cmd:
+    description: |
+      Command to use for dependencies installation instead of using the
+      default commands.
+    required: false
   analysis_report_file_name:
     description: Name of the file to save the analysis report
     required: false
@@ -45,8 +50,8 @@ inputs:
     description: |
       Fail the workflow if vulnerability is found in the project.
       This will lead to workflow failure and sarif file would not be obtained.
-      To set failure when vulnerability severity level is either "error" or "warning" set this input to "error".
-      By default it is set to fail when severity level is "warning",
+      To set failure when vulnerability severity level is either "error" or "warning" set this input to "warning".
+      By default it is set to fail when severity level is "error",
       or if you don't want to fail the action set this input to "false"
     required: false
     default: "error"

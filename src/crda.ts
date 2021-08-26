@@ -1,7 +1,7 @@
 import * as ghExec from "@actions/exec";
 import * as ghCore from "@actions/core";
 import * as path from "path";
-import * as util from "./utils";
+import * as util from "./util/utils";
 import { ExecResult } from "./types";
 import CmdOutputHider from "./cmdOutputHider";
 
@@ -37,6 +37,7 @@ namespace Crda {
         Json = "json",
         Verbose = "verbose",
         Client = "client",
+        Debug = "debug",
     }
 
     export type Options = { [key in Flags]?: string };
