@@ -4,6 +4,15 @@ import * as path from "path";
 import Crda from "./crda";
 import { Inputs } from "./generated/inputs-outputs";
 
+const REQUIREMENTS_TXT = "requirements.txt";
+const POM_XML = "pom.xml";
+const GO_MOD = "go.mod";
+const PACKAGE_JSON = "package.json";
+
+const ALL_MANIFESTS = [
+    REQUIREMENTS_TXT, POM_XML, GO_MOD, PACKAGE_JSON,
+];
+
 export async function installDeps(manifestFilePath: string): Promise<void> {
     const lastSlashIndex = manifestFilePath.lastIndexOf("/");
     const manifestFileName = manifestFilePath.slice(lastSlashIndex + 1);
@@ -25,21 +34,30 @@ export async function installDeps(manifestFilePath: string): Promise<void> {
     // use the provided command instead of
     // using default command
     if (depsInstallCmd) {
+        ghCore.info(
+            `Running custom ${Inputs.DEPENDENCY_INSTALLATION_CMD}`
+        );
         const splitCmd = depsInstallCmd.split(" ");
         const executablePath = await io.which(splitCmd[0], true);
         await Crda.exec(executablePath, [ ...splitCmd.slice(1) ], { group: true });
     }
-    else if (manifestFileName === "requirements.txt") {
+    else if (manifestFileName === REQUIREMENTS_TXT) {
         await installPythonDeps(manifestFileName);
     }
-    else if (manifestFileName === "pom.xml") {
+    else if (manifestFileName === POM_XML) {
         await installMavenDeps();
     }
-    else if (manifestFileName === "go.mod") {
+    else if (manifestFileName === GO_MOD) {
         await installGoDeps();
     }
-    else if (manifestFileName === "package.json") {
+    else if (manifestFileName === PACKAGE_JSON) {
         await installNodeDeps();
+    }
+    else {
+        throw new Error(
+            `Unrecognized manifest file "${manifestFileName}". `
+            + `Support manifest files are: ${JSON.stringify(ALL_MANIFESTS)}`
+        );
     }
 
     // change back to the previous dir
@@ -58,7 +76,7 @@ async function installMavenDeps(): Promise<void> {
 
 async function installNodeDeps(): Promise<void> {
     const npmPath = await io.which("npm", true);
-    await Crda.exec(npmPath, [ "install" ], { group: true });
+    await Crda.exec(npmPath, [ "ci" ], { group: true });
 }
 
 async function installGoDeps(): Promise<void> {

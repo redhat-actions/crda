@@ -201,9 +201,9 @@ function fetchResults(
     publiclyAvailableVulnerabilities.forEach((publiclyAvailableVulnerability) => {
         const ruleId = publiclyAvailableVulnerability.id;
         let textMessage = `This file introduces a vulnerability ${publiclyAvailableVulnerability.title} with `
-        + `${publiclyAvailableVulnerability.severity} severity.\n`
-        + `Vulnerability present at ${dependencyName}\n`
-        + `Version: ${dependencyVersion}\n`;
+            + `${publiclyAvailableVulnerability.severity} severity.\n`
+            + `Vulnerability present at ${dependencyName}\n`
+            + `Version: ${dependencyVersion}\n`;
 
         // TODO: Add message in markdown format
 
@@ -212,10 +212,10 @@ function fetchResults(
         // + `Vulnerability present at ${dependencyName}\n`
         // + `*Version*: ${dependencyVersion}\n`;
 
-        if (recommendedVersion !== "") {
+        if (recommendedVersion) {
             textMessage = `${textMessage}Recommended Version: ${recommendedVersion}\n`;
         }
-        if (latestVersion !== "") {
+        if (latestVersion) {
             textMessage = `${textMessage}Latest Version: ${latestVersion}`;
         }
         const message: sarif.Message = {

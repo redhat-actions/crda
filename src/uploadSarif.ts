@@ -14,7 +14,7 @@ export async function uploadSarifFile(
     const sarifContents = fs.readFileSync(sarifToUpload, "utf-8");
     ghCore.debug(`Raw upload size: ${sarifContents.length} bytes`);
     const zippedSarif = zlib.gzipSync(sarifContents).toString("base64");
-    ghCore.debug(`Zipped upload size: ${zippedSarif.length} bytes`);
+    ghCore.info(`Zipped upload size: ${zippedSarif.length} bytes`);
 
     const commitSha = await getCommitSha();
 
@@ -58,7 +58,11 @@ async function waitForUploadToFinish(githubPAT: string, sarifId: string): Promis
     // API documentation: https://docs.github.com/en/rest/reference/code-scanning#get-information-about-a-sarif-upload
     const octokit = new Octokit({ auth: githubPAT });
 
-    // TODO: Add a timeout for the case when status is "pending" for very long.
+    const delay = 2 * 1000;
+    const timeout = 120000;
+    const maxTries = timeout / delay;
+    let tries = 0;
+
     while (uploadStatus !== "complete") {
         try {
             const response = await octokit.request("GET /repos/{owner}/{repo}/code-scanning/sarifs/{sarif_id}", {
@@ -69,7 +73,7 @@ async function waitForUploadToFinish(githubPAT: string, sarifId: string): Promis
 
             ghCore.debug(JSON.stringify(response));
             if (response.data.processing_status !== undefined) {
-                ghCore.debug(`Upload status is ${response.data.processing_status}`);
+                ghCore.info(`Upload is ${response.data.processing_status}`);
                 uploadStatus = response.data.processing_status;
             }
 
@@ -78,21 +82,28 @@ async function waitForUploadToFinish(githubPAT: string, sarifId: string): Promis
             throw utils.getBetterHttpError(err);
         }
 
-        if (uploadStatus === "pending") {
-            await new Promise((f) => setTimeout(f, 20000));
+        if (tries > maxTries) {
+            throw new Error(`SARIF upload timed out: status was ${uploadStatus} after ${timeout / 1000}s.`);
         }
+
+        if (uploadStatus === "pending") {
+            await new Promise((r) => setTimeout(r, delay));
+        }
+        tries++;
     }
 }
 
 async function getCommitSha(): Promise<string> {
     try {
         const gitPath = await io.which("git", true);
-        const execResult = await Crda.exec(gitPath, [ "rev-parse", "HEAD" ], { hideOutput: true });
+        const execResult = await Crda.exec(gitPath, [ "rev-parse", "HEAD" ]);
         return execResult.stdout.trim();
     }
     catch (e) {
-        ghCore.debug(`Failed to get current commit SHA using git. `
-            + `Using environment variable GITHUB_SHA to get the current commit SHA.`);
+        ghCore.debug(
+            `Failed to get current commit SHA using git. `
+            + `Using environment variable GITHUB_SHA to get the current commit SHA.`
+        );
         return utils.getEnvVariableValue("GITHUB_SHA");
     }
 }

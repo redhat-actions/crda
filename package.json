@@ -27,7 +27,7 @@
     "@octokit/core": "^3.5.1",
     "@octokit/openapi-types": "^7.2.1",
     "@octokit/plugin-paginate-rest": "^2.15.1",
-    "package.json": "^2.0.1"
+    "zlib": "^1.0.5"
   },
   "devDependencies": {
     "@redhat-actions/action-io-generator": "^1.5.0",
@@ -39,7 +39,6 @@
     "@typescript-eslint/parser": "^4.22.0",
     "@vercel/ncc": "^0.24.1",
     "eslint": "^7.15.0",
-    "typescript": "^4.3",
-    "zlib": "^1.0.5"
+    "typescript": "^4.3"
   }
 }

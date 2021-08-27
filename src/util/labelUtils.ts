@@ -18,13 +18,14 @@ export function getLabelColor(label: string): string {
 export function getLabelDescription(label: string): string {
     switch (label) {
     case CrdaLabels.CRDA_SCAN_APPROVED:
-        return "CRDA Analysis approved by admin";
+        return "CRDA Analysis approved by a collaborator, and the scan will run.";
     case CrdaLabels.CRDA_SCAN_PENDING:
-        return "CRDA Analysis is pending for approval";
+        return `CRDA Analysis will run when the label `
+                + `"${CrdaLabels.CRDA_SCAN_APPROVED}" is added to this pull request`;
     case CrdaLabels.CRDA_SCAN_PASSED:
-        return "No vulnerabilities found";
+        return "CRDA found no vulnerabilities";
     case CrdaLabels.CRDA_SCAN_FAILED:
-        return "Vulnerabilities found";
+        return "CRDA exited with an error code";
     default:
         return "";
     }
