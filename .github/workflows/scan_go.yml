@@ -31,9 +31,6 @@ jobs:
         with:
           go-version: '^1.13.1'
 
-      - run: |
-          go mod vendor
-
       - name: Install CRDA
         uses: redhat-actions/openshift-tools-installer@v1
         with:

@@ -20,9 +20,6 @@ jobs:
         with:
           python-version: '3.9.6'
 
-      - run: |
-          pip install -r test-manifests/requirements.txt
-
       - name: Install CRDA
         uses: redhat-actions/openshift-tools-installer@v1
         with:
