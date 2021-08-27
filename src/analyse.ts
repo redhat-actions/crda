@@ -34,7 +34,12 @@ namespace Analyse {
         const crdaData = JSON.parse(analysisReportJson);
         fs.writeFileSync(analysisReportFileName, analysisReportJson, "utf8");
 
-        ghCore.info(`Failing if "${failOnVulnerability}" level vulnerability is found`);
+        if (failOnVulnerability) {
+            ghCore.info(`Failing if "${failOnVulnerability}" level vulnerability is found`);
+        }
+        else {
+            ghCore.info(`Not failing on any vulnerability`);
+        }
 
         // https://github.com/fabric8-analytics/cli-tools/blob/main/docs/cli_README.md#exit-codes
         // exit code is 2 when vulnerability is found
