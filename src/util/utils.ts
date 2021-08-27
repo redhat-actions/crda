@@ -1,5 +1,6 @@
 import * as ghCore from "@actions/core";
 import * as os from "os";
+import { promises as fs } from "fs";
 
 type OS = "linux" | "macos" | "windows";
 
@@ -59,4 +60,14 @@ export function getTmpDir(): string {
 
     // fallback
     return os.tmpdir();
+}
+
+export async function fileExists(filePath: string): Promise<boolean> {
+    try {
+        await fs.access(filePath);
+        return true;
+    }
+    catch (err) {
+        return false;
+    }
 }

@@ -3,6 +3,7 @@ import * as ghCore from "@actions/core";
 import * as path from "path";
 import Crda from "./crda";
 import { Inputs } from "./generated/inputs-outputs";
+import { fileExists } from "./util/utils";
 
 const REQUIREMENTS_TXT = "requirements.txt";
 const POM_XML = "pom.xml";
@@ -25,18 +26,19 @@ export async function installDeps(manifestFilePath: string): Promise<void> {
     const prevWorkdir = process.cwd();
 
     const checkoutPath = ghCore.getInput(Inputs.CHECKOUT_PATH);
-    const finalManifestPath = path.join(checkoutPath, manifestDir);
-    process.chdir(finalManifestPath);
-    ghCore.info(`⬇️ Installing Dependencies...`);
+    ghCore.info(`${Inputs.CHECKOUT_PATH} is ${checkoutPath}`);
+    const finalManifestDir = path.join(checkoutPath, manifestDir);
+    ghCore.info(`Change working directory to ${finalManifestDir}`);
+    process.chdir(finalManifestDir);
+
+    ghCore.info(`⬇️ Installing dependencies in ${finalManifestDir}`);
     const depsInstallCmd = ghCore.getInput(Inputs.DEPENDENCY_INSTALLATION_CMD);
 
     // if command is provided by the user,
     // use the provided command instead of
     // using default command
     if (depsInstallCmd) {
-        ghCore.info(
-            `Running custom ${Inputs.DEPENDENCY_INSTALLATION_CMD}`
-        );
+        ghCore.info(`Running custom ${Inputs.DEPENDENCY_INSTALLATION_CMD}`);
         const splitCmd = depsInstallCmd.split(" ");
         const executablePath = await io.which(splitCmd[0], true);
         await Crda.exec(executablePath, [ ...splitCmd.slice(1) ], { group: true });
@@ -61,6 +63,7 @@ export async function installDeps(manifestFilePath: string): Promise<void> {
     }
 
     // change back to the previous dir
+    ghCore.info(`Change working directory to ${prevWorkdir}`);
     process.chdir(prevWorkdir);
 }
 
@@ -74,9 +77,43 @@ async function installMavenDeps(): Promise<void> {
     await Crda.exec(mvnPath, [ "-ntp", "-B", "package" ], { group: true });
 }
 
+const PACKAGE_LOCK = "package-lock.json";
+const YARN_LOCK = "yarn.lock";
+
 async function installNodeDeps(): Promise<void> {
-    const npmPath = await io.which("npm", true);
-    await Crda.exec(npmPath, [ "ci" ], { group: true });
+    // https://github.com/redhat-actions/crda/issues/12
+    // we did the chdir above so we use relpath here
+    const packageLockExists = await fileExists(PACKAGE_LOCK);
+    const yarnLockExists = await fileExists(YARN_LOCK);
+
+    let executable: "yarn" | "npm";
+    let args: string[];
+    if (packageLockExists) {
+        if (yarnLockExists) {
+            ghCore.info(`Both ${PACKAGE_LOCK} and ${YARN_LOCK} exist`);
+            throw new Error(
+                `Failed to determine how to install JavaScript dependencies: `
+                + `Both ${PACKAGE_LOCK} and ${YARN_LOCK} are present. `
+                + `Remove one of these lockfiles, or set the "${Inputs.DEPENDENCY_INSTALLATION_CMD}" input.`
+            );
+        }
+        ghCore.info(`${PACKAGE_LOCK} exists; using clean install`);
+        executable = "npm";
+        args = [ "ci" ];
+    }
+    else if (yarnLockExists) {
+        ghCore.info(`${YARN_LOCK} exists; using yarn install with frozen lockfile`);
+        executable = "yarn";
+        args = [ "install", "--frozen-lockfile" ];
+    }
+    else {
+        ghCore.info(`No lockfile was found. Performing regular install - but you should commit a lockfile.`);
+        executable = "npm";
+        args = [ "install" ];
+    }
+
+    const executablePath = await io.which(executable, true);
+    await Crda.exec(executablePath, args, { group: true });
 }
 
 async function installGoDeps(): Promise<void> {

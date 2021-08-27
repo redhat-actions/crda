@@ -13,6 +13,8 @@ let isPullRequest = false;
 let origCheckoutBranch: string;
 
 async function run(): Promise<void> {
+    ghCore.info(`Working directory is ${process.cwd()}`);
+
     ghCore.debug(`Runner OS is ${utils.getOS()}`);
     ghCore.debug(`Node version is ${process.version}`);
 
