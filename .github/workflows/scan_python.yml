@@ -33,10 +33,8 @@ jobs:
         with:
           manifest_file_path: test-manifests/requirements.txt
           crda_key: ${{ secrets.CRDA_KEY }}
-          analysis_report_file_name: python
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
-          consent_telemetry: true
-          fail_on_vulnerability: "false"
+          fail_on_vulnerability: false
 
       - name: Print Analysis Report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}
@@ -63,5 +61,5 @@ jobs:
       - name: Upload merged Results
         uses: actions/upload-artifact@v2
         with:
-          name: workfiles_python
+          name: scan_result_python.zip
           path: ./uploads

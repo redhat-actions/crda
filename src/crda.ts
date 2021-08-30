@@ -76,69 +76,67 @@ namespace Crda {
      * @param execOptions Options for how to run the exec. See note about hideOutput on windows.
      * @returns Exit code and the contents of stdout/stderr.
      */
-     export async function exec(
-         executable: string = EXECUTABLE, args: string[],
-         execOptions: ghExec.ExecOptions & { group?: boolean, hideOutput?: boolean } = {}
-     ): Promise<ExecResult> {
-         // ghCore.info(`${EXECUTABLE} ${args.join(" ")}`)
+    export async function exec(
+        executable: string = EXECUTABLE, args: string[],
+        execOptions: ghExec.ExecOptions & { group?: boolean, hideOutput?: boolean } = {}
+    ): Promise<ExecResult> {
+        // ghCore.info(`${EXECUTABLE} ${args.join(" ")}`)
 
-         let stdout = "";
-         let stderr = "";
+        let stdout = "";
+        let stderr = "";
 
-         const finalExecOptions = { ...execOptions };
-         if (execOptions.hideOutput) {
-             // There is some bug here, only on Windows, where if the wrapped stream is NOT used,
-             // the output is not correctly captured into the execResult.
-             // so, if you have to use the contents of stdout, do not set hideOutput.
-             const wrappedOutStream = execOptions.outStream || process.stdout;
-             finalExecOptions.outStream = new CmdOutputHider(wrappedOutStream, stdout);
-         }
-         finalExecOptions.ignoreReturnCode = true;     // the return code is processed below
+        const finalExecOptions = { ...execOptions };
+        if (execOptions.hideOutput) {
+            // There is some bug here, only on Windows, where if the wrapped stream is NOT used,
+            // the output is not correctly captured into the execResult.
+            // so, if you have to use the contents of stdout, do not set hideOutput.
+            const wrappedOutStream = execOptions.outStream || process.stdout;
+            finalExecOptions.outStream = new CmdOutputHider(wrappedOutStream, stdout);
+        }
+        finalExecOptions.ignoreReturnCode = true;     // the return code is processed below
 
-         finalExecOptions.listeners = {
-             stdout: (chunk): void => {
-                 stdout += chunk.toString();
-             },
-             stderr: (chunk): void => {
-                 stderr += chunk.toString();
-             },
-         };
+        finalExecOptions.listeners = {
+            stdout: (chunk): void => {
+                stdout += chunk.toString();
+            },
+            stderr: (chunk): void => {
+                stderr += chunk.toString();
+            },
+        };
 
-         if (execOptions.group) {
-             const groupName = [ executable, ...args ].join(" ");
-             ghCore.startGroup(groupName);
-         }
+        if (execOptions.group) {
+            const groupName = [ executable, ...args ].join(" ");
+            ghCore.startGroup(groupName);
+        }
 
-         try {
-             const exitCode = await ghExec.exec(executable, args, finalExecOptions);
+        try {
+            const exitCode = await ghExec.exec(executable, args, finalExecOptions);
 
-             // avoiding failure if exit code is 2 as if vulnerability is found exit code is 2
-             if (execOptions.ignoreReturnCode !== true && exitCode !== 0 && exitCode !== 2) {
-                 // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
-                 // which saves some clicking when debugging.
-                 let error = `${path.basename(executable)} exited with code ${exitCode}`;
-                 if (stderr) {
-                     error += `\n${stderr}`;
-                 }
-                 throw new Error(error);
-             }
+            // avoiding failure if exit code is 2 as if vulnerability is found exit code is 2
+            if (execOptions.ignoreReturnCode !== true && exitCode !== 0 && exitCode !== 2) {
+                // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
+                // which saves some clicking when debugging.
+                let error = `${path.basename(executable)} exited with code ${exitCode}`;
+                if (stderr) {
+                    error += `\n${stderr}`;
+                }
+                throw new Error(error);
+            }
 
-             if (finalExecOptions.outStream instanceof CmdOutputHider) {
-                 stdout = finalExecOptions.outStream.getContents();
-             }
+            if (finalExecOptions.outStream instanceof CmdOutputHider) {
+                stdout = finalExecOptions.outStream.getContents();
+            }
 
-             return {
-                 exitCode, stdout, stderr,
-             };
-         }
-
-         finally {
-             if (execOptions.group) {
-                 ghCore.endGroup();
-             }
-         }
-     }
-
+            return {
+                exitCode, stdout, stderr,
+            };
+        }
+        finally {
+            if (execOptions.group) {
+                ghCore.endGroup();
+            }
+        }
+    }
 }
 
 export default Crda;

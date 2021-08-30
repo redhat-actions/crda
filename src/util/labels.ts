@@ -3,15 +3,15 @@ import * as github from "@actions/github";
 import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { components } from "@octokit/openapi-types/dist-types/index";
 import * as ghCore from "@actions/core";
-import { getBetterHttpError } from "./util/utils";
-import { Inputs } from "./generated/inputs-outputs";
-import * as LabelUtils from "./util/labelUtils";
+import { getBetterHttpError } from "./utils";
+import { Inputs } from "../generated/inputs-outputs";
+import * as LabelUtils from "./labelUtils";
 
 type Label = components["schemas"]["label"];
 let pat: string | undefined;
 
 // API documentation: https://docs.github.com/en/rest/reference/issues#add-labels-to-an-issue
-export async function addLabelToPr(prNumber: number, labels: string[]): Promise<void> {
+export async function addLabelsToPr(prNumber: number, labels: string[]): Promise<void> {
     const octokit = new Octokit({ auth: getPat() });
     try {
         await octokit.request("POST /repos/{owner}/{repo}/issues/{issue_number}/labels", {
@@ -27,7 +27,7 @@ export async function addLabelToPr(prNumber: number, labels: string[]): Promise<
 }
 
 // API documentation: https://docs.github.com/en/rest/reference/issues#list-labels-for-an-issue
-export async function getLablesFromPr(prNumber: number): Promise<string[]> {
+export async function getLabelsFromPr(prNumber: number): Promise<string[]> {
     const ActionsOctokit = Octokit.plugin(paginateRest);
     const octokit = new ActionsOctokit({ auth: getPat() });
     let labelsResponse: Label[];

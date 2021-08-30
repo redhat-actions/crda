@@ -4,7 +4,7 @@ import Analyse from "./analyse";
 import { convert } from "./convert";
 import Crda from "./crda";
 import { Inputs, Outputs } from "./generated/inputs-outputs";
-import { addLabelToPr } from "./labels";
+import { addLabelsToPr } from "./util/labels";
 import { uploadSarifFile } from "./uploadSarif";
 import { CrdaLabels } from "./util/constants";
 
@@ -34,7 +34,7 @@ export async function crdaScan(
     ghCore.debug(`Checkout Path: ${checkoutPath}`);
 
     // Setting up consent_telemetry config to avoid prompt during auth command
-    ghCore.info(`🖊️ Setting up the ${Crda.ConfigKeys.ConsentTelemetry} to ${consentTelemetry}.`);
+    ghCore.info(`🖊️ Setting ${Crda.ConfigKeys.ConsentTelemetry} to ${consentTelemetry}.`);
     await Analyse.configSet(Crda.ConfigKeys.ConsentTelemetry, consentTelemetry);
 
     // Auth using provided Synk Token
@@ -48,25 +48,26 @@ export async function crdaScan(
         ghCore.setSecret(generatedCrdaKey);
         ghCore.info(authOutput);
 
-        ghCore.info(`✅ Successfully authenticated to the CRDA with the provided Snyk Token.`);
+        ghCore.info(`✅ Successfully authenticated with the provided Snyk Token.`);
     }
     else if (crdaKey) {
-        ghCore.info(`🖊️ Setting up the ${Crda.ConfigKeys.CrdaKey} with the provided CRDA key.`);
+        ghCore.info(`🖊️ Setting ${Crda.ConfigKeys.CrdaKey} to the provided CRDA key.`);
         await Analyse.configSet(Crda.ConfigKeys.CrdaKey, crdaKey);
     }
     else {
-        throw new Error(`❌ Input ${Inputs.CRDA_KEY} or ${Inputs.SNYK_TOKEN} `
-        + `must be provided to authenticate to the CRDA.`);
+        throw new Error(
+            `❌ Input ${Inputs.CRDA_KEY} or ${Inputs.SNYK_TOKEN} must be provided for authenticating to CRDA.`
+        );
     }
     await Analyse.analyse(`${checkoutPath}/${manifestFilePath}`, crdaReportJson, failOnVulnerability);
 
     // Adding "crda-scan-passed" label to the pull request
     // if there is no vulnerability detected
     if (isPullRequest) {
-        await addLabelToPr(prNumber, [ CrdaLabels.CRDA_SCAN_PASSED ]);
+        await addLabelsToPr(prNumber, [ CrdaLabels.CRDA_SCAN_PASSED ]);
     }
 
-    ghCore.info(`✅ Analysis completed. Analysed JSON report is available at ${crdaReportJson}.`);
+    ghCore.info(`✅ Analysis completed. JSON report is available at ${crdaReportJson}.`);
 
     ghCore.setOutput(Outputs.CRDA_REPORT_JSON, crdaReportJson);
 
@@ -77,23 +78,26 @@ export async function crdaScan(
     ghCore.setOutput(Outputs.REPORT_LINK, reportLink);
 
     if (!crdaData.analysed_dependencies) {
-        ghCore.warning(`Cannot retrieve detailed analysis and report in sarif format. `
-            + `To get more detailed analysis and report in sarif format `
-            + `use input "${Inputs.SNYK_TOKEN}" or use CRDA key authenticated with the Snyk token. `
-            + `To get a Snyk token follow https://app.snyk.io/login?utm_campaign=Code-Ready-Analytics-2020&utm_source=code_ready&code_ready=FF1B53D9-57BE-4613-96D7-1D06066C38C9`);
+        ghCore.warning(
+            `Cannot retrieve detailed analysis and report in SARIF format. `
+            + `A Synk token or a CRDA key authenticated to Synk is required for detailed analysis and SARIF output.`
+            + `Use the "${Inputs.SNYK_TOKEN}" input, or provide a CRDA key authenticated with Snyk. `
+            + `To get a Snyk token, follow `
+            + `https://app.snyk.io/login?utm_campaign=Code-Ready-Analytics-2020&utm_source=code_ready&code_ready=FF1B53D9-57BE-4613-96D7-1D06066C38C9`
+        );
     }
     else {
-        ghCore.info(`🔁 Converting JSON analysed data to the Sarif format.`);
+        ghCore.info(`🔁 Converting JSON analysed data to the SARIF format.`);
         convert(crdaReportJson, checkoutPath, manifestFilePath, crdaReportSarif);
 
-        ghCore.info(`✅ Successfully converted analysis JSON to the Sarif format. `
-        + `Sarif file is available at ${crdaReportSarif}.`);
+        ghCore.info(`✅ Successfully converted analysis JSON to the SARIF format. `
+        + `SARIF file is available at ${crdaReportSarif}.`);
 
         ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
     }
 
     if (uploadSarif) {
-        ghCore.info(`⬆️ Uploading sarif file to GitHub...`);
+        ghCore.info(`⬆️ Uploading SARIF file to GitHub...`);
         if (isPullRequest) {
             const ref = `refs/pull/${prNumber}/head`;
             await uploadSarifFile(githubPAT, crdaReportSarif, checkoutPath, analysisStartTime, ref, sha);
@@ -101,9 +105,9 @@ export async function crdaScan(
         else {
             await uploadSarifFile(githubPAT, crdaReportSarif, checkoutPath, analysisStartTime);
         }
-        ghCore.info(`✅ Successfully uploaded sarif file to GitHub`);
+        ghCore.info(`✅ Successfully uploaded SARIFfile to GitHub`);
     }
     else {
-        ghCore.info(`⏩ Input ${Inputs.UPLOAD_SARIF} is set to false, skipping sarif upload.`);
+        ghCore.info(`⏩ Input ${Inputs.UPLOAD_SARIF} is set to false, skipping SARIF upload.`);
     }
 }

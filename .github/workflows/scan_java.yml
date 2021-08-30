@@ -19,10 +19,10 @@ jobs:
         with:
           repository: spring-projects/spring-petclinic
 
-      # - name: Checkout action
-      #   uses: actions/checkout@v2
-      #   with:
-      #     path: crda
+      - name: Checkout action
+        uses: actions/checkout@v2
+        with:
+          path: crda
 
       # If none of these files has changed, we assume that the contents of .m2/repository can be fetched from the cache.
       - name: Hash Maven files
@@ -61,15 +61,13 @@ jobs:
 
       - name: CRDA Scan
         id: scan
-        uses: redhat-actions/crda@main
+        uses: ./crda
         with:
           manifest_file_path: pom.xml
           crda_key: ${{ secrets.CRDA_KEY }}
-          analysis_report_file_name: java
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
-          consent_telemetry: true
-          fail_on_vulnerability: "false"
-          upload_sarif: false
+          analysis_report_file_name: java
+          fail_on_vulnerability: false
 
       - name: Print Analysis Report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}
@@ -97,5 +95,5 @@ jobs:
       - name: Upload merged Results
         uses: actions/upload-artifact@v2
         with:
-          name: workfiles_java
+          name: scan_result_java.zip
           path: ./uploads
