@@ -19,11 +19,13 @@ const labelsToCheckForRemoval = [
 type PrApprovalResultYes = {
     approved: true,
     sha: string,
+    prNumber: number,
 };
 
 type PrApprovalResultNo = {
     approved: false,
     sha?: undefined,
+    prNumber: number,
 };
 
 export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalResultYes | PrApprovalResultNo> {
@@ -40,7 +42,7 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
     await labels.createLabels(repoLabels);
     const availableLabels = await labels.getLabelsFromPr(prNumber);
     if (availableLabels.length !== 0) {
-        ghCore.debug(`Available Labels are : ${availableLabels.join(", ")}`);
+        ghCore.debug(`Available Labels are: ${availableLabels.join(", ")}`);
     }
     else {
         ghCore.debug("No labels found");
@@ -58,6 +60,7 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
 
         return {
             approved: false,
+            prNumber,
         };
     }
 
@@ -69,6 +72,7 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
         return {
             approved: true,
             sha: prData.sha,
+            prNumber,
         };
     }
 
@@ -78,6 +82,7 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
     }
     return {
         approved: false,
+        prNumber,
     };
 }
 

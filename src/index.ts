@@ -33,6 +33,7 @@ async function run(): Promise<void> {
         origCheckoutBranch = await prUtils.getOrigCheckoutBranch();
         const prApprovalResult = await prUtils.isPrScanApproved(pullRequestData);
         sha = prApprovalResult.sha;
+        prNumber = prApprovalResult.prNumber;
 
         if (prApprovalResult.approved) {
             ghCore.info(`"${CrdaLabels.CRDA_SCAN_APPROVED}" label is present, scan is approved.`);
