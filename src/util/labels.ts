@@ -68,7 +68,12 @@ export async function removeLabelsFromPr(prNumber: number, labels: string[]): Pr
 
 export async function createLabels(repoLabels: string[]): Promise<void> {
     const availableRepoLabels = await getRepoLabels();
-    ghCore.debug(`Available Repo labels: ${availableRepoLabels.join(", ")}`);
+    if (availableRepoLabels.length !== 0) {
+        ghCore.debug(`Available Repo labels: ${availableRepoLabels.join(", ")}`);
+    }
+    else {
+        ghCore.debug("No labels found in the repository");
+    }
     const labelsToCreate: string[] = [];
     repoLabels.forEach((label) => {
         if (!availableRepoLabels.includes(label)) {
@@ -76,7 +81,13 @@ export async function createLabels(repoLabels: string[]): Promise<void> {
         }
     });
 
-    ghCore.debug(`Labels to create in the repository: ${labelsToCreate.join(", ")}`);
+    if (labelsToCreate.length !== 0) {
+        ghCore.debug(`Labels to create in the repository: ${labelsToCreate.join(", ")}`);
+    }
+    else {
+        ghCore.debug("Required labels are already present in the repository. "
+        + "No labels need to be created.");
+    }
 
     await createRepoLabels(labelsToCreate);
 }

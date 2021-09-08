@@ -39,8 +39,13 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
 
     await labels.createLabels(repoLabels);
     const availableLabels = await labels.getLabelsFromPr(prNumber);
-    ghCore.debug(`Available Labels are : ${availableLabels.join(", ")}`);
-    ghCore.debug(`Action performed is ${github.context.payload.action}`);
+    if (availableLabels.length !== 0) {
+        ghCore.debug(`Available Labels are : ${availableLabels.join(", ")}`);
+    }
+    else {
+        ghCore.debug("No labels found");
+    }
+    ghCore.debug(`Action performed is "${github.context.payload.action}"`);
 
     const prAction = github.context.payload.action;
     if (prAction === "edited" || prAction === "synchronize") {

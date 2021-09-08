@@ -28,6 +28,9 @@ async function run(): Promise<void> {
         ghCore.info(`Scan is running in a pull request, checking for approval label...`);
 
         isPullRequest = true;
+
+        // needed to checkout back to the original checkedout branch
+        origCheckoutBranch = await prUtils.getOrigCheckoutBranch();
         const prApprovalResult = await prUtils.isPrScanApproved(pullRequestData);
         sha = prApprovalResult.sha;
 
@@ -39,8 +42,6 @@ async function run(): Promise<void> {
             ghCore.error(`"${CrdaLabels.CRDA_SCAN_APPROVED}" label is needed to scan this PR with CRDA`);
             return;
         }
-
-        origCheckoutBranch = await prUtils.getOrigCheckoutBranch();
     }
 
     const manifestFilePath = ghCore.getInput(Inputs.MANIFEST_FILE_PATH);
