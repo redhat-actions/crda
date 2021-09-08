@@ -96,10 +96,12 @@ async function waitForUploadToFinish(githubPAT: string, sarifId: string): Promis
 async function getCommitSha(): Promise<string> {
     try {
         const gitPath = await io.which("git", true);
+        ghCore.debug(`Resolved git path is ${gitPath}`);
         const execResult = await Crda.exec(gitPath, [ "rev-parse", "HEAD" ]);
         return execResult.stdout.trim();
     }
-    catch (e) {
+    catch (err) {
+        ghCore.debug(err);
         ghCore.debug(
             `Failed to get current commit SHA using git. `
             + `Using environment variable GITHUB_SHA to get the current commit SHA.`
