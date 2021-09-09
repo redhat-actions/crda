@@ -3,7 +3,6 @@ import * as github from "@actions/github";
 import * as zlib from "zlib";
 import * as ghCore from "@actions/core";
 import * as fs from "fs";
-import * as io from "@actions/io";
 import * as utils from "./util/utils";
 import Crda from "./crda";
 
@@ -94,18 +93,16 @@ async function waitForUploadToFinish(githubPAT: string, sarifId: string): Promis
 }
 
 async function getCommitSha(): Promise<string> {
-    try {
-        const gitPath = await io.which("git", true);
-        ghCore.debug(`Resolved git path is ${gitPath}`);
-        const execResult = await Crda.exec(gitPath, [ "rev-parse", "HEAD" ]);
-        return execResult.stdout.trim();
-    }
-    catch (err) {
-        ghCore.debug(err);
-        ghCore.debug(
+    const commitSha = (await Crda.exec("git", [ "rev-parse", "HEAD" ])).stdout;
+    return commitSha.trim();
+
+    /*
+    if (!commitSha) {
+        ghCore.info(
             `Failed to get current commit SHA using git. `
             + `Using environment variable GITHUB_SHA to get the current commit SHA.`
         );
         return utils.getEnvVariableValue("GITHUB_SHA");
     }
+    */
 }
