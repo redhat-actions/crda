@@ -43,10 +43,9 @@ jobs:
         uses: ./crda
         with:
           manifest_file_path: go.mod
-          # crda_key: ${{ secrets.CRDA_KEY }}
-          snyk_token: ${{ secrets.SNYK_TOKEN }}
+          crda_key: ${{ secrets.CRDA_KEY }}
+          # snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on_vulnerability: false
-          upload_sarif: false
 
       - name: Print Analysis Report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}

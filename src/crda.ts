@@ -5,7 +5,8 @@ import * as util from "./util/utils";
 import { ExecResult } from "./types";
 import CmdOutputHider from "./cmdOutputHider";
 
-const EXECUTABLE = util.getOS() === "windows" ? "crda.exe" : "crda";
+export const CRDA_EXECUTABLE = util.getOS() === "windows" ? "crda.exe" : "crda";
+export const GIT_EXECUTABLE = util.getOS() === "windows" ? "git.exe" : "git";
 
 namespace Crda {
     /**
@@ -77,10 +78,11 @@ namespace Crda {
      * @returns Exit code and the contents of stdout/stderr.
      */
     export async function exec(
-        executable: string = EXECUTABLE, args: string[],
+        executable: string, args: string[],
         execOptions: ghExec.ExecOptions & { group?: boolean, hideOutput?: boolean } = {}
     ): Promise<ExecResult> {
-        // ghCore.info(`${EXECUTABLE} ${args.join(" ")}`)
+        // ghCore.info(`${executable} ${args.join(" ")}`);
+        // ghCore.debug(`options ${JSON.stringify(execOptions)}`);
 
         let stdout = "";
         let stderr = "";
@@ -111,9 +113,12 @@ namespace Crda {
 
         try {
             const exitCode = await ghExec.exec(executable, args, finalExecOptions);
+            ghCore.debug(`Exit code ${exitCode}`);
 
-            // avoiding failure if exit code is 2 as if vulnerability is found exit code is 2
-            if (execOptions.ignoreReturnCode !== true && exitCode !== 0 && exitCode !== 2) {
+            if (execOptions.ignoreReturnCode !== true && exitCode !== 0
+                // allow crda to exit with 2 indicating scan failure
+                && (executable !== CRDA_EXECUTABLE && exitCode !== 2)
+            ) {
                 // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
                 // which saves some clicking when debugging.
                 let error = `${path.basename(executable)} exited with code ${exitCode}`;

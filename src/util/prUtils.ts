@@ -1,8 +1,7 @@
 import * as ghCore from "@actions/core";
-import * as io from "@actions/io";
 import * as github from "@actions/github";
 
-import Crda from "../crda";
+import Crda, { GIT_EXECUTABLE } from "../crda";
 import { CrdaLabels } from "./constants";
 import * as labels from "./labels";
 
@@ -99,14 +98,13 @@ function parsePrData(prData: string): { number: number, remoteUrl: string, sha: 
 // After completion of the scan this created remote and branch
 // will be deleted and branch will be checkedout the present branch
 async function checkoutPr(remote: string, prNumber: number): Promise<void> {
-    const gitPath = await io.which("git", true);
     ghCore.debug(`Adding remote ${remote}`);
     const remoteName = `remote-${prNumber}`;
-    await Crda.exec(gitPath, [ "remote", "add", remoteName, remote ]);
+    await Crda.exec(GIT_EXECUTABLE, [ "remote", "add", remoteName, remote ]);
     const localbranch = `pr-${prNumber}`;
     ghCore.info(`⬇️ Checking out PR #${prNumber} to run CRDA analysis.`);
-    await Crda.exec(gitPath, [ "fetch", remoteName, `pull/${prNumber}/head:${localbranch}` ]);
-    await Crda.exec(gitPath, [ "checkout", localbranch ]);
+    await Crda.exec(GIT_EXECUTABLE, [ "fetch", remoteName, `pull/${prNumber}/head:${localbranch}` ]);
+    await Crda.exec(GIT_EXECUTABLE, [ "checkout", localbranch ]);
 }
 
 // Do cleanup after the crda scan and checkout
@@ -114,19 +112,17 @@ async function checkoutPr(remote: string, prNumber: number): Promise<void> {
 export async function checkoutCleanup(prNumber: number, origCheckoutBranch: string): Promise<void> {
     const remoteName = `remote-${prNumber}`;
     const branchName = `pr-${prNumber}`;
-    const gitPath = await io.which("git", true);
     ghCore.debug(`Checking out back to ${origCheckoutBranch} branch.`);
-    await Crda.exec(gitPath, [ "checkout", origCheckoutBranch ]);
+    await Crda.exec(GIT_EXECUTABLE, [ "checkout", origCheckoutBranch ]);
 
     ghCore.debug(`Removing the created remote "${remoteName}"`);
-    await Crda.exec(gitPath, [ "remote", "remove", remoteName ]);
+    await Crda.exec(GIT_EXECUTABLE, [ "remote", "remove", remoteName ]);
 
     ghCore.debug(`Removing created branch "${branchName}"`);
-    await Crda.exec(gitPath, [ "branch", "-D", `${branchName}` ]);
+    await Crda.exec(GIT_EXECUTABLE, [ "branch", "-D", `${branchName}` ]);
 }
 
 export async function getOrigCheckoutBranch(): Promise<string> {
-    const gitPath = await io.which("git", true);
-    const execResult = await Crda.exec(gitPath, [ "branch", "--show-current" ]);
+    const execResult = await Crda.exec(GIT_EXECUTABLE, [ "branch", "--show-current" ]);
     return execResult.stdout.trim();
 }
