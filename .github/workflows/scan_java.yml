@@ -17,7 +17,8 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v2
         with:
-          repository: spring-projects/spring-petclinic
+          repository: redhat-actions/spring-petclinic
+          ref: crda-modification
 
       - name: Checkout action
         uses: actions/checkout@v2
@@ -68,6 +69,7 @@ jobs:
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           analysis_report_file_name: java
           fail_on_vulnerability: false
+          upload_sarif: false
 
       - name: Print Analysis Report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}
