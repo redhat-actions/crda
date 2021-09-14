@@ -15,7 +15,7 @@
 ## Action Inputs
 
 | Input | Description | Default |
-| ----- | ----------- | ------- |
+| ----- | ----------- | --------- |
 | manifest_path | Path of the manifest file to use for analysis. This path should not include the path where you checkedout the repository e.g. `requirements.txt`, `path/to/package.json` | **Must be provided**
 | checkout_path | Path at which the repository which is to be analyzed is checkedout | `${{ github.workspace }}`
 | deps_install_cmd | Command to use for the dependencies installation instead of using the default commands | [Check here](#pr-support)
@@ -41,7 +41,15 @@ This action either uses existing `crda_key` which can be found in `~/.crda/confi
 
 ## Note for input `deps_install_cmd`
 
-If manifest file name is either `go.mod`, `package.json`, `pom.xml` or `requirements.txt` then default dependency installation commands are `go mod vendor`, `npm install`, `mvn -ntp -B package` or `pip install -r requirements.txt` respectively. If your manifest file has different name or you need some different installation command, use input `deps_install_cmd` to provide the command.
+Below is list of manifest and it's corresponding default dependency installation command.
+| Manifest | Command |
+| ------- | ------------ |
+| `go.mod` | `go mod vendor` |
+| `package.json` | `npm install` |
+| `pom.xml` | `mvn -ntp -B package` |
+| `requirements.txt` | `pip install -r requirements.txt` |
+
+If your manifest file has different name or you need some different installation command, use input `deps_install_cmd` to provide the command.
 
 <a id="pr-support"></a>
 
@@ -70,7 +78,7 @@ steps:
   uses: actions/setup-node@v2
   with:
     node-version: '14'
- 
+
 - name: Install CRDA
   uses: redhat-actions/openshift-tools-installer@v1
   with:
