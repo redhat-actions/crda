@@ -1,6 +1,7 @@
 import * as ghExec from "@actions/exec";
 import * as ghCore from "@actions/core";
 import * as path from "path";
+import stripAnsi from "strip-ansi";
 import * as util from "./util/utils";
 import { ExecResult } from "./types";
 import CmdOutputHider from "./cmdOutputHider";
@@ -115,15 +116,21 @@ namespace Crda {
             const exitCode = await ghExec.exec(executable, args, finalExecOptions);
             ghCore.debug(`Exit code ${exitCode}`);
 
-            if (execOptions.ignoreReturnCode !== true && exitCode !== 0
-                // allow crda to exit with 2 indicating scan failure
-                && (executable !== CRDA_EXECUTABLE && exitCode !== 2)
-            ) {
+            let failCondition;
+            if (executable === CRDA_EXECUTABLE) {
+                // crda exit 2 indicates a vulnerability was found, so that's an expected error
+                failCondition = exitCode !== 0 && exitCode !== 2;
+            }
+            else {
+                failCondition = exitCode !== 0;
+            }
+
+            if (failCondition && !execOptions.ignoreReturnCode) {
                 // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
                 // which saves some clicking when debugging.
                 let error = `${path.basename(executable)} exited with code ${exitCode}`;
                 if (stderr) {
-                    error += `\n${stderr}`;
+                    error += `\n${stripAnsi(stderr)}`;
                 }
                 throw new Error(error);
             }
