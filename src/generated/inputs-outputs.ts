@@ -5,7 +5,7 @@ export enum Inputs {
      * Required: false
      * Default: "crda_analysis_report"
      */
-    ANALYSIS_REPORT_FILE_NAME = "analysis_report_file_name",
+    ANALYSIS_REPORT_NAME = "analysis_report_name",
     /**
      * Path at which the repository which is to be analyzed is checkedout
      * Required: false
@@ -31,30 +31,30 @@ export enum Inputs {
      * Required: false
      * Default: None.
      */
-    DEPENDENCY_INSTALLATION_CMD = "dependency_installation_cmd",
+    DEPS_INSTALL_CMD = "deps_install_cmd",
     /**
      * Fail the workflow if vulnerability is found in the project.
-     * This will lead to workflow failure and sarif file would not be obtained.
+     * This will lead to workflow failure and sarif file would not be uploaded.
      * To set failure when vulnerability severity level is either "error" or "warning" set this input to "warning".
      * By default it is set to fail when severity level is "error",
-     * or if you don't want to fail the action set this input to "false"
+     * or if you don't want to fail the action set this input to "never"
      * Required: false
      * Default: "error"
      */
-    FAIL_ON_VULNERABILITY = "fail_on_vulnerability",
+    FAIL_ON = "fail_on",
     /**
-     * Github personal access token to upload sarif file to the GitHub
+     * Github token to upload sarif file to the GitHub
      * Required: false
      * Default: "${{ github.token }}"
      */
-    GITHUB_PAT = "github_pat",
+    GITHUB_TOKEN = "github_token",
     /**
      * Path of the manifest file to use for analysis.
      * This path should not include the path where you checkedout the repository
      * Required: true
      * Default: None.
      */
-    MANIFEST_FILE_PATH = "manifest_file_path",
+    MANIFEST_PATH = "manifest_path",
     /**
      * Snyk token to be used to authenticate to the CRDA
      * Required: false

@@ -45,7 +45,7 @@ async function run(): Promise<void> {
         }
     }
 
-    const manifestFilePath = ghCore.getInput(Inputs.MANIFEST_FILE_PATH);
+    const manifestFilePath = ghCore.getInput(Inputs.MANIFEST_PATH);
     await installDeps(manifestFilePath);
     await crdaScan(analysisStartTime, isPullRequest, prNumber, sha);
 }
