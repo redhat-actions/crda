@@ -115,9 +115,12 @@ namespace Crda {
             const exitCode = await ghExec.exec(executable, args, finalExecOptions);
             ghCore.debug(`Exit code ${exitCode}`);
 
-            if (execOptions.ignoreReturnCode !== true && exitCode !== 0
-                // allow crda to exit with 2 indicating scan failure
-                && (executable !== CRDA_EXECUTABLE && exitCode !== 2)
+            const failNonCrda = executable !== CRDA_EXECUTABLE && exitCode !== 0;
+
+            // avoiding failure if exit code is 2 as if vulnerability is found exit code is 2
+            const failCrda = executable === CRDA_EXECUTABLE && exitCode !== 2 && exitCode !== 0;
+
+            if (execOptions.ignoreReturnCode !== true && (failCrda || failNonCrda)
             ) {
                 // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
                 // which saves some clicking when debugging.
