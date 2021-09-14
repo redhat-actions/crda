@@ -1,6 +1,7 @@
 import * as ghExec from "@actions/exec";
 import * as ghCore from "@actions/core";
 import * as path from "path";
+import stripAnsi from "strip-ansi";
 import * as util from "./util/utils";
 import { ExecResult } from "./types";
 import CmdOutputHider from "./cmdOutputHider";
@@ -126,7 +127,7 @@ namespace Crda {
                 // which saves some clicking when debugging.
                 let error = `${path.basename(executable)} exited with code ${exitCode}`;
                 if (stderr) {
-                    error += `\n${stderr}`;
+                    error += `\n${stripAnsi(stderr)}`;
                 }
                 throw new Error(error);
             }

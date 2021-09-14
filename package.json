@@ -27,6 +27,7 @@
     "@octokit/core": "^3.5.1",
     "@octokit/openapi-types": "^7.4.0",
     "@octokit/plugin-paginate-rest": "^2.16.0",
+    "strip-ansi": "^7.0.1",
     "zlib": "^1.0.5"
   },
   "devDependencies": {
