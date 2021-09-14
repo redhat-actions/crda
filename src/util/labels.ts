@@ -151,7 +151,7 @@ export function findLabelsToRemove(availableLabels: string[], labelsToCheck: str
  */
 function getPat(): string {
     if (pat == null) {
-        pat = ghCore.getInput(Inputs.GITHUB_PAT);
+        pat = ghCore.getInput(Inputs.GITHUB_TOKEN);
 
         // this to only solve the problem of local development
         if (!pat && process.env.GITHUB_TOKEN) {

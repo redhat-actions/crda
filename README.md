@@ -15,17 +15,17 @@
 ## Action Inputs
 
 | Input | Description | Default |
-| ----- | ----------- | ------- |
-| manifest_file_path | Path of the manifest file to use for analysis. This path should not include the path where you checkedout the repository e.g. `requirements.txt`, `path/to/package.json` | **Must be provided**
+| ----- | ----------- | --------- |
+| manifest_path | Path of the manifest file to use for analysis. This path should not include the path where you checkedout the repository e.g. `requirements.txt`, `path/to/package.json` | **Must be provided**
 | checkout_path | Path at which the repository which is to be analyzed is checkedout | `${{ github.workspace }}`
-| dependency_installation_cmd | Command to use for dependencies installation instead of using the default commands | [Check here](#pr-support)
-| analysis_report_file_name | Name of the file to save the analysis report. By default generated file names will be `crda_analysis_report.json` and `crda_analysis_report.sarif` | `crda_analysis_report`
+| deps_install_cmd | Command to use for the dependencies installation instead of using the default commands | [Check here](#pr-support)
+| analysis_report_name | Name of the file to save the analysis report. By default generated file names will be `crda_analysis_report.json` and `crda_analysis_report.sarif` | `crda_analysis_report`
 | snyk_token | Snyk token to be used to authenticate to the CRDA | None
 | crda_key | Existing CRDA key to identify the existing user. | None
-| github_pat | Github personal access token to upload the SARIF file to the GitHub. You must use an access token with the `security_events` write permission.  | `${{ github.token }}`
+| github_token | Github token to upload the SARIF file to the GitHub. Token must have `security_events` write permission. | `${{ github.token }}`
 | upload_sarif | Upload the generated SARIF file, by default it is set to `true`. If you don't want to upload SARIF file set this input to `false` | `true`
-| consent_telemetry | CRDA collects anonymous usage data, and is disabled by default. If you don't want this behaviour set this to `true`. Go through [privacy statement](https://developers.redhat.com/article/tool-data-collection) for more details. | `false`
-| fail_on_vulnerability | Fail the workflow if vulnerability is found in the project. This will lead to workflow failure and SARIF file would not be obtained. To set failure when vulnerability severity level is either `error` or `warning` set this input to `warning`. By default it is set to fail when severity level is `error`, or if you don't want to fail the action set this input to `false` | `error`
+| consent_telemetry | CRDA collects anonymous usage data, and is disabled by default. If you want to contribute towards this set this input to `true`. Go through [privacy statement](https://developers.redhat.com/article/tool-data-collection) for more details. | `false`
+| fail_on | Fail the workflow if vulnerability is found in the project. This will lead to workflow failure and SARIF file would not be uploaded. To set failure when vulnerability severity level is either `error` or `warning` set this input to `warning`. By default it is set to fail when severity level is `error`, or if you don't want to fail the action set this input to `never` | `error`
 
 ## Action Outputs
 
@@ -37,11 +37,19 @@
 
 This action either uses existing `crda_key` which can be found in `~/.crda/config.yaml` or `snyk_token` which you can get [here](https://app.snyk.io/login?utm_campaign=Code-Ready-Analytics-2020&utm_source=code_ready&code_ready=FF1B53D9-57BE-4613-96D7-1D06066C38C9) to authenticate to CRDA.
 
-**NOTE**: For detailed analysis report and report in SARIF format, if you are using existing CRDA key, make sure that it is mapped to the Snyk Token.
+**NOTE**: For detailed analysis report and report in SARIF format, if you are using existing CRDA key, make sure that it is mapped to the Snyk token.
 
-## Note for input `dependency_installation_cmd`
+## Note for input `deps_install_cmd`
 
-If manifest file name is either `go.mod`, `package.json`, `pom.xml` or `requirements.txt` then default dependency installation commands are `go mod vendor`, `npm install`, `mvn -ntp -B package` or `pip install -r requirements.txt` respectively. If your manifest file has different name or you need some different installation command, use input `dependency_installation_cmd` to provide the command.
+Below is list of manifest and it's corresponding default dependency installation command.
+| Manifest | Command |
+| ------- | ------------ |
+| `go.mod` | `go mod vendor` |
+| `package.json` | `npm install` |
+| `pom.xml` | `mvn -ntp -B package` |
+| `requirements.txt` | `pip install -r requirements.txt` |
+
+If your manifest file has different name or you need some different installation command, use input `deps_install_cmd` to provide the command.
 
 <a id="pr-support"></a>
 
@@ -81,11 +89,10 @@ steps:
   id: scan
   uses: redhat-actions/crda@v1
   with:
-    manifest_file_path: package.json
+    manifest_path: package.json
     crda_key: ${{ secrets.CRDA_KEY }}
     consent_telemetry: true
-    fail_on_vulnerability: false
-    dependency_installation_cmd: npm install
+    fail_on: never
 
 - name: Print Report Link
   run: echo ${{ steps.scan.outputs.report_link }}

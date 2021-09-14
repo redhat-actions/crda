@@ -12,10 +12,10 @@ jobs:
         shell: bash
     name: Analyse Node project
     steps:
+
       - name: Checkout project
         uses: actions/checkout@v2
         with:
-          # repository: nodejs/examples
           repository: jduimovich/crda-sarif-poc
 
       - name: Checkout action
@@ -39,28 +39,22 @@ jobs:
         id: scan
         uses: ./crda
         with:
-          manifest_file_path: package.json
+          manifest_path: package.json
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
-          fail_on_vulnerability: false
+          fail_on: never
           upload_sarif: false
 
-      - name: Print Analysis Report
+      - name: Print JSON analysis report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}
         run: cat ${{ steps.scan.outputs.crda_report_json }}
 
-      - name: Print Sarif
+      - name: Print SARIF analysis report
         if: ${{ always() && steps.scan.outputs.crda_report_sarif }}
         run: cat ${{ steps.scan.outputs.crda_report_sarif }}
 
       - name: Print Report Link
         run: echo ${{ steps.scan.outputs.report_link }}
-
-      # - name: Upload result to GitHub Code Scanning
-      #   if: ${{ steps.scan.outputs.crda_report_sarif }}
-      #   uses: github/codeql-action/upload-sarif@v1
-      #   with:
-      #     sarif_file: ${{ steps.scan.outputs.crda_report_sarif }}
 
       - name: Save intermediate files
         run: |

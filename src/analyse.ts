@@ -34,7 +34,7 @@ namespace Analyse {
         const crdaData = JSON.parse(analysisReportJson);
         fs.writeFileSync(analysisReportFileName, analysisReportJson, "utf8");
 
-        if (failOnVulnerability !== "false") {
+        if (failOnVulnerability !== "never") {
             ghCore.info(`Failing if "${failOnVulnerability}" level vulnerability is found`);
         }
         else {

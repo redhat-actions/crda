@@ -32,13 +32,13 @@ export async function installDeps(manifestFilePath: string): Promise<void> {
     process.chdir(finalManifestDir);
 
     ghCore.info(`⬇️ Installing dependencies in ${finalManifestDir}`);
-    const depsInstallCmd = ghCore.getInput(Inputs.DEPENDENCY_INSTALLATION_CMD);
+    const depsInstallCmd = ghCore.getInput(Inputs.DEPS_INSTALL_CMD);
 
     // if command is provided by the user,
     // use the provided command instead of
     // using default command
     if (depsInstallCmd) {
-        ghCore.info(`Running custom ${Inputs.DEPENDENCY_INSTALLATION_CMD}`);
+        ghCore.info(`Running custom ${Inputs.DEPS_INSTALL_CMD}`);
         const splitCmd = depsInstallCmd.split(" ");
         const executablePath = await io.which(splitCmd[0], true);
         await Crda.exec(executablePath, [ ...splitCmd.slice(1) ], { group: true });
@@ -94,7 +94,7 @@ async function installNodeDeps(): Promise<void> {
             throw new Error(
                 `Failed to determine how to install JavaScript dependencies: `
                 + `Both ${PACKAGE_LOCK} and ${YARN_LOCK} are present. `
-                + `Remove one of these lockfiles, or set the "${Inputs.DEPENDENCY_INSTALLATION_CMD}" input.`
+                + `Remove one of these lockfiles, or set the "${Inputs.DEPS_INSTALL_CMD}" input.`
             );
         }
         ghCore.info(`${PACKAGE_LOCK} exists; using clean install`);

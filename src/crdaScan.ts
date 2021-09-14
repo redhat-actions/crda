@@ -11,13 +11,13 @@ import { CrdaLabels } from "./util/constants";
 export async function crdaScan(
     analysisStartTime: string, isPullRequest: boolean, prNumber: number, sha?: string
 ): Promise<void> {
-    const manifestFilePath = ghCore.getInput(Inputs.MANIFEST_FILE_PATH);
+    const manifestFilePath = ghCore.getInput(Inputs.MANIFEST_PATH);
     const snykToken = ghCore.getInput(Inputs.SNYK_TOKEN);
     const crdaKey = ghCore.getInput(Inputs.CRDA_KEY);
     const consentTelemetry = ghCore.getInput(Inputs.CONSENT_TELEMETRY) || "false";
-    const analysisReportFileName = ghCore.getInput(Inputs.ANALYSIS_REPORT_FILE_NAME) || "crda_analysis_report";
-    const failOnVulnerability = ghCore.getInput(Inputs.FAIL_ON_VULNERABILITY) || "error";
-    const githubPAT = ghCore.getInput(Inputs.GITHUB_PAT);
+    const analysisReportFileName = ghCore.getInput(Inputs.ANALYSIS_REPORT_NAME) || "crda_analysis_report";
+    const failOnVulnerability = ghCore.getInput(Inputs.FAIL_ON) || "error";
+    const githubPAT = ghCore.getInput(Inputs.GITHUB_TOKEN);
     const uploadSarif = ghCore.getInput(Inputs.UPLOAD_SARIF) === "true";
     const checkoutPath = ghCore.getInput(Inputs.CHECKOUT_PATH);
 
