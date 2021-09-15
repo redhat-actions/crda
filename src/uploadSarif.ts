@@ -7,7 +7,7 @@ import * as utils from "./util/utils";
 import Crda from "./crda";
 
 export async function uploadSarifFile(
-    githubPAT: string, sarifToUpload: string, checkoutPath: string,
+    ghToken: string, sarifToUpload: string, checkoutPath: string,
     analysisStartTime: string, ref?: string, sha?: string
 ): Promise<void> {
     const sarifContents = fs.readFileSync(sarifToUpload, "utf-8");
@@ -21,7 +21,7 @@ export async function uploadSarifFile(
     ghCore.debug(`Ref: ${ref || utils.getEnvVariableValue("GITHUB_REF")} `);
 
     // API documentation: https://docs.github.com/en/rest/reference/code-scanning#update-a-code-scanning-alert
-    const octokit = new Octokit({ auth: githubPAT });
+    const octokit = new Octokit({ auth: ghToken });
     let sarifId = "";
     try {
         const uploadResponse = await octokit.request("POST /repos/{owner}/{repo}/code-scanning/sarifs", {
@@ -48,14 +48,14 @@ export async function uploadSarifFile(
     ghCore.info(`🕗 Sarif upload started. Waiting for upload to finish.`);
     // Since sarif upload takes few seconds, so waiting for it to finish.
     // Generally it takes less than a minute.
-    await waitForUploadToFinish(githubPAT, sarifId);
+    await waitForUploadToFinish(ghToken, sarifId);
 }
 
-async function waitForUploadToFinish(githubPAT: string, sarifId: string): Promise<void> {
+async function waitForUploadToFinish(ghToken: string, sarifId: string): Promise<void> {
     let uploadStatus = "pending";
 
     // API documentation: https://docs.github.com/en/rest/reference/code-scanning#get-information-about-a-sarif-upload
-    const octokit = new Octokit({ auth: githubPAT });
+    const octokit = new Octokit({ auth: ghToken });
 
     const delay = 2 * 1000;
     const timeout = 120000;

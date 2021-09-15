@@ -1,5 +1,10 @@
-name: CRDA scan Node Example
-on: [ push, workflow_dispatch ]
+name: CRDA scan Node project
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
+
 jobs:
   test:
     strategy:
@@ -13,15 +18,8 @@ jobs:
     name: Analyse Node project
     steps:
 
-      - name: Checkout project
-        uses: actions/checkout@v2
-        with:
-          repository: jduimovich/crda-sarif-poc
-
       - name: Checkout action
         uses: actions/checkout@v2
-        with:
-          path: crda
 
       - name: Install npm
         uses: actions/setup-node@v2
@@ -37,13 +35,12 @@ jobs:
 
       - name: CRDA Scan
         id: scan
-        uses: ./crda
+        uses: ./
         with:
-          manifest_path: package.json
+          manifest_path: test-manifests/node/package.json
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never
-          upload_sarif: false
 
       - name: Print JSON analysis report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}

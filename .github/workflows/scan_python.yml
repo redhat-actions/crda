@@ -1,5 +1,10 @@
-name: CRDA scan Python Example
-on: [ push, workflow_dispatch ]
+name: CRDA scan Python project
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
+
 jobs:
   test:
     strategy:
@@ -31,7 +36,7 @@ jobs:
         id: scan
         uses: ./
         with:
-          manifest_path: test-manifests/requirements.txt
+          manifest_path: test-manifests/python/requirements.txt
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never

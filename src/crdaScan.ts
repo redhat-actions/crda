@@ -11,13 +11,13 @@ import { CrdaLabels } from "./util/constants";
 export async function crdaScan(
     analysisStartTime: string, isPullRequest: boolean, prNumber: number, sha?: string
 ): Promise<void> {
-    const manifestFilePath = ghCore.getInput(Inputs.MANIFEST_PATH);
+    const manifestPath = ghCore.getInput(Inputs.MANIFEST_PATH);
     const snykToken = ghCore.getInput(Inputs.SNYK_TOKEN);
     const crdaKey = ghCore.getInput(Inputs.CRDA_KEY);
     const consentTelemetry = ghCore.getInput(Inputs.CONSENT_TELEMETRY) || "false";
-    const analysisReportFileName = ghCore.getInput(Inputs.ANALYSIS_REPORT_NAME) || "crda_analysis_report";
-    const failOnVulnerability = ghCore.getInput(Inputs.FAIL_ON) || "error";
-    const githubPAT = ghCore.getInput(Inputs.GITHUB_TOKEN);
+    const analysisReportName = ghCore.getInput(Inputs.ANALYSIS_REPORT_NAME) || "crda_analysis_report";
+    const failOn = ghCore.getInput(Inputs.FAIL_ON) || "error";
+    const githubToken = ghCore.getInput(Inputs.GITHUB_TOKEN);
     const uploadSarif = ghCore.getInput(Inputs.UPLOAD_SARIF) === "true";
     const checkoutPath = ghCore.getInput(Inputs.CHECKOUT_PATH);
 
@@ -28,8 +28,8 @@ export async function crdaScan(
     //     process.env.PYTHONPATH = pkgInstallationDirectoryPath;
     // }
 
-    const crdaReportJson = `${analysisReportFileName}.json` || "crda_analysis_report.json";
-    const crdaReportSarif = `${analysisReportFileName}.sarif` || "crda_analysis_report.sarif";
+    const crdaReportJson = `${analysisReportName}.json` || "crda_analysis_report.json";
+    const crdaReportSarif = `${analysisReportName}.sarif` || "crda_analysis_report.sarif";
 
     ghCore.debug(`Checkout Path: ${checkoutPath}`);
 
@@ -59,7 +59,7 @@ export async function crdaScan(
             `❌ Input ${Inputs.CRDA_KEY} or ${Inputs.SNYK_TOKEN} must be provided for authenticating to CRDA.`
         );
     }
-    await Analyse.analyse(`${checkoutPath}/${manifestFilePath}`, crdaReportJson, failOnVulnerability);
+    await Analyse.analyse(`${checkoutPath}/${manifestPath}`, crdaReportJson, failOn);
 
     // Adding "crda-scan-passed" label to the pull request
     // if there is no vulnerability detected
@@ -88,7 +88,7 @@ export async function crdaScan(
     }
     else {
         ghCore.info(`🔁 Converting JSON analysed data to the SARIF format.`);
-        convert(crdaReportJson, checkoutPath, manifestFilePath, crdaReportSarif);
+        convert(crdaReportJson, checkoutPath, manifestPath, crdaReportSarif);
 
         ghCore.info(`✅ Successfully converted analysis JSON to the SARIF format. `
         + `SARIF file is available at ${crdaReportSarif}.`);
@@ -100,10 +100,10 @@ export async function crdaScan(
         ghCore.info(`⬆️ Uploading SARIF file to GitHub...`);
         if (isPullRequest) {
             const ref = `refs/pull/${prNumber}/head`;
-            await uploadSarifFile(githubPAT, crdaReportSarif, checkoutPath, analysisStartTime, ref, sha);
+            await uploadSarifFile(githubToken, crdaReportSarif, checkoutPath, analysisStartTime, ref, sha);
         }
         else {
-            await uploadSarifFile(githubPAT, crdaReportSarif, checkoutPath, analysisStartTime);
+            await uploadSarifFile(githubToken, crdaReportSarif, checkoutPath, analysisStartTime);
         }
         ghCore.info(`✅ Successfully uploaded SARIFfile to GitHub`);
     }

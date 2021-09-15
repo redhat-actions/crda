@@ -14,12 +14,12 @@ const ALL_MANIFESTS = [
     REQUIREMENTS_TXT, POM_XML, GO_MOD, PACKAGE_JSON,
 ];
 
-export async function installDeps(manifestFilePath: string): Promise<void> {
-    const lastSlashIndex = manifestFilePath.lastIndexOf("/");
-    const manifestFileName = manifestFilePath.slice(lastSlashIndex + 1);
+export async function installDeps(manifestPath: string): Promise<void> {
+    const lastSlashIndex = manifestPath.lastIndexOf("/");
+    const manifestFileName = manifestPath.slice(lastSlashIndex + 1);
     let manifestDir = ".";
     if (lastSlashIndex !== -1) {
-        manifestDir = manifestFilePath.slice(0, lastSlashIndex);
+        manifestDir = manifestPath.slice(0, lastSlashIndex);
     }
     // store current working directory, to change back
     // to this directory after installation is successful
