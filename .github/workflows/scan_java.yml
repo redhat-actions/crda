@@ -1,5 +1,10 @@
-name: CRDA scan Java Example
-on: [ push, workflow_dispatch ]
+name: CRDA scan Java project
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
+
 jobs:
   test:
     strategy:

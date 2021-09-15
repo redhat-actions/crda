@@ -1,9 +1,12 @@
-name: CRDA scan Golang Example
+name: CRDA scan Golang project
 on:
   push:
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
   # pull_request_target:
   #   types: [ assigned, opened, synchronize, reopened, labeled, edited ]
+
 jobs:
   test:
     strategy:
@@ -16,16 +19,9 @@ jobs:
         shell: bash
     name: Analyse Golang project
     steps:
-    
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          repository: rafiu007/golang-vuln-demo
 
       - name: Checkout action
         uses: actions/checkout@v2
-        with:
-          path: crda
 
       - name: Setup Go
         uses: actions/setup-go@v2
@@ -41,13 +37,12 @@ jobs:
 
       - name: CRDA Scan
         id: scan
-        uses: ./crda
+        uses: ./
         with:
-          manifest_path: go.mod
+          manifest_path: test-manifests/golang/go.mod
           # crda_key: ${{ secrets.CRDA_KEY }}
           snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never
-          upload_sarif: false
 
       - name: Print JSON analysis report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}

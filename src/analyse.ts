@@ -32,6 +32,13 @@ namespace Analyse {
         const execResult = await Crda.exec(CRDA_EXECUTABLE, [ ...crdaExecArgs, "--json" ], { group: true });
         const analysisReportJson = execResult.stdout;
         const crdaData = JSON.parse(analysisReportJson);
+
+        // Incase if there is some problem while installing dependencies,
+        // dependencies found is zero, therefore failing action at this stage
+        if (crdaData.total_scanned_dependencies === null || crdaData.analysed_dependencies === null) {
+            throw new Error("❌ No dependencies found to scan, make sure dependencies are installed correctly.");
+        }
+
         fs.writeFileSync(analysisReportFileName, analysisReportJson, "utf8");
 
         if (failOnVulnerability !== "never") {
