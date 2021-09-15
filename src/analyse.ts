@@ -21,7 +21,7 @@ namespace Analyse {
     }
 
     export async function analyse(
-        manifestPath: string, analysisReportFileName: string, failOnVulnerability: string
+        manifestPath: string, analysisReportName: string, failOn: string
     ): Promise<void> {
         const crdaOptions = Crda.getOptions({ verbose: "", client: "gh-actions" });
         const crdaExecArgs = [ Crda.Commands.Analyse, manifestPath, ...crdaOptions ];
@@ -39,10 +39,10 @@ namespace Analyse {
             throw new Error("❌ No dependencies found to scan, make sure dependencies are installed correctly.");
         }
 
-        fs.writeFileSync(analysisReportFileName, analysisReportJson, "utf8");
+        fs.writeFileSync(analysisReportName, analysisReportJson, "utf8");
 
-        if (failOnVulnerability !== "never") {
-            ghCore.info(`Failing if "${failOnVulnerability}" level vulnerability is found`);
+        if (failOn !== "never") {
+            ghCore.info(`Failing if "${failOn}" level vulnerability is found`);
         }
         else {
             ghCore.info(`Not failing on any vulnerability`);
@@ -50,21 +50,21 @@ namespace Analyse {
 
         // https://github.com/fabric8-analytics/cli-tools/blob/main/docs/cli_README.md#exit-codes
         // exit code is 2 when vulnerability is found
-        // if failOnVulnerability is "warning" then fail action if vulnerability
+        // if failOn is "warning" then fail action if vulnerability
         // is found irrespective of its severity
-        if (failOnVulnerability === "warning" && execResult.exitCode === 2) {
+        if (failOn === "warning" && execResult.exitCode === 2) {
             throw new Error(
                 `Found vulnerabilities in the project. `
-                + `Detailed analysis report is available at ${analysisReportFileName}`
+                + `Detailed analysis report is available at ${analysisReportName}`
             );
         }
-        // if failOnVulnerability is "error", fail only if severity of
+        // if failOn is "error", fail only if severity of
         // vulnerability is "high" and "critical" only
-        else if (failOnVulnerability === "error"
+        else if (failOn === "error"
             && (crdaData.severity.high !== null || crdaData.severity.critical !== null)) {
             throw new Error(
                 `Found high severity vulnerabilities in the project. `
-                + `Detailed analysis report is available at ${analysisReportFileName}`
+                + `Detailed analysis report is available at ${analysisReportName}`
             );
         }
     }

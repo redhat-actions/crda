@@ -8,11 +8,11 @@ import { Inputs } from "../generated/inputs-outputs";
 import * as LabelUtils from "./labelUtils";
 
 type Label = components["schemas"]["label"];
-let pat: string | undefined;
+let ghToken: string | undefined;
 
 // API documentation: https://docs.github.com/en/rest/reference/issues#add-labels-to-an-issue
 export async function addLabelsToPr(prNumber: number, labels: string[]): Promise<void> {
-    const octokit = new Octokit({ auth: getPat() });
+    const octokit = new Octokit({ auth: getGhToken() });
     try {
         await octokit.request("POST /repos/{owner}/{repo}/issues/{issue_number}/labels", {
             owner: github.context.repo.owner,
@@ -29,7 +29,7 @@ export async function addLabelsToPr(prNumber: number, labels: string[]): Promise
 // API documentation: https://docs.github.com/en/rest/reference/issues#list-labels-for-an-issue
 export async function getLabelsFromPr(prNumber: number): Promise<string[]> {
     const ActionsOctokit = Octokit.plugin(paginateRest);
-    const octokit = new ActionsOctokit({ auth: getPat() });
+    const octokit = new ActionsOctokit({ auth: getGhToken() });
     let labelsResponse: Label[];
     try {
         labelsResponse = await octokit.paginate("GET /repos/{owner}/{repo}/issues/{issue_number}/labels", {
@@ -50,7 +50,7 @@ export async function getLabelsFromPr(prNumber: number): Promise<string[]> {
 
 // API documentation: https://docs.github.com/en/rest/reference/issues#remove-a-label-from-an-issue
 export async function removeLabelsFromPr(prNumber: number, labels: string[]): Promise<void> {
-    const octokit = new Octokit({ auth: getPat() });
+    const octokit = new Octokit({ auth: getGhToken() });
     labels.forEach(async (label) => {
         try {
             await octokit.request("DELETE /repos/{owner}/{repo}/issues/{issue_number}/labels/{name}", {
@@ -94,7 +94,7 @@ export async function createLabels(repoLabels: string[]): Promise<void> {
 
 async function getRepoLabels(): Promise<string[]> {
     const ActionsOctokit = Octokit.plugin(paginateRest);
-    const octokit = new ActionsOctokit({ auth: getPat() });
+    const octokit = new ActionsOctokit({ auth: getGhToken() });
     let labelsResponse: Label[];
     try {
         labelsResponse = await octokit.paginate("GET /repos/{owner}/{repo}/labels", {
@@ -114,7 +114,7 @@ async function getRepoLabels(): Promise<string[]> {
 
 // API documentation: https://docs.github.com/en/rest/reference/issues#create-a-label
 async function createRepoLabels(labels: string[]): Promise<void> {
-    const octokit = new Octokit({ auth: getPat() });
+    const octokit = new Octokit({ auth: getGhToken() });
     labels.forEach(async (label) => {
         try {
             ghCore.debug(`Creating label ${label}`);
@@ -146,17 +146,17 @@ export function findLabelsToRemove(availableLabels: string[], labelsToCheck: str
 
 /**
  *
- * @returns GitHub personal access token provided by the user.
- * If no PAT is provided, returns the empty string.
+ * @returns GitHub token provided by the user.
+ * If no token is provided, returns the empty string.
  */
-function getPat(): string {
-    if (pat == null) {
-        pat = ghCore.getInput(Inputs.GITHUB_TOKEN);
+function getGhToken(): string {
+    if (ghToken == null) {
+        ghToken = ghCore.getInput(Inputs.GITHUB_TOKEN);
 
         // this to only solve the problem of local development
-        if (!pat && process.env.GITHUB_TOKEN) {
-            pat = process.env.GITHUB_TOKEN;
+        if (!ghToken && process.env.GITHUB_TOKEN) {
+            ghToken = process.env.GITHUB_TOKEN;
         }
     }
-    return pat;
+    return ghToken;
 }
