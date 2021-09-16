@@ -1,71 +1,75 @@
-# crda
+# CodeReady Dependency Analytics (crda)
 
-**crda** GitHub Action is an action for analysing vulnerabilities in the project's dependency and uploading the SARIF result to the GitHub code scanning.
+**crda** is a GitHub Action is an action which uses [**CodeReady Dependency Analytics**](https://github.com/fabric8-analytics/cli-tools/blob/main/docs/cli_README.md) to analyze vulnerabilities in a project's dependencies.
+
+The scan's result is uploaded to the GitHub repository as a [SARIF](https://sarifweb.azurewebsites.net/) file, and vulnerabilities found are reported to repository maintainers in the **Security** tab.
+
+CRDA supports Go, Java, Node.js, and Python projects.
+
+CRDA is [integrated with Snyk](https://snyk.io/blog/snyk-integration-with-red-hat-codeready-dependency-analytics/) to provide excellent analysis by referencing a database of known vulnerabilities.
+
+Read more about CRDA in [this blog post](https://developers.redhat.com/blog/2020/08/28/vulnerability-analysis-with-red-hat-codeready-dependency-analytics-and-snyk).
 
 <a id="prerequisites"></a>
 
-## Prerequisites
-- Project's environment must be setup in the workflow.
-    - To set up go, you can use [setup-go](https://github.com/actions/setup-go) action.
-    - To set up java, you can use [setup-java](https://github.com/actions/setup-java) action.
-    - To set up node, you can use [setup-node](https://github.com/actions/setup-node) action.
-    - To set up python, you can use [setup-python](https://github.com/actions/setup-python) action.
-- CRDA command line tool must be installed in the workflow. Use [**OpenShift Tools Installer**](https://github.com/redhat-actions/openshift-tools-installer) to install CRDA cli.
+## Configuration
 
-## Action Inputs
+You can refer to [the examples in this repository](./.github/workflows) for a simple example of scanning each supported language.
 
-| Input | Description | Default |
-| ----- | ----------- | --------- |
-| manifest_path | Path of the manifest file to use for analysis. This path should not include the path where you checkedout the repository e.g. `requirements.txt`, `path/to/package.json` | **Must be provided**
-| checkout_path | Path at which the repository which is to be analyzed is checkedout | `${{ github.workspace }}`
-| deps_install_cmd | Command to use for the dependencies installation instead of using the default commands | [Check here](#pr-support)
-| analysis_report_name | Name of the file to save the analysis report. By default generated file names will be `crda_analysis_report.json` and `crda_analysis_report.sarif` | `crda_analysis_report`
-| snyk_token | Snyk token to be used to authenticate to the CRDA | None
-| crda_key | Existing CRDA key to identify the existing user. | None
-| github_token | Github token to upload the SARIF file to the GitHub. Token must have `security_events` write permission. | `${{ github.token }}`
-| upload_sarif | Upload the generated SARIF file, by default it is set to `true`. If you don't want to upload SARIF file set this input to `false` | `true`
-| consent_telemetry | CRDA collects anonymous usage data, and is disabled by default. If you want to contribute towards this set this input to `true`. Go through [privacy statement](https://developers.redhat.com/article/tool-data-collection) for more details. | `false`
-| fail_on | Fail the workflow if vulnerability is found in the project. This will lead to workflow failure and SARIF file would not be uploaded. To set failure when vulnerability severity level is either `error` or `warning` set this input to `warning`. By default it is set to fail when severity level is `error`, or if you don't want to fail the action set this input to `never` | `error`
+### 1. Set up the tool stack
+Unless already done, you must set up the tool stack for your project.
 
-## Action Outputs
+Refer to the setup actions for:
+  - [Go](https://github.com/actions/setup-go)
+  - [Java](https://github.com/actions/setup-java)
+  - [Node.js](https://github.com/actions/setup-node)
+  - [Python](https://github.com/actions/setup-python)
 
-- **crda_report_json**: Generated CRDA Analysis Report in JSON format.
-- **crda_report_sarif**: Generated CRDA Analysis Report in SARIF format.
-- **report_link**: CRDA analysis report link.
+### 2. Install the CRDA command line interface
+Use the [**OpenShift Tools Installer**](https://github.com/redhat-actions/openshift-tools-installer) to install the CRDA CLI.
 
-## Authentication
+<a id="installing-dependencies"></a>
+### 3. Installing Dependencies
+The project must have a dependencies manifest file which CRDA can read to install dependencies.
 
-This action either uses existing `crda_key` which can be found in `~/.crda/config.yaml` or `snyk_token` which you can get [here](https://app.snyk.io/login?utm_campaign=Code-Ready-Analytics-2020&utm_source=code_ready&code_ready=FF1B53D9-57BE-4613-96D7-1D06066C38C9) to authenticate to CRDA.
+By default, CRDA will install dependencies using a standard command for the project type.
+  - Override the path to the manifest with the `manifest_path` input.
+  - Override the install command with the `deps_install_cmd` input.
 
-**NOTE**: For detailed analysis report and report in SARIF format, if you are using existing CRDA key, make sure that it is mapped to the Snyk token.
+| Project Type   | Required Manifest | Default Install Command |
+| -------------- | --------------------- | ---------------------------- |
+| Go             | `go.mod`            | `go mod vendor`              |
+| Java           | `pom.xml`           | `mvn -ntp -B package`     |
+| Node.js (npm)  | `package.json`, `package-lock.json` | `npm ci` |
+| Node.js (yarn) | `package.json`, `yarn.lock` | `yarn install --frozen-lockfile` |
+| Python         | `requirements.txt` | `pip install -r requirements.txt` |
 
-## Note for input `deps_install_cmd`
+<a id="authentication"></a>
+### 4. Set Up Authentication
 
-Below is list of manifest and it's corresponding default dependency installation command.
-| Manifest | Command |
-| ------- | ------------ |
-| `go.mod` | `go mod vendor` |
-| `package.json` | `npm install` |
-| `pom.xml` | `mvn -ntp -B package` |
-| `requirements.txt` | `pip install -r requirements.txt` |
+For authentication, you must provide either a CRDA Key or a Synk Token.
 
-If your manifest file has different name or you need some different installation command, use input `deps_install_cmd` to provide the command.
+The token must be stored in a [repository secret](https://docs.github.com/en/actions/reference/encrypted-secrets).
 
-<a id="pr-support"></a>
+#### Snyk Token
+1. [Sign up for Synk](https://app.snyk.io/login?utm_campaign=Code-Ready-Analytics-2020&utm_source=code_ready&code_ready=FF1B53D9-57BE-4613-96D7-1D06066C38C9).
+2. Click through the wizard. You do not need to provide it any permissions if you don't want to.
+3. Go to `Account settings` to find your Synk Token (aka "key").
+4. Provide the token in the `synk_token` input.
 
-## Support to run CRDA scan on the pull request code
+#### CRDA Key (Optional)
+1. First, obtain a Snyk token.
+2. [Install the CRDA CLI locally](https://github.com/fabric8-analytics/cli-tools/blob/main/docs/cli_README.md)
+3. Run `crda auth`. Provide the Snyk token so the CRDA Key can also access the Synk database.
+4. Extracted the CRDA Key from the output or `$HOME/.crda/config.yaml`.
+5. Prhovide the CRDA Key in the `crda_key` input. You can
 
-This action can run CRDA checks on pull requests too, this is designed in such a way that it runs the CRDA checks on pull request code even if event is `pull_request_target`.
-It checkout the PR code and after the analysis removes the created branch and checkout back to the previous branch.
-Repository admin need to manually approve the pull request to run the CRDA checks. It can be easily done by adding the label `CRDA Scan Approved`. This label is created by default by the CRDA workflow.
-If there is any code change happens in the pull request, repository admin again will need to add the `CRDA Scan Approved` label and this will trigger the workflow again. `CRDA Scan Passed` or `CRDA Scan Failed` label gets added depending upon the status of CRDA Scan workflow.
+You only need to provide one of the two authentication tokens.
 
-> Make sure you add the following types on `pull_request_target` event, to get the desired behaviour.
-> `types: [opened, synchronize, reopened, labeled, edited]`
-
+<a href="example"></a>
 ## Example
 
-The Example below shows how the **crda** action can be used to scan vulnerabilities in a node project and upload the result to the Github code scanning.
+The example workflow job below shows how the **crda** action can be used to scan vulnerabilities in a Node.js project and upload the result to GitHub.
 
 ```yaml
 steps:
@@ -74,7 +78,7 @@ steps:
    with:
     repository: nodejs/examples
 
-- name: Install npm
+- name: Set up Node.js
   uses: actions/setup-node@v2
   with:
     node-version: '14'
@@ -83,17 +87,58 @@ steps:
   uses: redhat-actions/openshift-tools-installer@v1
   with:
     source: github
-    crda: "latest"
+    crda: latest
 
 - name: CRDA Scan
-  id: scan
+  id: crda_scan
   uses: redhat-actions/crda@v1
   with:
     manifest_path: package.json
     crda_key: ${{ secrets.CRDA_KEY }}
-    consent_telemetry: true
-    fail_on: never
 
 - name: Print Report Link
-  run: echo ${{ steps.scan.outputs.report_link }}
+  run: echo ${{ steps.crda_scan.outputs.report_link }}
+```
+
+
+<a id="action-inputs"></a>
+## Action Inputs
+
+| Input | Description | Default |
+| ----- | ----------- | --------- |
+| crda_key | Existing CRDA key to identify the existing user. | **Required** unless `synk_token` is set
+| snyk_token | Snyk token to be used to authenticate to the CRDA | **Required** unless `crda_key` is set
+| manifest_path | Path of the manifest file to use for analysis, relative to the repository root. | **Required**
+| analysis_report_name | Name of the analysis report files. A `.json` and a `.sarif` file will be created. | `crda_analysis_report`
+| checkout_path | Path at which the project repository is checked out. | `${{ github.workspace }}`
+| consent_telemetry | CRDA collects anonymous usage data. Enable this to help make CRDA better for our users. Refer to the [privacy statement](https://developers.redhat.com/article/tool-data-collection) for more details. | `false`
+| deps_install_cmd | Command to use for the dependencies installation instead of using the default. | [View defaults](#installing-dependencies)
+| fail_on | Configure if the workflow should fail if a vulnerability of this level or higher is found in the project. This can be `error` to fail only on errors, `warning` to fail on warnings or errors, or `never` to always pass the step.| `error`
+| github_token | Github token used to upload the SARIF report to GitHub. The token must have `security_events` write permission. | [`${{ github.token }}`](https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret)
+| upload_sarif | Whether or not to upload the generated SARIF file. If this is disabled, vulnerabilities will not be reported in the Security tab. | `true`
+
+## Action Outputs
+
+- **crda_report_json**: Path to generated CRDA analysis report in JSON format.
+- **crda_report_sarif**: Path to generated CRDA analysis report in SARIF format.
+- **report_link**: CRDA Analysis report link.
+
+<a id="pr-support"></a>
+
+## Scanning Pull Requests
+
+This action can run CRDA scans on pull requests. Because the action must check out the pull request's code in order to scan it, the [`pull_request_target` trigger](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target) must be used.
+
+Since the pull request's code will be checked out in order to install dependencies, repository maintainers must **manually verify** that the pull request does not include any malicious code before the scan can run. Maintainers can approve the CRDA scan by adding the `CRDA Scan Approved` label.
+
+Each time a new commit is pushed to the pull request, the `Approved` label will be removed. A maintainer must review the code again and re-add the label, to prevent malicious code from executing due to the prior approval.
+
+After the CRDA scan is approved and the workflow runs, a label indicating the scan result will be added to the pull request.
+
+Use the following snippet to enable pull request scans in your repository:
+``` yaml
+on:
+  pull_request_target:
+    # These types are all required for CRDA to scan pull requests correctly and securely.
+    types: [ opened, synchronize, reopened, labeled, edited ]
 ```
