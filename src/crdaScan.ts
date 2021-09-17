@@ -59,12 +59,29 @@ export async function crdaScan(
             `❌ Input ${Inputs.CRDA_KEY} or ${Inputs.SNYK_TOKEN} must be provided for authenticating to CRDA.`
         );
     }
-    await Analyse.analyse(`${checkoutPath}/${manifestPath}`, crdaReportJson, failOn);
+    const vulSeverity = await Analyse.analyse(`${checkoutPath}/${manifestPath}`, crdaReportJson);
 
-    // Adding "crda-scan-passed" label to the pull request
-    // if there is no vulnerability detected
+    if (failOn !== "never") {
+        ghCore.info(`Failing if "${failOn}" level vulnerability is found`);
+    }
+    else {
+        ghCore.info(`Not failing on any vulnerability`);
+    }
+
     if (isPullRequest) {
-        await addLabelsToPr(prNumber, [ CrdaLabels.CRDA_SCAN_PASSED ]);
+        switch (vulSeverity) {
+        case "error":
+            await addLabelsToPr(prNumber, [ CrdaLabels.CRDA_FOUND_ERROR ]);
+            break;
+        case "warning":
+            await addLabelsToPr(prNumber, [ CrdaLabels.CRDA_FOUND_WARNING ]);
+            break;
+            // Adding "crda-scan-passed" label to the pull request
+            // if there is no vulnerability detected
+        default:
+            await addLabelsToPr(prNumber, [ CrdaLabels.CRDA_SCAN_PASSED ]);
+            break;
+        }
     }
 
     ghCore.info(`✅ Analysis completed. JSON report is available at ${crdaReportJson}.`);
@@ -105,9 +122,21 @@ export async function crdaScan(
         else {
             await uploadSarifFile(githubToken, crdaReportSarif, checkoutPath, analysisStartTime);
         }
-        ghCore.info(`✅ Successfully uploaded SARIFfile to GitHub`);
+        ghCore.info(`✅ Successfully uploaded SARIF file to GitHub`);
     }
     else {
         ghCore.info(`⏩ Input ${Inputs.UPLOAD_SARIF} is set to false, skipping SARIF upload.`);
+    }
+
+    if (failOn !== "never") {
+        if (failOn === "warning" && (vulSeverity === "error" || vulSeverity === "warning")) {
+            throw new Error(`Found vulnerabilities in the project.`);
+        }
+        else if (failOn === "error" && vulSeverity === "error") {
+            throw new Error(`Found high severity vulnerabilities in the project.`);
+        }
+    }
+    else {
+        ghCore.info(`Not failing on any vulnerability`);
     }
 }
