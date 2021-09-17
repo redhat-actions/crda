@@ -62,7 +62,7 @@ The token must be stored in a [repository secret](https://docs.github.com/en/act
 2. [Install the CRDA CLI locally](https://github.com/fabric8-analytics/cli-tools/blob/main/docs/cli_README.md)
 3. Run `crda auth`. Provide the Snyk token so the CRDA Key can also access the Synk database.
 4. Extracted the CRDA Key from the output or `$HOME/.crda/config.yaml`.
-5. Prhovide the CRDA Key in the `crda_key` input. You can
+5. Provide the CRDA Key in the `crda_key` input.
 
 You only need to provide one of the two authentication tokens.
 
@@ -114,7 +114,7 @@ steps:
 | consent_telemetry | CRDA collects anonymous usage data. Enable this to help make CRDA better for our users. Refer to the [privacy statement](https://developers.redhat.com/article/tool-data-collection) for more details. | `false`
 | deps_install_cmd | Command to use for the dependencies installation instead of using the default. | [View defaults](#installing-dependencies)
 | fail_on | Configure if the workflow should fail if a vulnerability of this level or higher is found in the project. This can be `error` to fail only on errors, `warning` to fail on warnings or errors, or `never` to always pass the step.| `error`
-| github_token | Github token used to upload the SARIF report to GitHub. The token must have `security_events` write permission. | [`${{ github.token }}`](https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret)
+| github_token | GitHub token used to upload the SARIF report to GitHub. The token must have `security_events` write permission. | [`${{ github.token }}`](https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret)
 | upload_sarif | Whether or not to upload the generated SARIF file. If this is disabled, vulnerabilities will not be reported in the Security tab. | `true`
 
 ## Action Outputs
