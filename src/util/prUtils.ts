@@ -8,11 +8,13 @@ import * as labels from "./labels";
 const repoLabels = [
     CrdaLabels.CRDA_SCAN_PENDING, CrdaLabels.CRDA_SCAN_APPROVED,
     CrdaLabels.CRDA_SCAN_FAILED, CrdaLabels.CRDA_SCAN_PASSED,
+    CrdaLabels.CRDA_FOUND_WARNING, CrdaLabels.CRDA_FOUND_ERROR,
 ];
 
 const labelsToCheckForRemoval = [
     CrdaLabels.CRDA_SCAN_APPROVED,
     CrdaLabels.CRDA_SCAN_FAILED, CrdaLabels.CRDA_SCAN_PASSED,
+    CrdaLabels.CRDA_FOUND_WARNING, CrdaLabels.CRDA_FOUND_ERROR,
 ];
 
 type PrApprovalResultYes = {
