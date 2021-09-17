@@ -37,7 +37,8 @@ jobs:
         id: scan
         uses: ./
         with:
-          manifest_path: test-manifests/node/package.json
+          checkout_path: test-manifests/node/no-lockfile
+          manifest_path: package.json
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never

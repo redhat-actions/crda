@@ -1,4 +1,4 @@
-name: CRDA scan Python project
+name: CRDA scan Node project
 on:
   push:
   workflow_dispatch:
@@ -15,15 +15,16 @@ jobs:
     defaults:
       run:
         shell: bash
-    name: Analyse Python project
+    name: Analyse Node project
     steps:
 
       - name: Checkout action
         uses: actions/checkout@v2
 
-      - uses: actions/setup-python@v2
+      - name: Install npm
+        uses: actions/setup-node@v2
         with:
-          python-version: '3.9.6'
+          node-version: '14'
 
       - name: Install CRDA
         uses: redhat-actions/openshift-tools-installer@v1
@@ -36,7 +37,7 @@ jobs:
         id: scan
         uses: ./
         with:
-          checkout_path: test-manifests/python/
+          checkout_path: test-manifests/node/npm
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never
@@ -61,5 +62,5 @@ jobs:
       - name: Upload merged Results
         uses: actions/upload-artifact@v2
         with:
-          name: scan_result_python.zip
+          name: scan_result_js.zip
           path: ./uploads

@@ -70,12 +70,11 @@ jobs:
         id: scan
         uses: ./crda
         with:
-          manifest_path: pom.xml
+          checkout_path: spring-petclinic
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           analysis_report_name: java
           fail_on: never
-          upload_sarif: false
 
       - name: Print JSON analysis report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}

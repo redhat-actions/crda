@@ -4,7 +4,7 @@ import * as utils from "./util/utils";
 import { CrdaLabels } from "./util/constants";
 import { crdaScan } from "./crdaScan";
 import { Inputs } from "./generated/inputs-outputs";
-import { installDeps } from "./installDeps";
+import { findManifestAndInstallDeps } from "./installDeps";
 import * as prUtils from "./util/prUtils";
 import * as labels from "./util/labels";
 
@@ -45,8 +45,15 @@ async function run(): Promise<void> {
         }
     }
 
+    const checkoutPath = ghCore.getInput(Inputs.CHECKOUT_PATH);
     const manifestPath = ghCore.getInput(Inputs.MANIFEST_PATH);
-    await installDeps(manifestPath);
+    const depsInstallCmdStr = ghCore.getInput(Inputs.DEPS_INSTALL_CMD);
+    let depsInstallCmd: string[] | undefined;
+    if (depsInstallCmdStr.length > 0) {
+        depsInstallCmd = depsInstallCmdStr.split(" ");
+    }
+
+    await findManifestAndInstallDeps(checkoutPath, manifestPath, depsInstallCmd);
     await crdaScan(analysisStartTime, isPullRequest, prNumber, sha);
 }
 
