@@ -22,7 +22,7 @@ namespace Analyse {
 
     export async function analyse(
         manifestPath: string, analysisReportName: string,
-    ): Promise<string> {
+    ): Promise<"none" | "warning" | "error"> {
         const crdaOptions = Crda.getOptions({ verbose: "", client: "gh-actions" });
         const crdaExecArgs = [ Crda.Commands.Analyse, manifestPath, ...crdaOptions ];
 
@@ -42,7 +42,7 @@ namespace Analyse {
         fs.writeFileSync(analysisReportName, analysisReportJson, "utf8");
         ghCore.info(`ℹ️ Detailed analysis report is available at ${analysisReportName}`);
 
-        let vulSeverity = "none";
+        let vulSeverity: "none" | "warning" | "error" = "none";
 
         // https://github.com/fabric8-analytics/cli-tools/blob/main/docs/cli_README.md#exit-codes
         // exit code is 2 when vulnerability is found
