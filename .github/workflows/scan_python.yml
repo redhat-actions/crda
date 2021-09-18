@@ -1,4 +1,4 @@
-name: CRDA scan Python project
+name: Scan Python project
 on:
   push:
   workflow_dispatch:
@@ -36,7 +36,7 @@ jobs:
         id: scan
         uses: ./
         with:
-          manifest_path: test-manifests/python/requirements.txt
+          checkout_path: test-manifests/python/
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never

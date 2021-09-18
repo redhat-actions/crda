@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as path from "path";
 import * as sarif from "sarif";
 import * as ghCore from "@actions/core";
 import {
@@ -109,12 +110,12 @@ function fetchRules(
 
 let nestedVulnerabilitycount = 0;
 function crdaToResult(
-    crdaAnalysedDependency: CrdaAnalysedDependency, checkoutPath: string,
+    crdaAnalysedDependency: CrdaAnalysedDependency,
     manifestFile: string, directDependencyName?: string,
 ): [ sarif.Result[], string[], string[] ] {
     let isDirect = true;
     const results: sarif.Result[] = [];
-    const manifestData = fs.readFileSync(`${checkoutPath}/${manifestFile}`, "utf-8");
+    const manifestData = fs.readFileSync(manifestFile, "utf-8");
     const lines = manifestData.split(/\r\n|\n/);
     const dependencyName: string = crdaAnalysedDependency.name;
     const dependencyVersion = crdaAnalysedDependency.version;
@@ -182,7 +183,7 @@ function crdaToResult(
     if (crdaAnalysedDependency.vulnerable_transitives !== null) {
         nestedVulnerabilitycount++;
         crdaAnalysedDependency.vulnerable_transitives.forEach((transitiveVulnerability) => {
-            const sarifResultData = crdaToResult(transitiveVulnerability, checkoutPath, manifestFile, dependencyName);
+            const sarifResultData = crdaToResult(transitiveVulnerability, manifestFile, dependencyName);
             results.push(...sarifResultData[0]);
             vulnerableTransitiveDependencyRuleIds.push(...sarifResultData[2]);
         });
@@ -256,7 +257,7 @@ function fetchResults(
     return [ results, ruleIds ];
 }
 
-function getSarif(crdaAnalysedData: string, checkoutPath: string, manifestFile: string): sarif.Log {
+function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
     const crdaData = JSON.parse(crdaAnalysedData);
     let finalResults: sarif.Result[] = [];
     const vulnerableDirectDependencyRuleIds: string[] = [];
@@ -264,7 +265,7 @@ function getSarif(crdaAnalysedData: string, checkoutPath: string, manifestFile: 
     const tranVulRuleIdsWithDepName: TransitiveVulRuleIdsDepName = {};
     crdaData.analysed_dependencies.forEach(
         (dependency: CrdaAnalysedDependency) => {
-            const resultsData = crdaToResult(dependency, checkoutPath, manifestFile);
+            const resultsData = crdaToResult(dependency, manifestFile);
             vulnerableDirectDependencyRuleIds.push(...resultsData[1]);
             vulnerableTransitiveDependencyRuleIds.push(...resultsData[2]);
 
@@ -318,12 +319,23 @@ function getSarif(crdaAnalysedData: string, checkoutPath: string, manifestFile: 
     };
 }
 
-export function convert(
-    crdaReportJson: string, checkoutPath: string, manifestFile: string, crdaReportSarif: string
-): void {
+/**
+ *
+ * @returns The name of the newly written .sarif file
+ */
+export function convertCRDAReportToSarif(
+    crdaReportJson: string, manifestFile: string
+): string {
     const crdaAnalysedData = fs.readFileSync(crdaReportJson, "utf-8");
-    const convertedSarif = getSarif(crdaAnalysedData, checkoutPath, manifestFile);
+    const convertedSarif = getSarif(crdaAnalysedData, manifestFile);
+
+    const jsonExt = path.extname(crdaReportJson);
+    const jsonBasename = path.basename(crdaReportJson);
+    const sarifFilename = `${jsonBasename.substring(0, jsonExt.length - 1)}.sarif`;
+
     if (convertedSarif.$schema) {
-        fs.writeFileSync(crdaReportSarif, JSON.stringify(convertedSarif, undefined, 4), "utf-8");
+        fs.writeFileSync(sarifFilename, JSON.stringify(convertedSarif, undefined, 4), "utf-8");
     }
+
+    return sarifFilename;
 }

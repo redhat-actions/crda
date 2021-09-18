@@ -1,6 +1,7 @@
 import * as ghCore from "@actions/core";
 import * as os from "os";
 import { promises as fs } from "fs";
+import Crda from "../crda";
 
 type OS = "linux" | "macos" | "windows";
 
@@ -70,4 +71,19 @@ export async function fileExists(filePath: string): Promise<boolean> {
     catch (err) {
         return false;
     }
+}
+
+export async function getCommitSha(): Promise<string> {
+    const commitSha = (await Crda.exec("git", [ "rev-parse", "HEAD" ])).stdout;
+    return commitSha.trim();
+
+    /*
+    if (!commitSha) {
+        ghCore.info(
+            `Failed to get current commit SHA using git. `
+            + `Using environment variable GITHUB_SHA to get the current commit SHA.`
+        );
+        return utils.getEnvVariableValue("GITHUB_SHA");
+    }
+    */
 }

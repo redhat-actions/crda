@@ -2,32 +2,33 @@ import { Octokit } from "@octokit/core";
 import * as github from "@actions/github";
 import * as zlib from "zlib";
 import * as ghCore from "@actions/core";
-import * as fs from "fs";
+import { promises as fs } from "fs";
+import { promisify } from "util";
 import * as utils from "./util/utils";
-import Crda from "./crda";
 
 export async function uploadSarifFile(
     ghToken: string, sarifToUpload: string, checkoutPath: string,
-    analysisStartTime: string, ref?: string, sha?: string
+    analysisStartTime: string, sha: string, ref?: string,
 ): Promise<void> {
-    const sarifContents = fs.readFileSync(sarifToUpload, "utf-8");
+    const { owner, repo } = github.context.repo;
+    ghCore.info(`⬆️ Uploading SARIF file to ${owner}/${repo}...`);
+
+    const sarifContents = await fs.readFile(sarifToUpload, "utf-8");
     ghCore.debug(`Raw upload size: ${sarifContents.length} bytes`);
-    const zippedSarif = zlib.gzipSync(sarifContents).toString("base64");
+    const zippedSarif = (await promisify(zlib.gzip)(sarifContents)).toString("base64");
     ghCore.info(`Zipped upload size: ${zippedSarif.length} bytes`);
 
-    const commitSha = await getCommitSha();
-
-    ghCore.debug(`Commit Sha: ${sha || commitSha}`);
+    ghCore.debug(`Commit Sha: ${sha}`);
     ghCore.debug(`Ref: ${ref || utils.getEnvVariableValue("GITHUB_REF")} `);
 
     // API documentation: https://docs.github.com/en/rest/reference/code-scanning#update-a-code-scanning-alert
     const octokit = new Octokit({ auth: ghToken });
-    let sarifId = "";
+    let sarifId;
     try {
         const uploadResponse = await octokit.request("POST /repos/{owner}/{repo}/code-scanning/sarifs", {
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            commit_sha: sha || commitSha,
+            owner,
+            repo,
+            commit_sha: sha,
             ref: ref || utils.getEnvVariableValue("GITHUB_REF"),
             sarif: zippedSarif,
             checkout_uri: checkoutPath,
@@ -45,7 +46,11 @@ export async function uploadSarifFile(
         throw utils.getBetterHttpError(err);
     }
 
-    ghCore.info(`🕗 Sarif upload started. Waiting for upload to finish.`);
+    if (!sarifId) {
+        throw new Error(`Upload SARIF response from GitHub did not include an upload ID`);
+    }
+
+    ghCore.info(`🕗 SARIF upload started. Waiting for upload to finish.`);
     // Since sarif upload takes few seconds, so waiting for it to finish.
     // Generally it takes less than a minute.
     await waitForUploadToFinish(ghToken, sarifId);
@@ -90,19 +95,4 @@ async function waitForUploadToFinish(ghToken: string, sarifId: string): Promise<
         }
         tries++;
     }
-}
-
-async function getCommitSha(): Promise<string> {
-    const commitSha = (await Crda.exec("git", [ "rev-parse", "HEAD" ])).stdout;
-    return commitSha.trim();
-
-    /*
-    if (!commitSha) {
-        ghCore.info(
-            `Failed to get current commit SHA using git. `
-            + `Using environment variable GITHUB_SHA to get the current commit SHA.`
-        );
-        return utils.getEnvVariableValue("GITHUB_SHA");
-    }
-    */
 }

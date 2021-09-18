@@ -6,10 +6,19 @@ import * as util from "./util/utils";
 import { ExecResult } from "./types";
 import CmdOutputHider from "./cmdOutputHider";
 
-export const CRDA_EXECUTABLE = util.getOS() === "windows" ? "crda.exe" : "crda";
-export const GIT_EXECUTABLE = util.getOS() === "windows" ? "git.exe" : "git";
-
 namespace Crda {
+
+    let crdaExecutable: string | undefined;
+    export function getCRDAExecutable(): string {
+        if (crdaExecutable) {
+            return crdaExecutable;
+        }
+
+        const crda = util.getOS() === "windows" ? "crda.exe" : "crda";
+        crdaExecutable = crda;
+        return crda;
+    }
+
     /**
      * crda commands.
      */
@@ -17,6 +26,7 @@ namespace Crda {
         Auth = "auth",
         Analyse = "analyse",
         Config = "config",
+        Version = "version",
     }
 
     /**
@@ -117,7 +127,7 @@ namespace Crda {
             ghCore.debug(`Exit code ${exitCode}`);
 
             let failCondition;
-            if (executable === CRDA_EXECUTABLE) {
+            if (executable === Crda.getCRDAExecutable()) {
                 // crda exit 2 indicates a vulnerability was found, so that's an expected error
                 failCondition = exitCode !== 0 && exitCode !== 2;
             }
