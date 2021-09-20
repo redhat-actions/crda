@@ -40,7 +40,6 @@ jobs:
           manifest_directory: test-manifests/node/yarn/
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
-          fail_on: never
 
       - name: Print JSON analysis report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}

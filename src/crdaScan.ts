@@ -8,6 +8,7 @@ import { Inputs, Outputs } from "./generated/inputs-outputs";
 import { addLabelsToPr } from "./util/labels";
 import { uploadSarifFile } from "./uploadSarif";
 import { CrdaLabels } from "./util/constants";
+import { capitalizeFirstLetter } from "./util/utils";
 
 export async function crdaScan(
     resolvedManifestPath: string,
@@ -48,7 +49,7 @@ export async function crdaScan(
         ghCore.info(`✅ Successfully authenticated with the provided Snyk Token.`);
     }
     else if (crdaKey) {
-        ghCore.info(`🖊️ Setting ${Crda.ConfigKeys.CrdaKey} to the provided CRDA key.`);
+        ghCore.info(`🔐️ Authenticating with the provided CRDA Key`);
         await Analyse.configSet(Crda.ConfigKeys.CrdaKey, crdaKey);
     }
     else {
@@ -57,13 +58,6 @@ export async function crdaScan(
         );
     }
     const vulSeverity = await Analyse.analyse(resolvedManifestPath, crdaReportJson);
-
-    if (failOn !== "never") {
-        ghCore.info(`Failing if "${failOn}" level vulnerability is found`);
-    }
-    else {
-        ghCore.info(`Not failing on any vulnerability`);
-    }
 
     if (isPullRequest) {
         switch (vulSeverity) {
@@ -81,8 +75,6 @@ export async function crdaScan(
         }
     }
 
-    ghCore.info(`✅ Analysis completed. JSON report is available at ${crdaReportJson}.`);
-
     ghCore.setOutput(Outputs.CRDA_REPORT_JSON, crdaReportJson);
 
     const crdaAnalysedData = await fs.readFile(crdaReportJson, "utf-8");
@@ -95,7 +87,7 @@ export async function crdaScan(
         ghCore.warning(
             `Cannot retrieve detailed analysis and report in SARIF format. `
             + `A Synk token or a CRDA key authenticated to Synk is required for detailed analysis and SARIF output.`
-            + `Use the "${Inputs.SNYK_TOKEN}" or ${Inputs.CRDA_KEY} input. Refer to the README for more information.`
+            + `Use the "${Inputs.SNYK_TOKEN}" or "${Inputs.CRDA_KEY}" input. Refer to the README for more information.`
         );
 
         // cannot proceed with SARIF
@@ -106,7 +98,7 @@ export async function crdaScan(
     const crdaReportSarif = convertCRDAReportToSarif(crdaReportJson, resolvedManifestPath);
 
     ghCore.info(
-        `✅ Successfully converted analysis JSON to the SARIF format. SARIF file is available at ${crdaReportSarif}.`
+        `ℹ️ Successfully converted analysis JSON to the SARIF format. SARIF file is available at ${crdaReportSarif}`
     );
 
     ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
@@ -121,21 +113,33 @@ export async function crdaScan(
         else {
             await uploadSarifFile(githubToken, crdaReportSarif, manifestDir, analysisStartTime, sha);
         }
-        ghCore.info(`✅ Successfully uploaded SARIF file to GitHub`);
     }
     else {
         ghCore.info(`⏩ Input ${Inputs.UPLOAD_SARIF} is false, skipping SARIF upload.`);
     }
 
-    if (failOn !== "never") {
-        if (failOn === "warning" && (vulSeverity === "error" || vulSeverity === "warning")) {
-            throw new Error(`Found vulnerabilities in the project.`);
+    if (vulSeverity !== "none") {
+        ghCore.warning(`${capitalizeFirstLetter(vulSeverity)} level vulnerabilities were found in the project`);
+
+        if (failOn !== "never") {
+            if (failOn === "warning") {
+                ghCore.info(
+                    `Input "${Inputs.FAIL_ON}" is "${failOn}", and at least one warning was found. Failing workflow.`
+                );
+                throw new Error(`Found vulnerabilities in the project.`);
+            }
+            else if (failOn === "error" && vulSeverity === "error") {
+                ghCore.info(
+                    `Input "${Inputs.FAIL_ON}" is "${failOn}", and at least one error was found. Failing workflow.`
+                );
+                throw new Error(`Found high severity vulnerabilities in the project.`);
+            }
         }
-        else if (failOn === "error" && vulSeverity === "error") {
-            throw new Error(`Found high severity vulnerabilities in the project.`);
+        else {
+            ghCore.info(`Input "${Inputs.FAIL_ON}" is "${failOn}". Not failing workflow.`);
         }
     }
     else {
-        ghCore.info(`Not failing on any vulnerability`);
+        ghCore.info(`✅ No vulnerabilities were found`);
     }
 }

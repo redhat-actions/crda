@@ -5,7 +5,7 @@ import Crda from "./crda";
 import { Inputs } from "./generated/inputs-outputs";
 import { fileExists } from "./util/utils";
 
-type DepsInstallType = "Go" | "Maven" | "Node" | "Pip" | "custom";
+type DepsInstallType = "Go" | "Maven" | "Node.js" | "Pip" | "custom";
 
 const GO_MOD = "go.mod";
 const POM_XML = "pom.xml";
@@ -39,9 +39,9 @@ export async function findManifestAndInstallDeps(
         ghCore.info(`Manifest directory is ${manifestDir}`);
     }
     else {
-        ghCore.info(`🔍 ${Inputs.MANIFEST_FILE} input not provided. Auto-detecting manifest file.`);
+        ghCore.info(`${Inputs.MANIFEST_FILE} input not provided. Auto-detecting manifest file.`);
         manifestDir = manifestDirInput || process.cwd();
-        ghCore.info(`Looking for manifest in ${manifestDir}`);
+        ghCore.info(`🔍 Looking for manifest in ${manifestDir}`);
 
         const autoDetectResult = await autoDetectInstall(manifestDir);
 
@@ -66,7 +66,7 @@ export async function findManifestAndInstallDeps(
         installType = installTypeOrUndef;
     }
 
-    ghCore.info(`Installing dependencies using ${installType} strategy`);
+    ghCore.info(`Dependencies will be installed using ${installType} strategy`);
 
     // store current working directory, to change back
     // to this directory after installation is successful
@@ -128,7 +128,7 @@ function getInstallTypeForFile(file: string): DepsInstallType | undefined {
         return "Maven";
     }
     else if (file.includes(PACKAGE_JSON)) {
-        return "Node";
+        return "Node.js";
     }
     else if (file.includes(REQUIREMENTS_TXT)) {
         return "Pip";
@@ -143,7 +143,7 @@ async function installDeps(
     installType: DepsInstallType,
     depsInstallCmd: string[] | undefined,
 ): Promise<void> {
-    ghCore.info(`⬇️ Installing dependencies in ${process.cwd()}`);
+    ghCore.info(`⬇️ Installing dependencies...`);
 
     // if command is provided by the user,
     // use the provided command instead of
@@ -158,7 +158,7 @@ async function installDeps(
     else if (installType === "Maven") {
         await installMavenDeps();
     }
-    else if (installType === "Node") {
+    else if (installType === "Node.js") {
         await installNodeDeps();
     }
     else if (installType === "Pip") {

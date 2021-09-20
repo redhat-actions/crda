@@ -50,10 +50,12 @@ export async function uploadSarifFile(
         throw new Error(`Upload SARIF response from GitHub did not include an upload ID`);
     }
 
-    ghCore.info(`🕗 SARIF upload started. Waiting for upload to finish.`);
+    ghCore.info(`⏳ SARIF upload started. Waiting for upload to finish.`);
     // Since sarif upload takes few seconds, so waiting for it to finish.
     // Generally it takes less than a minute.
     await waitForUploadToFinish(ghToken, sarifId);
+
+    ghCore.info(`✅ Successfully uploaded SARIF file to ${owner}/${repo}`);
 }
 
 async function waitForUploadToFinish(ghToken: string, sarifId: string): Promise<void> {
@@ -77,8 +79,10 @@ async function waitForUploadToFinish(ghToken: string, sarifId: string): Promise<
 
             ghCore.debug(JSON.stringify(response));
             if (response.data.processing_status !== undefined) {
-                ghCore.info(`Upload is ${response.data.processing_status}`);
                 uploadStatus = response.data.processing_status;
+
+                const emoji = uploadStatus === "pending" ? "⏳ " : "";
+                ghCore.info(`${emoji}Upload is ${response.data.processing_status}`);
             }
 
         }

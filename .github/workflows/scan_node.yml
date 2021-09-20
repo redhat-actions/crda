@@ -1,4 +1,4 @@
-name: Scan Node/no-lockfile project
+name: Scan Node/no lockfile project
 on:
   push:
   workflow_dispatch:
