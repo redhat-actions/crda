@@ -22,25 +22,25 @@ const ALL_MANIFESTS = [
  * @returns The resolved manifest path - the manifest path even if the input was empty.
  */
 export async function findManifestAndInstallDeps(
-    checkoutPath: string,
-    manifestPathInput: string,
+    manifestDirInput: string,
+    manifestFileInput: string,
     depsInstallCmd: string[] | undefined
 ): Promise<string> {
-    // ghCore.info(`${Inputs.CHECKOUT_PATH} is ${checkoutPath}`);
+    // ghCore.info(`${Inputs.manifest_directory} is ${manifestDir}`);
     let manifestDir;
     let manifestFilename;
     let resolvedManifestPath;
     let installType: DepsInstallType | undefined;
 
-    if (manifestPathInput) {
-        manifestDir = path.join(checkoutPath, path.dirname(manifestPathInput));
-        manifestFilename = path.basename(manifestPathInput);
+    if (manifestFileInput) {
+        manifestDir = path.join(manifestDirInput, path.dirname(manifestFileInput));
+        manifestFilename = path.basename(manifestFileInput);
         resolvedManifestPath = path.join(manifestDir, manifestFilename);
         ghCore.info(`Manifest directory is ${manifestDir}`);
     }
     else {
-        ghCore.info(`🔍 ${Inputs.MANIFEST_PATH} input not provided. Auto-detecting manifest file.`);
-        manifestDir = checkoutPath || process.cwd();
+        ghCore.info(`🔍 ${Inputs.MANIFEST_FILE} input not provided. Auto-detecting manifest file.`);
+        manifestDir = manifestDirInput || process.cwd();
         ghCore.info(`Looking for manifest in ${manifestDir}`);
 
         const autoDetectResult = await autoDetectInstall(manifestDir);
@@ -50,6 +50,8 @@ export async function findManifestAndInstallDeps(
 
         resolvedManifestPath = path.join(manifestDir, manifestFilename);
     }
+
+    // now the manifestDirInput and manifestFileInput have been processed, do not use those again
 
     ghCore.info(`Manifest file is ${resolvedManifestPath}`);
 
@@ -72,13 +74,13 @@ export async function findManifestAndInstallDeps(
     let didChangeWD = false;
 
     try {
-        if (checkoutPath) {
+        if (manifestDir) {
             let newWD;
-            if (path.isAbsolute(checkoutPath)) {
-                newWD = checkoutPath;
+            if (path.isAbsolute(manifestDir)) {
+                newWD = manifestDir;
             }
             else {
-                newWD = path.join(process.cwd(), checkoutPath);
+                newWD = path.join(process.cwd(), manifestDir);
             }
             ghCore.info(`Changing working directory to ${newWD}`);
             process.chdir(newWD);

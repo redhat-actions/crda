@@ -1,4 +1,5 @@
 import * as ghCore from "@actions/core";
+import * as path from "path";
 import { promises as fs } from "fs";
 import Analyse from "./analyse";
 import { convertCRDAReportToSarif } from "./convert";
@@ -9,7 +10,7 @@ import { uploadSarifFile } from "./uploadSarif";
 import { CrdaLabels } from "./util/constants";
 
 export async function crdaScan(
-    resolvedManifestPath: string, checkoutPath: string,
+    resolvedManifestPath: string,
     analysisStartTime: string, isPullRequest: boolean, prNumber: number, sha: string
 ): Promise<void> {
     const snykToken = ghCore.getInput(Inputs.SNYK_TOKEN);
@@ -111,17 +112,19 @@ export async function crdaScan(
     ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
 
     if (uploadSarif) {
+        const manifestDir = path.dirname(resolvedManifestPath);
+
         if (isPullRequest) {
             const ref = `refs/pull/${prNumber}/head`;
-            await uploadSarifFile(githubToken, crdaReportSarif, checkoutPath, analysisStartTime, sha, ref);
+            await uploadSarifFile(githubToken, crdaReportSarif, manifestDir, analysisStartTime, sha, ref);
         }
         else {
-            await uploadSarifFile(githubToken, crdaReportSarif, checkoutPath, analysisStartTime, sha);
+            await uploadSarifFile(githubToken, crdaReportSarif, manifestDir, analysisStartTime, sha);
         }
         ghCore.info(`✅ Successfully uploaded SARIF file to GitHub`);
     }
     else {
-        ghCore.info(`⏩ Input ${Inputs.UPLOAD_SARIF} is set to false, skipping SARIF upload.`);
+        ghCore.info(`⏩ Input ${Inputs.UPLOAD_SARIF} is false, skipping SARIF upload.`);
     }
 
     if (failOn !== "never") {

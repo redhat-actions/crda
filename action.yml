@@ -5,16 +5,15 @@ branding:
   icon: circle
   color: red
 inputs:
-  manifest_path:
+  manifest_directory:
     description: |
-      Path of the manifest file to use for analysis.
-      This path should not include the path where you checkedout the repository
-    required: true
-  checkout_path:
-    description: |
-      Path at which the repository which is to be analyzed is checkedout
+      Path to the directory containing the manifest_file.
     required: false
-    default: ${{ github.workspace }}
+    default: Working directory
+  manifest_file:
+    description: |
+      Name (basename) of the manifest file to analyze. This file must exist in the manifest_directory.
+    required: false
   deps_install_cmd:
     description: |
       Command to use for dependencies installation instead of using the

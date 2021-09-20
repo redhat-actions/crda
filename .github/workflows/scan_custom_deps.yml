@@ -37,7 +37,7 @@ jobs:
         id: scan
         uses: ./
         with:
-          checkout_path: test-manifests/node/empty-package/
+          manifest_directory: test-manifests/node/empty-package/
           deps_install_cmd: "npm install urijs@1.19.5"
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}

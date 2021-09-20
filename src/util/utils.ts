@@ -73,8 +73,19 @@ export async function fileExists(filePath: string): Promise<boolean> {
     }
 }
 
+let gitExecutable: string | undefined;
+export function getGitExecutable(): string {
+    if (gitExecutable) {
+        return gitExecutable;
+    }
+
+    const git = getOS() === "windows" ? "git.exe" : "git";
+    gitExecutable = git;
+    return git;
+}
+
 export async function getCommitSha(): Promise<string> {
-    const commitSha = (await Crda.exec("git", [ "rev-parse", "HEAD" ])).stdout;
+    const commitSha = (await Crda.exec(getGitExecutable(), [ "rev-parse", "HEAD" ])).stdout;
     return commitSha.trim();
 
     /*

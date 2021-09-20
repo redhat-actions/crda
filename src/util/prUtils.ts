@@ -4,7 +4,7 @@ import * as github from "@actions/github";
 import Crda from "../crda";
 import { CrdaLabels } from "./constants";
 import * as labels from "./labels";
-import { getOS } from "./utils";
+import { getGitExecutable } from "./utils";
 
 const repoLabels = [
     CrdaLabels.CRDA_SCAN_PENDING, CrdaLabels.CRDA_SCAN_APPROVED,
@@ -95,17 +95,6 @@ function parsePrData(prData: string): { number: number, remoteUrl: string, sha: 
         sha: prJson.head.sha,
         remoteUrl: prJson.base.repo.html_url,
     };
-}
-
-let gitExecutable: string | undefined;
-export function getGitExecutable(): string {
-    if (gitExecutable) {
-        return gitExecutable;
-    }
-
-    const git = getOS() === "windows" ? "git.exe" : "git";
-    gitExecutable = git;
-    return git;
 }
 
 // Checkout PR code to run the CRDA Analysis on a PR,

@@ -37,7 +37,7 @@ jobs:
         id: scan
         uses: ./
         with:
-          checkout_path: test-manifests/node/yarn/
+          manifest_directory: test-manifests/node/yarn/
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never

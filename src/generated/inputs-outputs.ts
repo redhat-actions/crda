@@ -7,12 +7,6 @@ export enum Inputs {
      */
     ANALYSIS_REPORT_NAME = "analysis_report_name",
     /**
-     * Path at which the repository which is to be analyzed is checkedout
-     * Required: false
-     * Default: "${{ github.workspace }}"
-     */
-    CHECKOUT_PATH = "checkout_path",
-    /**
      * CRDA collects anonymous usage data, and is disabled by default.
      * If you want this behaviour set this to "true"
      * Required: false
@@ -49,12 +43,17 @@ export enum Inputs {
      */
     GITHUB_TOKEN = "github_token",
     /**
-     * Path of the manifest file to use for analysis.
-     * This path should not include the path where you checkedout the repository
-     * Required: true
+     * Path to the directory containing the manifest_file.
+     * Required: false
+     * Default: "Working directory"
+     */
+    MANIFEST_DIRECTORY = "manifest_directory",
+    /**
+     * Name (basename) of the manifest file to analyze. This file must exist in the manifest_directory.
+     * Required: false
      * Default: None.
      */
-    MANIFEST_PATH = "manifest_path",
+    MANIFEST_FILE = "manifest_file",
     /**
      * Snyk token to be used to authenticate to the CRDA
      * Required: false

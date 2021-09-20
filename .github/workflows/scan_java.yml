@@ -49,7 +49,7 @@ jobs:
         id: scan
         uses: ./
         with:
-          checkout_path: ${{ env.PROJECT_REPO }}
+          manifest_directory: ${{ env.PROJECT_REPO }}
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           analysis_report_name: java

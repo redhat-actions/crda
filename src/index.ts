@@ -56,10 +56,10 @@ async function run(): Promise<void> {
         sha = await utils.getCommitSha();
     }
 
-    const checkoutPath = ghCore.getInput(Inputs.CHECKOUT_PATH);
-    ghCore.info(`${Inputs.CHECKOUT_PATH} is "${checkoutPath}"`);
-    const manifestPathInput = ghCore.getInput(Inputs.MANIFEST_PATH);
-    ghCore.debug(`Manifest path "${manifestPathInput}"`);
+    const manifestDirInput = ghCore.getInput(Inputs.MANIFEST_DIRECTORY);
+    ghCore.info(`${Inputs.MANIFEST_DIRECTORY} is "${manifestDirInput}"`);
+    const manifestFileInput = ghCore.getInput(Inputs.MANIFEST_FILE);
+    ghCore.debug(`Manifest path "${manifestFileInput}"`);
 
     const depsInstallCmdStr = ghCore.getInput(Inputs.DEPS_INSTALL_CMD);
     let depsInstallCmd: string[] | undefined;
@@ -67,9 +67,10 @@ async function run(): Promise<void> {
         depsInstallCmd = depsInstallCmdStr.split(" ");
     }
 
-    const resolvedManifestPath = await findManifestAndInstallDeps(checkoutPath, manifestPathInput, depsInstallCmd);
+    const resolvedManifestPath = await findManifestAndInstallDeps(manifestDirInput, manifestFileInput, depsInstallCmd);
+    // use the resolvedManifestPath from now on - not the manifestDir and manifestFile
     ghCore.debug(`Resolved manifest path is ${resolvedManifestPath}`);
-    await crdaScan(resolvedManifestPath, checkoutPath, analysisStartTime, isPullRequest, prNumber, sha);
+    await crdaScan(resolvedManifestPath, analysisStartTime, isPullRequest, prNumber, sha);
 }
 
 run()

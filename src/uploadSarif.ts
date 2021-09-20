@@ -7,7 +7,7 @@ import { promisify } from "util";
 import * as utils from "./util/utils";
 
 export async function uploadSarifFile(
-    ghToken: string, sarifToUpload: string, checkoutPath: string,
+    ghToken: string, sarifToUpload: string, manifestDir: string,
     analysisStartTime: string, sha: string, ref?: string,
 ): Promise<void> {
     const { owner, repo } = github.context.repo;
@@ -31,7 +31,7 @@ export async function uploadSarifFile(
             commit_sha: sha,
             ref: ref || utils.getEnvVariableValue("GITHUB_REF"),
             sarif: zippedSarif,
-            checkout_uri: checkoutPath,
+            checkout_uri: manifestDir,
             started_at: analysisStartTime,
             tool_name: "Code Ready Dependency Analytics",
         });

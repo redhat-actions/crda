@@ -36,7 +36,7 @@ jobs:
         id: scan
         uses: ./
         with:
-          checkout_path: test-manifests/python/
+          manifest_directory: test-manifests/python/
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never
