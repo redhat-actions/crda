@@ -135,6 +135,8 @@ Each time a new commit is pushed to the pull request, the `Approved` label will 
 
 After the CRDA scan is approved and the workflow runs, a label indicating the scan result will be added to the pull request.
 
+> **Note**: Pull requests created by repository maintainers will automatically have `CRDA Scan Approved` label.
+
 Use the following snippet to enable pull request scans in your repository:
 ``` yaml
 on:
