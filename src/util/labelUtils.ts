@@ -13,7 +13,7 @@ export function getLabelColor(label: string): string {
     case CrdaLabels.CRDA_FOUND_WARNING:
         return "EE9900";               // yellow color
     case CrdaLabels.CRDA_FOUND_ERROR:
-        return "B60205";                // red color
+        return "B60205";               // red color
     default:
         return "FBCA04";
     }
