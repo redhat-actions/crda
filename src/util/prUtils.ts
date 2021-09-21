@@ -1,10 +1,12 @@
 import * as ghCore from "@actions/core";
 import * as github from "@actions/github";
+import { Octokit } from "@octokit/core";
 
 import Crda from "../crda";
 import { CrdaLabels } from "./constants";
 import * as labels from "./labels";
-import { getGitExecutable } from "./utils";
+import { Inputs } from "../generated/inputs-outputs";
+import { getBetterHttpError, getGitExecutable } from "./utils";
 
 const repoLabels = [
     CrdaLabels.CRDA_SCAN_PENDING, CrdaLabels.CRDA_SCAN_APPROVED,
@@ -35,7 +37,7 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
     const prData = parsePrData(prDataStr);
     const prNumber = prData.number;
     const remote = prData.remoteUrl;
-
+    const prAuthor = prData.user;
     ghCore.debug(`PR number is ${prNumber}`);
     ghCore.debug(`Remote is ${remote}`);
 
@@ -51,12 +53,30 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
     }
     ghCore.debug(`Action performed is "${github.context.payload.action}"`);
 
+    const isPrAuthorHasWriteAccess = await canPrAuthorWrite(prAuthor);
+
     const prAction = github.context.payload.action;
     if (prAction === "edited" || prAction === "synchronize") {
         const labelsToRemove = labels.findLabelsToRemove(availableLabels, labelsToCheckForRemoval);
+
+        // if pr author has write access do not remove approved label
+        if (isPrAuthorHasWriteAccess) {
+            const index = labelsToRemove.indexOf(CrdaLabels.CRDA_SCAN_APPROVED, 0);
+            if (index > -1) {
+                labelsToRemove.splice(index, 1);
+            }
+        }
+
         ghCore.info(`Code change detected, removing labels ${labelsToRemove.join(", ")}.`);
         await labels.removeLabelsFromPr(prNumber, labelsToRemove);
 
+        if (isPrAuthorHasWriteAccess) {
+            return {
+                approved: true,
+                sha: prData.sha,
+                prNumber,
+            };
+        }
         ghCore.info(`Adding "${CrdaLabels.CRDA_SCAN_PENDING}" label.`);
         await labels.addLabelsToPr(prNumber, [ CrdaLabels.CRDA_SCAN_PENDING ]);
 
@@ -78,6 +98,18 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
         };
     }
 
+    if (isPrAuthorHasWriteAccess) {
+        ghCore.info(`Since user "${prAuthor}" has write access to the repository, `
+            + `adding "${CrdaLabels.CRDA_SCAN_APPROVED}" label`);
+        await labels.addLabelsToPr(prNumber, [ CrdaLabels.CRDA_SCAN_APPROVED ]);
+
+        return {
+            approved: true,
+            sha: prData.sha,
+            prNumber,
+        };
+    }
+
     if (!availableLabels.includes(CrdaLabels.CRDA_SCAN_PENDING)) {
         ghCore.info(`Adding "${CrdaLabels.CRDA_SCAN_PENDING}" label`);
         await labels.addLabelsToPr(prNumber, [ CrdaLabels.CRDA_SCAN_PENDING ]);
@@ -88,12 +120,13 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
     };
 }
 
-function parsePrData(prData: string): { number: number, remoteUrl: string, sha: string } {
+function parsePrData(prData: string): { number: number, remoteUrl: string, sha: string, user: string } {
     const prJson = JSON.parse(prData);
     return {
         number: prJson.number,
         sha: prJson.head.sha,
         remoteUrl: prJson.base.repo.html_url,
+        user: prJson.base.user.login,
     };
 }
 
@@ -128,4 +161,53 @@ export async function checkoutCleanup(prNumber: number, origCheckoutBranch: stri
 export async function getOrigCheckoutBranch(): Promise<string> {
     const execResult = await Crda.exec(getGitExecutable(), [ "branch", "--show-current" ]);
     return execResult.stdout.trim();
+}
+
+// API documentation: https://docs.github.com/en/rest/reference/repos#get-repository-permissions-for-a-user
+async function canPrAuthorWrite(prAuthor: string): Promise<boolean> {
+    const octokit = new Octokit({ auth: getGhToken() });
+    const { owner, repo } = github.context.repo;
+    let authorPermissionResponse;
+    try {
+        ghCore.debug(`Checking if the user "${prAuthor}" has write `
+            + `access to repository "${owner}/${repo}"`);
+        authorPermissionResponse = await octokit.request(
+            "GET /repos/{owner}/{repo}/collaborators/{username}/permission", {
+                owner,
+                repo,
+                username: prAuthor,
+            }
+        );
+    }
+    catch (err) {
+        throw getBetterHttpError(err);
+    }
+
+    const permission = authorPermissionResponse.data.permission;
+    if (permission === "admin" || permission === "write") {
+        ghCore.debug(`User has write access to the repository`);
+        return true;
+    }
+    ghCore.debug(`User doesn't has write access to the repository`);
+
+    return false;
+}
+
+let ghToken: string | undefined;
+
+/**
+ *
+ * @returns GitHub token provided by the user.
+ * If no token is provided, returns the empty string.
+ */
+function getGhToken(): string {
+    if (ghToken == null) {
+        ghToken = ghCore.getInput(Inputs.GITHUB_TOKEN);
+
+        // this to only solve the problem of local development
+        if (!ghToken && process.env.GITHUB_TOKEN) {
+            ghToken = process.env.GITHUB_TOKEN;
+        }
+    }
+    return ghToken;
 }
