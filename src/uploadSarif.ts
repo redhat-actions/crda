@@ -3,12 +3,13 @@ import * as github from "@actions/github";
 import * as zlib from "zlib";
 import * as ghCore from "@actions/core";
 import { promises as fs } from "fs";
+import * as path from "path";
 import { promisify } from "util";
 import * as utils from "./util/utils";
 
 export async function uploadSarifFile(
-    ghToken: string, sarifToUpload: string, manifestDir: string,
-    analysisStartTime: string, sha: string, ref?: string,
+    ghToken: string, sarifToUpload: string, resolvedManifestPath: string,
+    analysisStartTime: string, sha: string, ref: string,
 ): Promise<void> {
     const { owner, repo } = github.context.repo;
     ghCore.info(`⬆️ Uploading SARIF file to ${owner}/${repo}...`);
@@ -19,7 +20,10 @@ export async function uploadSarifFile(
     ghCore.info(`Zipped upload size: ${zippedSarif.length} bytes`);
 
     ghCore.debug(`Commit Sha: ${sha}`);
-    ghCore.debug(`Ref: ${ref || utils.getEnvVariableValue("GITHUB_REF")} `);
+    ghCore.debug(`Ref: ${ref}`);
+
+    const manifestDir = path.resolve(path.dirname(resolvedManifestPath));
+    ghCore.debug(`Manifest directory for sarif upload is ${manifestDir}`);
 
     // API documentation: https://docs.github.com/en/rest/reference/code-scanning#update-a-code-scanning-alert
     const octokit = new Octokit({ auth: ghToken });
@@ -28,8 +32,8 @@ export async function uploadSarifFile(
         const uploadResponse = await octokit.request("POST /repos/{owner}/{repo}/code-scanning/sarifs", {
             owner,
             repo,
+            ref,
             commit_sha: sha,
-            ref: ref || utils.getEnvVariableValue("GITHUB_REF"),
             sarif: zippedSarif,
             checkout_uri: manifestDir,
             started_at: analysisStartTime,

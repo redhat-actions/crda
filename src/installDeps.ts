@@ -33,7 +33,7 @@ export async function findManifestAndInstallDeps(
     let installType: DepsInstallType | undefined;
 
     if (manifestFileInput) {
-        manifestDir = path.join(manifestDirInput, path.dirname(manifestFileInput));
+        manifestDir = path.join(manifestDirInput, manifestFileInput);
         manifestFilename = path.basename(manifestFileInput);
         resolvedManifestPath = path.join(manifestDir, manifestFilename);
         ghCore.info(`Manifest directory is ${manifestDir}`);

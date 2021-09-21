@@ -1,5 +1,6 @@
 import * as ghCore from "@actions/core";
 import * as github from "@actions/github";
+
 import * as utils from "./util/utils";
 import { CrdaLabels } from "./util/constants";
 import { crdaScan } from "./crdaScan";
@@ -58,8 +59,9 @@ async function run(): Promise<void> {
 
     const manifestDirInput = ghCore.getInput(Inputs.MANIFEST_DIRECTORY);
     ghCore.info(`${Inputs.MANIFEST_DIRECTORY} is "${manifestDirInput}"`);
+
     const manifestFileInput = ghCore.getInput(Inputs.MANIFEST_FILE);
-    ghCore.debug(`Manifest path "${manifestFileInput}"`);
+    ghCore.info(`${Inputs.MANIFEST_FILE} is "${manifestFileInput}"`);
 
     const depsInstallCmdStr = ghCore.getInput(Inputs.DEPS_INSTALL_CMD);
     let depsInstallCmd: string[] | undefined;

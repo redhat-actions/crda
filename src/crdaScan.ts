@@ -1,5 +1,4 @@
 import * as ghCore from "@actions/core";
-import * as path from "path";
 import { promises as fs } from "fs";
 import Analyse from "./analyse";
 import { convertCRDAReportToSarif } from "./convert";
@@ -8,7 +7,7 @@ import { Inputs, Outputs } from "./generated/inputs-outputs";
 import { addLabelsToPr } from "./util/labels";
 import { uploadSarifFile } from "./uploadSarif";
 import { CrdaLabels } from "./util/constants";
-import { capitalizeFirstLetter } from "./util/utils";
+import { capitalizeFirstLetter, getEnvVariableValue } from "./util/utils";
 
 export async function crdaScan(
     resolvedManifestPath: string,
@@ -104,14 +103,14 @@ export async function crdaScan(
     ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
 
     if (uploadSarif) {
-        const manifestDir = path.dirname(resolvedManifestPath);
-
+        let ref;
         if (isPullRequest) {
-            const ref = `refs/pull/${prNumber}/head`;
-            await uploadSarifFile(githubToken, crdaReportSarif, manifestDir, analysisStartTime, sha, ref);
+            ref = `refs/pull/${prNumber}/head`;
+            await uploadSarifFile(githubToken, crdaReportSarif, resolvedManifestPath, analysisStartTime, sha, ref);
         }
         else {
-            await uploadSarifFile(githubToken, crdaReportSarif, manifestDir, analysisStartTime, sha);
+            ref = getEnvVariableValue("GITHUB_REF");
+            await uploadSarifFile(githubToken, crdaReportSarif, resolvedManifestPath, analysisStartTime, sha, ref);
         }
     }
     else {
