@@ -39,7 +39,7 @@ jobs:
         id: scan
         uses: ./
         with:
-          manifest_directory: test-manifests/golang/
+          manifest_directory: manifests/golang/
           # crda_key: ${{ secrets.CRDA_KEY }}
           snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never

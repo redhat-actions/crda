@@ -2,13 +2,14 @@ import { Octokit } from "@octokit/core";
 import * as github from "@actions/github";
 import * as zlib from "zlib";
 import * as ghCore from "@actions/core";
+import { URLSearchParams } from "url";
 import { promises as fs } from "fs";
-import * as path from "path";
+
 import { promisify } from "util";
 import * as utils from "./util/utils";
 
 export async function uploadSarifFile(
-    ghToken: string, sarifToUpload: string, resolvedManifestPath: string,
+    ghToken: string, sarifToUpload: string, /* resolvedManifestPath: string, */
     analysisStartTime: string, sha: string, ref: string,
 ): Promise<void> {
     const { owner, repo } = github.context.repo;
@@ -22,8 +23,8 @@ export async function uploadSarifFile(
     ghCore.debug(`Commit Sha: ${sha}`);
     ghCore.debug(`Ref: ${ref}`);
 
-    const manifestDir = path.resolve(path.dirname(resolvedManifestPath));
-    ghCore.debug(`Manifest directory for sarif upload is ${manifestDir}`);
+    // const manifestDir = path.resolve(path.dirname(resolvedManifestPath));
+    // ghCore.debug(`Manifest directory for sarif upload is ${manifestDir}`);
 
     // API documentation: https://docs.github.com/en/rest/reference/code-scanning#update-a-code-scanning-alert
     const octokit = new Octokit({ auth: ghToken });
@@ -35,7 +36,7 @@ export async function uploadSarifFile(
             ref,
             commit_sha: sha,
             sarif: zippedSarif,
-            checkout_uri: manifestDir,
+            // checkout_uri: manifestDir,
             started_at: analysisStartTime,
             tool_name: "Code Ready Dependency Analytics",
         });
@@ -59,7 +60,22 @@ export async function uploadSarifFile(
     // Generally it takes less than a minute.
     await waitForUploadToFinish(ghToken, sarifId);
 
-    ghCore.info(`✅ Successfully uploaded SARIF file to ${owner}/${repo}`);
+    ghCore.info(`✅ Successfully uploaded SARIF file`);
+
+    let branch;
+    const BRANCH_REF_PREFIX = "refs/heads/";
+    if (ref.startsWith(BRANCH_REF_PREFIX)) {
+        branch = ref.substring(BRANCH_REF_PREFIX.length);
+    }
+
+    const search: URLSearchParams = new URLSearchParams({
+        query: `is:open sort:created-desc${branch ? ` branch:${branch}` : ""}`,
+    });
+
+    const codeScanningUrl = utils.getEnvVariableValue("GITHUB_SERVER_URL")
+        + `/${owner}/${repo}/security/code-scanning?${search.toString()}`;
+
+    ghCore.info(`👀 Review the Code Scanning results in the Security tab: ${codeScanningUrl}`);
 }
 
 async function waitForUploadToFinish(ghToken: string, sarifId: string): Promise<void> {

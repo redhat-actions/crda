@@ -37,8 +37,9 @@ jobs:
         id: scan
         uses: ./
         with:
-          manifest_directory: test-manifests/node/yarn/
+          manifest_directory: manifests/node/yarn/
           crda_key: ${{ secrets.CRDA_KEY }}
+          fail_on: never
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
 
       - name: Print JSON analysis report

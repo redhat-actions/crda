@@ -106,11 +106,15 @@ export async function crdaScan(
         let ref;
         if (isPullRequest) {
             ref = `refs/pull/${prNumber}/head`;
-            await uploadSarifFile(githubToken, crdaReportSarif, resolvedManifestPath, analysisStartTime, sha, ref);
+            await uploadSarifFile(
+                githubToken, crdaReportSarif, /* resolvedManifestPath, */ analysisStartTime, sha, ref
+            );
         }
         else {
             ref = getEnvVariableValue("GITHUB_REF");
-            await uploadSarifFile(githubToken, crdaReportSarif, resolvedManifestPath, analysisStartTime, sha, ref);
+            await uploadSarifFile(
+                githubToken, crdaReportSarif, /* resolvedManifestPath, */ analysisStartTime, sha, ref
+            );
         }
     }
     else {

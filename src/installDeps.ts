@@ -3,7 +3,7 @@ import * as path from "path";
 import { promises as fs } from "fs";
 import Crda from "./crda";
 import { Inputs } from "./generated/inputs-outputs";
-import { fileExists } from "./util/utils";
+import { fileExists, getEnvVariableValue } from "./util/utils";
 
 type DepsInstallType = "Go" | "Maven" | "Node.js" | "Pip" | "custom";
 
@@ -27,20 +27,18 @@ export async function findManifestAndInstallDeps(
     depsInstallCmd: string[] | undefined
 ): Promise<string> {
     // ghCore.info(`${Inputs.manifest_directory} is ${manifestDir}`);
-    let manifestDir;
+    const manifestDir = manifestDirInput || getEnvVariableValue("GITHUB_WORKSPACE");
     let manifestFilename;
     let resolvedManifestPath;
     let installType: DepsInstallType | undefined;
 
     if (manifestFileInput) {
-        manifestDir = path.join(manifestDirInput, manifestFileInput);
-        manifestFilename = path.basename(manifestFileInput);
-        resolvedManifestPath = path.join(manifestDir, manifestFilename);
         ghCore.info(`Manifest directory is ${manifestDir}`);
+        manifestFilename = manifestFileInput;
+        resolvedManifestPath = path.join(manifestDir, manifestFilename);
     }
     else {
         ghCore.info(`${Inputs.MANIFEST_FILE} input not provided. Auto-detecting manifest file.`);
-        manifestDir = manifestDirInput || process.cwd();
         ghCore.info(`🔍 Looking for manifest in ${manifestDir}`);
 
         const autoDetectResult = await autoDetectInstall(manifestDir);
