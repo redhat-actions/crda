@@ -8,8 +8,6 @@ import { CrdaLabels } from "./constants";
 import * as labels from "./labels";
 import { getBetterHttpError } from "./utils";
 
-let ghToken: string | undefined;
-
 const repoLabels = [
     CrdaLabels.CRDA_SCAN_PENDING, CrdaLabels.CRDA_SCAN_APPROVED,
     CrdaLabels.CRDA_SCAN_FAILED, CrdaLabels.CRDA_SCAN_PASSED,
@@ -102,7 +100,7 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
 
     if (isPrAuthorHasWriteAccess) {
         ghCore.info(`Since user "${prAuthor}" has write access to the repository, `
-            + `Adding "${CrdaLabels.CRDA_SCAN_APPROVED}" label`);
+            + `adding "${CrdaLabels.CRDA_SCAN_APPROVED}" label`);
         await labels.addLabelsToPr(prNumber, [ CrdaLabels.CRDA_SCAN_APPROVED ]);
 
         return {
@@ -165,6 +163,7 @@ export async function getOrigCheckoutBranch(): Promise<string> {
     return execResult.stdout.trim();
 }
 
+// API documentation: https://docs.github.com/en/rest/reference/repos#get-repository-permissions-for-a-user
 async function canPrAuthorWrite(prAuthor: string): Promise<boolean> {
     const octokit = new Octokit({ auth: getGhToken() });
     const { owner, repo } = github.context.repo;
@@ -186,13 +185,15 @@ async function canPrAuthorWrite(prAuthor: string): Promise<boolean> {
 
     const permission = authorPermissionResponse.data.permission;
     if (permission === "admin" || permission === "write") {
-        ghCore.info(`User has write access to the repository`);
+        ghCore.debug(`User has write access to the repository`);
         return true;
     }
-    ghCore.info(`User doesn't has write access to the repository`);
+    ghCore.debug(`User doesn't has write access to the repository`);
 
     return false;
 }
+
+let ghToken: string | undefined;
 
 /**
  *
