@@ -26,8 +26,12 @@ export async function findManifestAndInstallDeps(
     manifestFileInput: string,
     depsInstallCmd: string[] | undefined
 ): Promise<string> {
-    // ghCore.info(`${Inputs.manifest_directory} is ${manifestDir}`);
+
+    if (!manifestDirInput) {
+        ghCore.info(`${Inputs.MANIFEST_DIRECTORY} not provided. Using GITHUB_WORKSPACE`);
+    }
     const manifestDir = manifestDirInput || getEnvVariableValue("GITHUB_WORKSPACE");
+
     let manifestFilename;
     let resolvedManifestPath;
     let installType: DepsInstallType | undefined;
@@ -38,7 +42,7 @@ export async function findManifestAndInstallDeps(
         resolvedManifestPath = path.join(manifestDir, manifestFilename);
     }
     else {
-        ghCore.info(`${Inputs.MANIFEST_FILE} input not provided. Auto-detecting manifest file.`);
+        ghCore.info(`${Inputs.MANIFEST_FILE} input not provided. Auto-detecting manifest file`);
         ghCore.info(`🔍 Looking for manifest in ${manifestDir}`);
 
         const autoDetectResult = await autoDetectInstall(manifestDir);
@@ -54,6 +58,8 @@ export async function findManifestAndInstallDeps(
     ghCore.info(`Manifest file is ${resolvedManifestPath}`);
 
     if (depsInstallCmd) {
+        ghCore.info(`${Inputs.DEPS_INSTALL_CMD} is set`);
+
         installType = "custom";
     }
     else if (!installType) {
@@ -196,12 +202,12 @@ async function installNodeDeps(): Promise<void> {
                 + `Remove one of these lockfiles, or set the "${Inputs.DEPS_INSTALL_CMD}" input.`
             );
         }
-        ghCore.info(`${PACKAGE_LOCK} exists; using clean install`);
+        ghCore.info(`${PACKAGE_LOCK} exists. Using npm clean install`);
         executable = "npm";
         args = [ "ci" ];
     }
     else if (yarnLockExists) {
-        ghCore.info(`${YARN_LOCK} exists; using yarn install with frozen lockfile`);
+        ghCore.info(`${YARN_LOCK} exists. Using yarn install with frozen lockfile`);
         executable = "yarn";
         args = [ "install", "--frozen-lockfile" ];
     }

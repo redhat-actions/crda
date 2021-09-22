@@ -16,9 +16,9 @@ export async function uploadSarifFile(
     ghCore.info(`⬆️ Uploading SARIF file to ${owner}/${repo}...`);
 
     const sarifContents = await fs.readFile(sarifToUpload, "utf-8");
-    ghCore.debug(`Raw upload size: ${sarifContents.length} bytes`);
+    ghCore.debug(`Raw upload size: ${utils.convertToHumanFileSize(sarifContents.length)}`);
     const zippedSarif = (await promisify(zlib.gzip)(sarifContents)).toString("base64");
-    ghCore.info(`Zipped upload size: ${zippedSarif.length} bytes`);
+    ghCore.info(`Zipped upload size: ${utils.convertToHumanFileSize(zippedSarif.length)}`);
 
     ghCore.debug(`Commit Sha: ${sha}`);
     ghCore.debug(`Ref: ${ref}`);

@@ -28,7 +28,7 @@ namespace Analyse {
 
         await Crda.exec(Crda.getCRDAExecutable(), crdaExecArgs);
 
-        ghCore.info(`⏳ Collecting JSON data for the detailed analysis.`);
+        ghCore.info(`⏳ Collecting JSON data for analysis`);
         const execResult = await Crda.exec(Crda.getCRDAExecutable(), [ ...crdaExecArgs, "--json" ], { group: true });
         const analysisReportJson = execResult.stdout;
         const crdaData = JSON.parse(analysisReportJson);

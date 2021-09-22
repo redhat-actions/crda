@@ -98,3 +98,24 @@ export async function getCommitSha(): Promise<string> {
     }
     */
 }
+
+const SIZE_UNITS = [ "B", "KB", "MB", "GB" ];
+
+/**
+ * @returns The size of the resource at the given URL as a human-readable string. Eg, "1.23KB".
+ */
+export function convertToHumanFileSize(size: number): string {
+    try {
+        let sizeUnitIndex = 0;
+        while (size > 1024 && sizeUnitIndex < SIZE_UNITS.length) {
+            // eslint-disable-next-line no-param-reassign
+            size /= 1024;
+            sizeUnitIndex++;
+        }
+
+        return `${size.toFixed(2)}${SIZE_UNITS[sizeUnitIndex]}`;
+    }
+    catch (err) {
+        return size.toString() + "B";
+    }
+}

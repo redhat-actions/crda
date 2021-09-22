@@ -58,10 +58,14 @@ async function run(): Promise<void> {
     }
 
     const manifestDirInput = ghCore.getInput(Inputs.MANIFEST_DIRECTORY);
-    ghCore.info(`${Inputs.MANIFEST_DIRECTORY} is "${manifestDirInput}"`);
+    if (manifestDirInput) {
+        ghCore.info(`${Inputs.MANIFEST_DIRECTORY} is "${manifestDirInput}"`);
+    }
 
     const manifestFileInput = ghCore.getInput(Inputs.MANIFEST_FILE);
-    ghCore.info(`${Inputs.MANIFEST_FILE} is "${manifestFileInput}"`);
+    if (manifestFileInput) {
+        ghCore.info(`${Inputs.MANIFEST_FILE} is "${manifestFileInput}"`);
+    }
 
     const depsInstallCmdStr = ghCore.getInput(Inputs.DEPS_INSTALL_CMD);
     let depsInstallCmd: string[] | undefined;

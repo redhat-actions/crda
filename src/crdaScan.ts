@@ -93,11 +93,11 @@ export async function crdaScan(
         return;
     }
 
-    ghCore.info(`🔁 Converting JSON analysed data to the SARIF format.`);
+    ghCore.info(`🔁 Converting JSON analysed data to the SARIF format`);
     const crdaReportSarif = convertCRDAReportToSarif(crdaReportJson, resolvedManifestPath);
 
     ghCore.info(
-        `ℹ️ Successfully converted analysis JSON to the SARIF format. SARIF file is available at ${crdaReportSarif}`
+        `ℹ️ Successfully converted analysis JSON report to SARIF. SARIF file is available at ${crdaReportSarif}`
     );
 
     ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
