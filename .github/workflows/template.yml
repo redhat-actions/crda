@@ -1,0 +1,33 @@
+# Template workflow for OpenShift GitHub Connector
+
+name: CRDA Scan
+
+on:
+  push:
+    branches: [ "n/a" ]
+  # pull_request_target:
+    # These types are all required for CRDA to scan pull requests correctly and securely.
+    # types: [ opened, synchronize, reopened, labeled, edited ]
+
+jobs:
+  crda-scan:
+    name: CRDA Scan
+    runs-on: ubuntu-20.04
+
+    steps:
+    # INSERT setup-[go|java|node|python] here
+
+    - name: Install CRDA
+      uses: redhat-actions/openshift-tools-installer@v1
+      with:
+        source: github
+        github_pat: ${{ github.token }}
+        crda: latest
+
+    - name: CRDA Scan
+      # TODO - v1
+      uses: redhat-actions/crda@main
+      with:
+        crda_key: ${{ secrets.CRDA_KEY }}
+        # snyk_token: ${{ secrets.SNYK_TOKEN }}
+        # manifest_directory: ""
