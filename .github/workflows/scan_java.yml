@@ -6,7 +6,7 @@ on:
     - cron: '0 0 * * *'  # every day at midnight
 
 env:
-  PROJECT_REPO: spring-petclinic
+  PROJECT_DIR: spring-petclinic
 
 jobs:
   test:
@@ -14,6 +14,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ "macos-latest", "windows-latest", "ubuntu-20.04" ]
+        # Test once with explicit manifest_file, and once without
+        manifest_file: [ "pom.xml", "" ]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -23,13 +25,13 @@ jobs:
       - name: Checkout action
         uses: actions/checkout@v2
 
-      - name: Clone ${{ env.PROJECT_REPO }}
+      - name: Clone ${{ env.PROJECT_DIR }}
         run: |
-          git clone --single-branch --branch crda-modification --depth 1 https://github.com/redhat-actions/${{ env.PROJECT_REPO }}.git
+          git clone --single-branch --branch crda-modification --depth 1 https://github.com/redhat-actions/${{ env.PROJECT_DIR }}.git
 
       # pom.xml must be in working directory when setup-java is run
       - name: Copy pom.xml to working directory
-        run: cp ${{ env.PROJECT_REPO }}/pom.xml .
+        run: cp ${{ env.PROJECT_DIR }}/pom.xml .
 
       - name: Setup Java
         uses: actions/setup-java@v2
@@ -49,7 +51,8 @@ jobs:
         id: scan
         uses: ./
         with:
-          manifest_directory: ${{ env.PROJECT_REPO }}
+          manifest_directory: ${{ env.PROJECT_DIR }}
+          manifest_file: ${{ matrix.manifest_file }}
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           analysis_report_name: java

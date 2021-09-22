@@ -11,6 +11,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ "macos-latest", "windows-latest", "ubuntu-20.04" ]
+        # Test once with explicit manifest_file, and once without
+        manifest_file: [ "requirements.txt", "" ]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -37,6 +39,7 @@ jobs:
         uses: ./
         with:
           manifest_directory: manifests/python/
+          manifest_file: ${{ matrix.manifest_file }}
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never
