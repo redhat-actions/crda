@@ -53,7 +53,7 @@ export async function crdaScan(
     }
     else {
         throw new Error(
-            `❌ Input ${Inputs.CRDA_KEY} or ${Inputs.SNYK_TOKEN} must be provided for authenticating to CRDA.`
+            `❌ Input "${Inputs.CRDA_KEY}" or "${Inputs.SNYK_TOKEN}" must be provided for authenticating to CRDA.`
         );
     }
     const vulSeverity = await Analyse.analyse(resolvedManifestPath, crdaReportJson);
@@ -118,7 +118,7 @@ export async function crdaScan(
         }
     }
     else {
-        ghCore.info(`⏩ Input ${Inputs.UPLOAD_SARIF} is false, skipping SARIF upload.`);
+        ghCore.info(`⏩ Input "${Inputs.UPLOAD_SARIF}" is false, skipping SARIF upload.`);
     }
 
     if (vulSeverity !== "none") {

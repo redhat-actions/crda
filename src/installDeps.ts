@@ -28,7 +28,7 @@ export async function findManifestAndInstallDeps(
 ): Promise<string> {
 
     if (!manifestDirInput) {
-        ghCore.info(`${Inputs.MANIFEST_DIRECTORY} not provided. Using GITHUB_WORKSPACE`);
+        ghCore.info(`"${Inputs.MANIFEST_DIRECTORY}" not provided. Using GITHUB_WORKSPACE`);
     }
     const manifestDir = manifestDirInput || getEnvVariableValue("GITHUB_WORKSPACE");
 
@@ -42,7 +42,7 @@ export async function findManifestAndInstallDeps(
         resolvedManifestPath = path.join(manifestDir, manifestFilename);
     }
     else {
-        ghCore.info(`${Inputs.MANIFEST_FILE} input not provided. Auto-detecting manifest file`);
+        ghCore.info(`"${Inputs.MANIFEST_FILE}" input not provided. Auto-detecting manifest file`);
         ghCore.info(`🔍 Looking for manifest in ${manifestDir}`);
 
         const autoDetectResult = await autoDetectInstall(manifestDir);
@@ -58,7 +58,7 @@ export async function findManifestAndInstallDeps(
     ghCore.info(`Manifest file is ${resolvedManifestPath}`);
 
     if (depsInstallCmd) {
-        ghCore.info(`${Inputs.DEPS_INSTALL_CMD} is set`);
+        ghCore.info(`"${Inputs.DEPS_INSTALL_CMD}" is set`);
 
         installType = "custom";
     }
@@ -153,7 +153,7 @@ async function installDeps(
     // use the provided command instead of
     // using default command
     if (depsInstallCmd) {
-        ghCore.info(`Running custom ${Inputs.DEPS_INSTALL_CMD}`);
+        ghCore.info(`Running custom "${Inputs.DEPS_INSTALL_CMD}"`);
         await Crda.exec(depsInstallCmd[0], [ ...depsInstallCmd.slice(1) ], { group: true });
     }
     else if (installType === "Go") {

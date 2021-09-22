@@ -331,7 +331,9 @@ export function convertCRDAReportToSarif(
 
     const jsonExt = path.extname(crdaReportJson);
     const jsonBasename = path.basename(crdaReportJson);
-    const sarifFilename = `${jsonBasename.substring(0, jsonExt.length - 1)}.sarif`;
+
+    // eg crda_analysis_report.json -> crda_analysis_report.sarif
+    const sarifFilename = jsonBasename.replace(jsonExt, ".sarif");
 
     if (convertedSarif.$schema) {
         fs.writeFileSync(sarifFilename, JSON.stringify(convertedSarif, undefined, 4), "utf-8");
