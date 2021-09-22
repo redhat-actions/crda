@@ -1,4 +1,4 @@
-name: CRDA scan Python project
+name: Scan Python project
 on:
   push:
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
 
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.9.6'
+          python-version: 3
 
       - name: Install CRDA
         uses: redhat-actions/openshift-tools-installer@v1
@@ -36,7 +36,7 @@ jobs:
         id: scan
         uses: ./
         with:
-          manifest_path: test-manifests/python/requirements.txt
+          manifest_directory: manifests/python/
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never

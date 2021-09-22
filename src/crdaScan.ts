@@ -1,17 +1,18 @@
 import * as ghCore from "@actions/core";
-import * as fs from "fs";
+import { promises as fs } from "fs";
 import Analyse from "./analyse";
-import { convert } from "./convert";
+import { convertCRDAReportToSarif } from "./convert";
 import Crda from "./crda";
 import { Inputs, Outputs } from "./generated/inputs-outputs";
 import { addLabelsToPr } from "./util/labels";
 import { uploadSarifFile } from "./uploadSarif";
 import { CrdaLabels } from "./util/constants";
+import { capitalizeFirstLetter, getEnvVariableValue } from "./util/utils";
 
 export async function crdaScan(
-    analysisStartTime: string, isPullRequest: boolean, prNumber: number, sha?: string
+    resolvedManifestPath: string,
+    analysisStartTime: string, isPullRequest: boolean, prNumber: number, sha: string
 ): Promise<void> {
-    const manifestPath = ghCore.getInput(Inputs.MANIFEST_PATH);
     const snykToken = ghCore.getInput(Inputs.SNYK_TOKEN);
     const crdaKey = ghCore.getInput(Inputs.CRDA_KEY);
     const consentTelemetry = ghCore.getInput(Inputs.CONSENT_TELEMETRY) || "false";
@@ -19,7 +20,6 @@ export async function crdaScan(
     const failOn = ghCore.getInput(Inputs.FAIL_ON) || "error";
     const githubToken = ghCore.getInput(Inputs.GITHUB_TOKEN);
     const uploadSarif = ghCore.getInput(Inputs.UPLOAD_SARIF) === "true";
-    const checkoutPath = ghCore.getInput(Inputs.CHECKOUT_PATH);
 
     // const pkgInstallationDirectoryPath = ghCore.getInput(Inputs.PKG_INSTALLATION_DIRECTORY_PATH);
 
@@ -29,9 +29,6 @@ export async function crdaScan(
     // }
 
     const crdaReportJson = `${analysisReportName}.json` || "crda_analysis_report.json";
-    const crdaReportSarif = `${analysisReportName}.sarif` || "crda_analysis_report.sarif";
-
-    ghCore.debug(`Checkout Path: ${checkoutPath}`);
 
     // Setting up consent_telemetry config to avoid prompt during auth command
     ghCore.info(`🖊️ Setting ${Crda.ConfigKeys.ConsentTelemetry} to ${consentTelemetry}.`);
@@ -51,22 +48,15 @@ export async function crdaScan(
         ghCore.info(`✅ Successfully authenticated with the provided Snyk Token.`);
     }
     else if (crdaKey) {
-        ghCore.info(`🖊️ Setting ${Crda.ConfigKeys.CrdaKey} to the provided CRDA key.`);
+        ghCore.info(`🔐️ Authenticating with the provided CRDA Key`);
         await Analyse.configSet(Crda.ConfigKeys.CrdaKey, crdaKey);
     }
     else {
         throw new Error(
-            `❌ Input ${Inputs.CRDA_KEY} or ${Inputs.SNYK_TOKEN} must be provided for authenticating to CRDA.`
+            `❌ Input "${Inputs.CRDA_KEY}" or "${Inputs.SNYK_TOKEN}" must be provided for authenticating to CRDA.`
         );
     }
-    const vulSeverity = await Analyse.analyse(`${checkoutPath}/${manifestPath}`, crdaReportJson);
-
-    if (failOn !== "never") {
-        ghCore.info(`Failing if "${failOn}" level vulnerability is found`);
-    }
-    else {
-        ghCore.info(`Not failing on any vulnerability`);
-    }
+    const vulSeverity = await Analyse.analyse(resolvedManifestPath, crdaReportJson);
 
     if (isPullRequest) {
         switch (vulSeverity) {
@@ -84,11 +74,9 @@ export async function crdaScan(
         }
     }
 
-    ghCore.info(`✅ Analysis completed. JSON report is available at ${crdaReportJson}.`);
-
     ghCore.setOutput(Outputs.CRDA_REPORT_JSON, crdaReportJson);
 
-    const crdaAnalysedData = fs.readFileSync(crdaReportJson, "utf-8");
+    const crdaAnalysedData = await fs.readFile(crdaReportJson, "utf-8");
     const crdaData = JSON.parse(crdaAnalysedData);
 
     const reportLink = crdaData.report_link;
@@ -98,45 +86,63 @@ export async function crdaScan(
         ghCore.warning(
             `Cannot retrieve detailed analysis and report in SARIF format. `
             + `A Synk token or a CRDA key authenticated to Synk is required for detailed analysis and SARIF output.`
-            + `Use the "${Inputs.SNYK_TOKEN}" input, or provide a CRDA key authenticated with Snyk. `
-            + `To get a Snyk token, follow `
-            + `https://app.snyk.io/login?utm_campaign=Code-Ready-Analytics-2020&utm_source=code_ready&code_ready=FF1B53D9-57BE-4613-96D7-1D06066C38C9`
+            + `Use the "${Inputs.SNYK_TOKEN}" or "${Inputs.CRDA_KEY}" input. Refer to the README for more information.`
         );
-    }
-    else {
-        ghCore.info(`🔁 Converting JSON analysed data to the SARIF format.`);
-        convert(crdaReportJson, checkoutPath, manifestPath, crdaReportSarif);
 
-        ghCore.info(`✅ Successfully converted analysis JSON to the SARIF format. `
-        + `SARIF file is available at ${crdaReportSarif}.`);
-
-        ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
+        // cannot proceed with SARIF
+        return;
     }
+
+    ghCore.info(`🔁 Converting JSON analysed data to the SARIF format`);
+    const crdaReportSarif = convertCRDAReportToSarif(crdaReportJson, resolvedManifestPath);
+
+    ghCore.info(
+        `ℹ️ Successfully converted analysis JSON report to SARIF. SARIF file is available at ${crdaReportSarif}`
+    );
+
+    ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
 
     if (uploadSarif) {
-        ghCore.info(`⬆️ Uploading SARIF file to GitHub...`);
+        let ref;
         if (isPullRequest) {
-            const ref = `refs/pull/${prNumber}/head`;
-            await uploadSarifFile(githubToken, crdaReportSarif, checkoutPath, analysisStartTime, ref, sha);
+            ref = `refs/pull/${prNumber}/head`;
+            await uploadSarifFile(
+                githubToken, crdaReportSarif, /* resolvedManifestPath, */ analysisStartTime, sha, ref
+            );
         }
         else {
-            await uploadSarifFile(githubToken, crdaReportSarif, checkoutPath, analysisStartTime);
+            ref = getEnvVariableValue("GITHUB_REF");
+            await uploadSarifFile(
+                githubToken, crdaReportSarif, /* resolvedManifestPath, */ analysisStartTime, sha, ref
+            );
         }
-        ghCore.info(`✅ Successfully uploaded SARIF file to GitHub`);
     }
     else {
-        ghCore.info(`⏩ Input ${Inputs.UPLOAD_SARIF} is set to false, skipping SARIF upload.`);
+        ghCore.info(`⏩ Input "${Inputs.UPLOAD_SARIF}" is false, skipping SARIF upload.`);
     }
 
-    if (failOn !== "never") {
-        if (failOn === "warning" && (vulSeverity === "error" || vulSeverity === "warning")) {
-            throw new Error(`Found vulnerabilities in the project.`);
+    if (vulSeverity !== "none") {
+        ghCore.warning(`Found ${capitalizeFirstLetter(vulSeverity)} level vulnerabilities`);
+
+        if (failOn !== "never") {
+            if (failOn === "warning") {
+                ghCore.info(
+                    `Input "${Inputs.FAIL_ON}" is "${failOn}", and at least one warning was found. Failing workflow.`
+                );
+                throw new Error(`Found vulnerabilities in the project.`);
+            }
+            else if (failOn === "error" && vulSeverity === "error") {
+                ghCore.info(
+                    `Input "${Inputs.FAIL_ON}" is "${failOn}", and at least one error was found. Failing workflow.`
+                );
+                throw new Error(`Found high severity vulnerabilities in the project.`);
+            }
         }
-        else if (failOn === "error" && vulSeverity === "error") {
-            throw new Error(`Found high severity vulnerabilities in the project.`);
+        else {
+            ghCore.info(`Input "${Inputs.FAIL_ON}" is "${failOn}". Not failing workflow.`);
         }
     }
     else {
-        ghCore.info(`Not failing on any vulnerability`);
+        ghCore.info(`✅ No vulnerabilities were found`);
     }
 }

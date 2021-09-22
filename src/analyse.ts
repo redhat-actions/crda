@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as ghCore from "@actions/core";
-import Crda, { CRDA_EXECUTABLE } from "./crda";
+import Crda from "./crda";
 
 namespace Analyse {
 
@@ -9,14 +9,14 @@ namespace Analyse {
             Crda.Commands.Config, Crda.SubCommands.set, configKey, configValue,
         ];
 
-        await Crda.exec(CRDA_EXECUTABLE, crdaExecArgs);
+        await Crda.exec(Crda.getCRDAExecutable(), crdaExecArgs);
     }
     export async function auth(snykToken: string): Promise<string> {
         const crdaOptions = Crda.getOptions({ "snyk-token": snykToken });
         const crdaExecArgs = [ Crda.Commands.Auth, ...crdaOptions ];
 
         // Hiding the output as it contains generated CRDA key
-        const authResult = await Crda.exec(CRDA_EXECUTABLE, crdaExecArgs, { hideOutput: true });
+        const authResult = await Crda.exec(Crda.getCRDAExecutable(), crdaExecArgs, { hideOutput: true });
         return authResult.stdout;
     }
 
@@ -26,10 +26,10 @@ namespace Analyse {
         const crdaOptions = Crda.getOptions({ verbose: "", client: "gh-actions" });
         const crdaExecArgs = [ Crda.Commands.Analyse, manifestPath, ...crdaOptions ];
 
-        await Crda.exec(CRDA_EXECUTABLE, crdaExecArgs);
+        await Crda.exec(Crda.getCRDAExecutable(), crdaExecArgs);
 
-        ghCore.info(`⏳ Collecting JSON data for the detailed analysis.`);
-        const execResult = await Crda.exec(CRDA_EXECUTABLE, [ ...crdaExecArgs, "--json" ], { group: true });
+        ghCore.info(`⏳ Collecting JSON data for analysis`);
+        const execResult = await Crda.exec(Crda.getCRDAExecutable(), [ ...crdaExecArgs, "--json" ], { group: true });
         const analysisReportJson = execResult.stdout;
         const crdaData = JSON.parse(analysisReportJson);
 

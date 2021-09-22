@@ -1,9 +1,12 @@
-name: CRDA scan Java project
+name: Scan Java project
 on:
   push:
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'  # every day at midnight
+
+env:
+  PROJECT_REPO: spring-petclinic
 
 jobs:
   test:
@@ -16,48 +19,24 @@ jobs:
       run:
         shell: bash
     name: Analyse Java project
-    env:
-      MVN_REPO_DIR: ~/.m2/repository
     steps:
-
-      - name: Checkout project
-        uses: actions/checkout@v2
-        with:
-          repository: redhat-actions/spring-petclinic
-          ref: crda-modification
-
       - name: Checkout action
         uses: actions/checkout@v2
-        with:
-          path: crda
 
-      # If none of these files has changed, we assume that the contents of .m2/repository can be fetched from the cache.
-      - name: Hash Maven files
+      - name: Clone ${{ env.PROJECT_REPO }}
         run: |
-          echo "MVN_HASH=${{ hashFiles('pom.xml', '.mvn/**/*', 'mvnw*') }}" >> $GITHUB_ENV
+          git clone --single-branch --branch crda-modification --depth 1 https://github.com/redhat-actions/${{ env.PROJECT_REPO }}.git
 
-      # Download the m2 repository from the cache to speed up the build.
-      - name: Check for Maven cache
-        id: check-mvn-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.MVN_REPO_DIR }}
-          key: ${{ env.MVN_HASH }}
+      # pom.xml must be in working directory when setup-java is run
+      - name: Copy pom.xml to working directory
+        run: cp ${{ env.PROJECT_REPO }}/pom.xml .
 
       - name: Setup Java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
+          distribution: temurin
           java-version: 11
-
-      - run: java -version
-
-      # If there was no cache hit above, store the output into the cache now.
-      - name: Save Maven repo into cache
-        if: ${{ steps.check-mvn-cache.outputs.cache-hit }} != 'true'
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.MVN_REPO_DIR }}
-          key: ${{ env.MVN_HASH }}
+          cache: maven
 
       - name: Install CRDA
         uses: redhat-actions/openshift-tools-installer@v1
@@ -68,14 +47,13 @@ jobs:
 
       - name: CRDA Scan
         id: scan
-        uses: ./crda
+        uses: ./
         with:
-          manifest_path: pom.xml
+          manifest_directory: ${{ env.PROJECT_REPO }}
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           analysis_report_name: java
           fail_on: never
-          upload_sarif: false
 
       - name: Print JSON analysis report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}

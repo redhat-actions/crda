@@ -1,11 +1,9 @@
-name: Scan Golang project
+name: Scan Node/yarn project
 on:
   push:
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'  # every day at midnight
-  # pull_request_target:
-  #   types: [ assigned, opened, synchronize, reopened, labeled, edited ]
 
 jobs:
   test:
@@ -17,16 +15,16 @@ jobs:
     defaults:
       run:
         shell: bash
-    name: Analyse Golang project
+    name: Analyse Node project
     steps:
 
       - name: Checkout action
         uses: actions/checkout@v2
 
-      - name: Setup Go
-        uses: actions/setup-go@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
         with:
-          go-version: '^1.13.1'
+          node-version: '14'
 
       - name: Install CRDA
         uses: redhat-actions/openshift-tools-installer@v1
@@ -39,10 +37,10 @@ jobs:
         id: scan
         uses: ./
         with:
-          manifest_directory: manifests/golang/
-          # crda_key: ${{ secrets.CRDA_KEY }}
-          snyk_token: ${{ secrets.SNYK_TOKEN }}
+          manifest_directory: manifests/node/yarn/
+          crda_key: ${{ secrets.CRDA_KEY }}
           fail_on: never
+          # snyk_token: ${{ secrets.SNYK_TOKEN }}
 
       - name: Print JSON analysis report
         if: ${{ always() && steps.scan.outputs.crda_report_json }}
@@ -64,5 +62,5 @@ jobs:
       - name: Upload merged Results
         uses: actions/upload-artifact@v2
         with:
-          name: scan_result_go.zip
+          name: scan_result_js.zip
           path: ./uploads

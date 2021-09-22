@@ -1,6 +1,7 @@
 import * as ghCore from "@actions/core";
 import * as os from "os";
 import { promises as fs } from "fs";
+import Crda from "../crda";
 
 type OS = "linux" | "macos" | "windows";
 
@@ -69,5 +70,52 @@ export async function fileExists(filePath: string): Promise<boolean> {
     }
     catch (err) {
         return false;
+    }
+}
+
+let gitExecutable: string | undefined;
+export function getGitExecutable(): string {
+    if (gitExecutable) {
+        return gitExecutable;
+    }
+
+    const git = getOS() === "windows" ? "git.exe" : "git";
+    gitExecutable = git;
+    return git;
+}
+
+export async function getCommitSha(): Promise<string> {
+    const commitSha = (await Crda.exec(getGitExecutable(), [ "rev-parse", "HEAD" ])).stdout;
+    return commitSha.trim();
+
+    /*
+    if (!commitSha) {
+        ghCore.info(
+            `Failed to get current commit SHA using git. `
+            + `Using environment variable GITHUB_SHA to get the current commit SHA.`
+        );
+        return utils.getEnvVariableValue("GITHUB_SHA");
+    }
+    */
+}
+
+const SIZE_UNITS = [ "B", "KB", "MB", "GB" ];
+
+/**
+ * @returns The size of the resource at the given URL as a human-readable string. Eg, "1.23KB".
+ */
+export function convertToHumanFileSize(size: number): string {
+    try {
+        let sizeUnitIndex = 0;
+        while (size > 1024 && sizeUnitIndex < SIZE_UNITS.length) {
+            // eslint-disable-next-line no-param-reassign
+            size /= 1024;
+            sizeUnitIndex++;
+        }
+
+        return `${size.toFixed(2)}${SIZE_UNITS[sizeUnitIndex]}`;
+    }
+    catch (err) {
+        return size.toString() + "B";
     }
 }

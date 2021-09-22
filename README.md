@@ -14,7 +14,7 @@ Read more about CRDA in [this blog post](https://developers.redhat.com/blog/2020
 
 ## Configuration
 
-You can refer to [the examples in this repository](./.github/workflows) for a simple example of scanning each supported language.
+You can refer to [the examples in this repository](./.github/workflows) for a simple example of scanning each supported language. Or, skip to the [example below](#example).
 
 ### 1. Set up the tool stack
 Unless already done, you must set up the tool stack for your project.
@@ -26,17 +26,21 @@ Refer to the setup actions for:
   - [Python](https://github.com/actions/setup-python)
 
 ### 2. Install the CRDA command line interface
-Use the [**OpenShift Tools Installer**](https://github.com/redhat-actions/openshift-tools-installer) to install the CRDA CLI.
+Use the [**OpenShift Tools Installer**](https://github.com/redhat-actions/openshift-tools-installer) to install the CRDA CLI from GitHub.
 
 <a id="installing-dependencies"></a>
 ### 3. Installing Dependencies
-The project must have a dependencies manifest file which CRDA can read to install dependencies.
+The project must have a dependencies manifest file which CRDA can read to install and analyze dependencies.
 
-By default, CRDA will install dependencies using a standard command for the project type.
-  - Override the path to the manifest with the `manifest_path` input.
-  - Override the install command with the `deps_install_cmd` input.
+By default, CRDA will install dependencies using a standard command for the project type as described in the table below. This can be overridden with the `deps_install_cmd` input.
 
-| Project Type   | Required Manifest | Default Install Command |
+Use the `manifest_directory` input if your project is not in the default directory, the `GITHUB_WORKSPACE`. The install command will execute in this directory.
+
+Use the `manifest_file` input if your manifest file is named differently than the table below. The file must exist in the `manifest_directory`. If this input is omitted, the `manifest_directory` will be searched for the files in the table below.
+
+Refer to the [Action Inputs](#action-inputs) section for more information.
+
+| Project Type   | Default `manifest_file` | Default Install Command |
 | -------------- | --------------------- | ---------------------------- |
 | Go             | `go.mod`            | `go mod vendor`              |
 | Java           | `pom.xml`           | `mvn -ntp -B package`     |
@@ -93,13 +97,11 @@ steps:
   id: crda_scan
   uses: redhat-actions/crda@v1
   with:
-    manifest_path: package.json
     crda_key: ${{ secrets.CRDA_KEY }}
 
 - name: Print Report Link
   run: echo ${{ steps.crda_scan.outputs.report_link }}
 ```
-
 
 <a id="action-inputs"></a>
 ## Action Inputs
@@ -108,13 +110,13 @@ steps:
 | ----- | ----------- | --------- |
 | crda_key | Existing CRDA key to identify the existing user. | **Required** unless `synk_token` is set
 | snyk_token | Snyk token to be used to authenticate to the CRDA | **Required** unless `crda_key` is set
-| manifest_path | Path of the manifest file to use for analysis, relative to the repository root. | **Required**
 | analysis_report_name | Name of the analysis report files. A `.json` and a `.sarif` file will be created. | `crda_analysis_report`
-| checkout_path | Path at which the project repository is checked out. | `${{ github.workspace }}`
 | consent_telemetry | CRDA collects anonymous usage data. Enable this to help make CRDA better for our users. Refer to the [privacy statement](https://developers.redhat.com/article/tool-data-collection) for more details. | `false`
 | deps_install_cmd | Command to use for the dependencies installation instead of using the default. | [View defaults](#installing-dependencies)
 | fail_on | Configure if the workflow should fail if a vulnerability of this level or higher is found in the project. This can be `error` to fail only on errors, `warning` to fail on warnings or errors, or `never` to always pass the step.| `error`
 | github_token | GitHub token used to upload the SARIF report to GitHub. The token must have `security_events` write permission. | [`${{ github.token }}`](https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret)
+| manifest_directory | Path to the directory where the project's manifest is. | `${{ github.workspace }}`
+| manifest_file | File name (basename) of the manifest file to use for analysis. This file must exist in the `manifest_directory`. If not specified, the action will scan the `manifest_directory` for any of the expected manifest files. | [View defaults](#installing-dependencies) |
 | upload_sarif | Whether or not to upload the generated SARIF file. If this is disabled, vulnerabilities will not be reported in the Security tab. | `true`
 
 ## Action Outputs
