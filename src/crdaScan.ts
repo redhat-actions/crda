@@ -122,7 +122,7 @@ export async function crdaScan(
     }
 
     if (vulSeverity !== "none") {
-        ghCore.warning(`${capitalizeFirstLetter(vulSeverity)} level vulnerabilities were found in the project`);
+        ghCore.warning(`Found ${capitalizeFirstLetter(vulSeverity)} level vulnerabilities`);
 
         if (failOn !== "never") {
             if (failOn === "warning") {
