@@ -58,7 +58,7 @@ export async function crdaScan(
     }
     const vulSeverity = await Analyse.analyse(resolvedManifestPath, crdaReportJson);
 
-    if (isPullRequest) {
+    if (isPullRequest && vulSeverity !== undefined) {
         switch (vulSeverity) {
         case "error":
             await addLabelsToPr(prNumber, [ CrdaLabels.CRDA_FOUND_ERROR ]);
@@ -82,13 +82,7 @@ export async function crdaScan(
     const reportLink = crdaData.report_link;
     ghCore.setOutput(Outputs.REPORT_LINK, reportLink);
 
-    if (!crdaData.analysed_dependencies) {
-        ghCore.warning(
-            `Cannot retrieve detailed analysis and report in SARIF format. `
-            + `A Synk token or a CRDA key authenticated to Synk is required for detailed analysis and SARIF output.`
-            + `Use the "${Inputs.SNYK_TOKEN}" or "${Inputs.CRDA_KEY}" input. Refer to the README for more information.`
-        );
-
+    if (vulSeverity === undefined) {
         // cannot proceed with SARIF
         return;
     }
