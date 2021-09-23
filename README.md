@@ -1,17 +1,17 @@
 # CodeReady Dependency Analytics (crda)
 
-[![CI Checks](https://github.com/redhat-actions/crda/actions/workflows/ci.yml/badge.svg)](./actions/workflows/ci.yml)
-[![Link checker](https://github.com/redhat-actions/crda/actions/workflows/link_checker.yml/badge.svg)](./actions/workflows/link_checker.yml)
+[![CI Checks](https://github.com/redhat-actions/crda/actions/workflows/ci.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/ci.yml)
+[![Link checker](https://github.com/redhat-actions/crda/actions/workflows/link_checker.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/link_checker.yml)
 <br>
 <br>
-[![Scan Golang project](https://github.com/redhat-actions/crda/actions/workflows/scan_go.yml/badge.svg)](./actions/workflows/scan_go.yml)
-[![Scan Java project](https://github.com/redhat-actions/crda/actions/workflows/scan_java.yml/badge.svg)](./actions/workflows/scan_java.yml)
-[![Scan Node projects](https://github.com/redhat-actions/crda/actions/workflows/scan_node.yml/badge.svg)](./actions/workflows/scan_node.yml)
-[![Scan Node project with deps_install_cmd](https://github.com/redhat-actions/crda/actions/workflows/scan_custom_deps.yml/badge.svg)](./actions/workflows/scan_custom_deps.yml)
-[![Scan Python project](https://github.com/redhat-actions/crda/actions/workflows/scan_python.yml/badge.svg)](./actions/workflows/scan_python.yml)
+[![Scan Golang project](https://github.com/redhat-actions/crda/actions/workflows/scan_go.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_go.yml)
+[![Scan Java project](https://github.com/redhat-actions/crda/actions/workflows/scan_java.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_java.yml)
+[![Scan Node projects](https://github.com/redhat-actions/crda/actions/workflows/scan_node.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_node.yml)
+[![Scan using custom installation](https://github.com/redhat-actions/crda/actions/workflows/scan_custom_deps.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_custom_deps.yml)
+[![Scan Python project](https://github.com/redhat-actions/crda/actions/workflows/scan_python.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_python.yml)
 <br>
 <br>
-[![tag badge](https://img.shields.io/github/v/tag/redhat-actions/crda)](./tags)
+[![tag badge](https://img.shields.io/github/v/tag/redhat-actions/crda)](https://github.com/redhat-actions/crda/tags)
 [![license badge](https://img.shields.io/github/license/redhat-actions/crda)](./LICENSE)
 [![size badge](https://img.shields.io/github/size/redhat-actions/crda/dist/index.js)](./dist)
 
