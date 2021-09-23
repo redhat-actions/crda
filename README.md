@@ -7,7 +7,6 @@
 [![Scan Golang project](https://github.com/redhat-actions/crda/actions/workflows/scan_go.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_go.yml)
 [![Scan Java project](https://github.com/redhat-actions/crda/actions/workflows/scan_java.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_java.yml)
 [![Scan Node projects](https://github.com/redhat-actions/crda/actions/workflows/scan_node.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_node.yml)
-[![Scan using custom installation](https://github.com/redhat-actions/crda/actions/workflows/scan_custom_deps.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_custom_deps.yml)
 [![Scan Python project](https://github.com/redhat-actions/crda/actions/workflows/scan_python.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_python.yml)
 <br>
 <br>
