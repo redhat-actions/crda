@@ -1,4 +1,4 @@
-name: Scan Node/no lockfile project
+name: Scan Node projects
 on:
   push:
   workflow_dispatch:
@@ -11,6 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ "macos-latest", "windows-latest", "ubuntu-20.04" ]
+        manifest_directory: [ "manifests/node/no-lockfile", "manifests/node/npm", "manifests/node/yarn/" ]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -37,8 +38,7 @@ jobs:
         id: scan
         uses: ./
         with:
-          manifest_directory: manifests/node/no-lockfile
-          manifest_file: package.json
+          manifest_directory: ${{ matrix.manifest_directory }}
           crda_key: ${{ secrets.CRDA_KEY }}
           # snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never
