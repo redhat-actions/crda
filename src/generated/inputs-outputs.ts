@@ -45,7 +45,7 @@ export enum Inputs {
     /**
      * Path to the directory containing the manifest_file.
      * Required: false
-     * Default: "${{ github.workspace }}"
+     * Default: "Working directory"
      */
     MANIFEST_DIRECTORY = "manifest_directory",
     /**

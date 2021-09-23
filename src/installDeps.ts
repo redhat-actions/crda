@@ -3,7 +3,7 @@ import * as path from "path";
 import { promises as fs } from "fs";
 import Crda from "./crda";
 import { Inputs } from "./generated/inputs-outputs";
-import { fileExists, getEnvVariableValue } from "./util/utils";
+import { fileExists } from "./util/utils";
 
 type DepsInstallType = "Go" | "Maven" | "Node.js" | "Pip" | "custom";
 
@@ -28,9 +28,9 @@ export async function findManifestAndInstallDeps(
 ): Promise<string> {
 
     if (!manifestDirInput) {
-        ghCore.info(`"${Inputs.MANIFEST_DIRECTORY}" not provided. Using GITHUB_WORKSPACE`);
+        ghCore.info(`"${Inputs.MANIFEST_DIRECTORY}" not provided. Using working directory.`);
     }
-    const manifestDir = manifestDirInput || getEnvVariableValue("GITHUB_WORKSPACE");
+    const manifestDir = manifestDirInput || ".";
 
     let manifestFilename;
     let resolvedManifestPath;
@@ -78,7 +78,7 @@ export async function findManifestAndInstallDeps(
     let didChangeWD = false;
 
     try {
-        if (manifestDir) {
+        if (path.resolve(manifestDir) !== process.cwd()) {
             let newWD;
             if (path.isAbsolute(manifestDir)) {
                 newWD = manifestDir;

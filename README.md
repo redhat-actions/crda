@@ -129,7 +129,7 @@ steps:
 | deps_install_cmd | Command to use for the dependencies installation instead of using the default. | [View defaults](#installing-dependencies)
 | fail_on | Configure if the workflow should fail if a vulnerability of this level or higher is found in the project. This can be `error` to fail only on errors, `warning` to fail on warnings or errors, or `never` to always pass the step.| `error`
 | github_token | GitHub token used to upload the SARIF report to GitHub. The token must have `security_events` write permission. | [`${{ github.token }}`](https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret)
-| manifest_directory | Path to the directory where the project's manifest is. | `${{ github.workspace }}`
+| manifest_directory | Path to the directory where the project's manifest is. | Working directory
 | manifest_file | File name (basename) of the manifest file to use for analysis. This file must exist in the `manifest_directory`. If not specified, the action will scan the `manifest_directory` for any of the expected manifest files. | [View defaults](#installing-dependencies) |
 | upload_sarif | Whether or not to upload the generated SARIF file. If this is disabled, vulnerabilities will not be reported in the Security tab. | `true`
 

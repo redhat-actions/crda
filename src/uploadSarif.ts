@@ -55,10 +55,16 @@ export async function uploadSarifFile(
         throw new Error(`Upload SARIF response from GitHub did not include an upload ID`);
     }
 
-    ghCore.info(`⏳ SARIF upload started. Waiting for upload to finish.`);
     // Since sarif upload takes few seconds, so waiting for it to finish.
     // Generally it takes less than a minute.
-    await waitForUploadToFinish(ghToken, sarifId);
+
+    try {
+        ghCore.startGroup(`⏳ Waiting for SARIF upload...`);
+        await waitForUploadToFinish(ghToken, sarifId);
+    }
+    finally {
+        ghCore.endGroup();
+    }
 
     ghCore.info(`✅ Successfully uploaded SARIF file`);
 
