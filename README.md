@@ -1,5 +1,20 @@
 # CodeReady Dependency Analytics (crda)
 
+[![CI Checks](https://github.com/redhat-actions/crda/actions/workflows/ci.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/ci.yml)
+[![Link checker](https://github.com/redhat-actions/crda/actions/workflows/link_checker.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/link_checker.yml)
+<br>
+<br>
+[![Scan Golang project](https://github.com/redhat-actions/crda/actions/workflows/scan_go.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_go.yml)
+[![Scan Java project](https://github.com/redhat-actions/crda/actions/workflows/scan_java.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_java.yml)
+[![Scan Node projects](https://github.com/redhat-actions/crda/actions/workflows/scan_node.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_node.yml)
+[![Scan using custom installation](https://github.com/redhat-actions/crda/actions/workflows/scan_custom_deps.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_custom_deps.yml)
+[![Scan Python project](https://github.com/redhat-actions/crda/actions/workflows/scan_python.yml/badge.svg)](https://github.com/redhat-actions/crda/actions/workflows/scan_python.yml)
+<br>
+<br>
+[![tag badge](https://img.shields.io/github/v/tag/redhat-actions/crda)](https://github.com/redhat-actions/crda/tags)
+[![license badge](https://img.shields.io/github/license/redhat-actions/crda)](./LICENSE)
+[![size badge](https://img.shields.io/github/size/redhat-actions/crda/dist/index.js)](./dist)
+
 **crda** is a GitHub Action is an action which uses [**CodeReady Dependency Analytics**](https://github.com/fabric8-analytics/cli-tools/blob/main/docs/cli_README.md) to analyze vulnerabilities in a project's dependencies.
 
 The scan's result is uploaded to the GitHub repository as a [SARIF](https://sarifweb.azurewebsites.net/) file, and vulnerabilities found are reported to repository maintainers in the **Security** tab.

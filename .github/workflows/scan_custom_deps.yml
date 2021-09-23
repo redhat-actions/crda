@@ -1,4 +1,4 @@
-name: Scan Node project with deps_install_cmd
+name: Scan using custom installation
 on:
   push:
   workflow_dispatch:
