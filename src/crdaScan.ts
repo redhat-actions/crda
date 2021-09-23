@@ -58,7 +58,7 @@ export async function crdaScan(
     }
     const vulSeverity = await Analyse.analyse(resolvedManifestPath, crdaReportJson);
 
-    if (isPullRequest && vulSeverity !== "") {
+    if (isPullRequest && vulSeverity !== undefined) {
         switch (vulSeverity) {
         case "error":
             await addLabelsToPr(prNumber, [ CrdaLabels.CRDA_FOUND_ERROR ]);
@@ -82,7 +82,7 @@ export async function crdaScan(
     const reportLink = crdaData.report_link;
     ghCore.setOutput(Outputs.REPORT_LINK, reportLink);
 
-    if (!crdaData.analysed_dependencies) {
+    if (vulSeverity === undefined) {
         // cannot proceed with SARIF
         return;
     }

@@ -23,7 +23,7 @@ namespace Analyse {
 
     export async function analyse(
         manifestPath: string, analysisReportName: string,
-    ): Promise<"none" | "warning" | "error" | ""> {
+    ): Promise<"none" | "warning" | "error" | undefined> {
         const crdaOptions = Crda.getOptions({ verbose: "", client: "gh-actions" });
         const crdaExecArgs = [ Crda.Commands.Analyse, manifestPath, ...crdaOptions ];
 
@@ -51,7 +51,7 @@ namespace Analyse {
                 + `Refer to the README for more information.`
             );
 
-            return "";
+            return undefined;
         }
 
         let vulSeverity: "none" | "warning" | "error" = "none";
