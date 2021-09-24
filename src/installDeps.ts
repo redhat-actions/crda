@@ -3,7 +3,7 @@ import * as path from "path";
 import { promises as fs } from "fs";
 import Crda from "./crda";
 import { Inputs } from "./generated/inputs-outputs";
-import { fileExists, getEnvVariableValue } from "./util/utils";
+import { fileExists } from "./util/utils";
 
 type DepsInstallType = "Go" | "Maven" | "Node.js" | "Pip" | "custom";
 
@@ -18,6 +18,8 @@ const ALL_MANIFESTS = [
     GO_MOD, POM_XML, PACKAGE_JSON, REQUIREMENTS_TXT,
 ];
 
+const DEFAULT_MANIFEST_DIR = ".";
+
 /**
  * @returns The resolved manifest path - the manifest path even if the input was empty.
  */
@@ -28,22 +30,21 @@ export async function findManifestAndInstallDeps(
 ): Promise<string> {
 
     if (!manifestDirInput) {
-        ghCore.info(`"${Inputs.MANIFEST_DIRECTORY}" not provided. Using GITHUB_WORKSPACE`);
+        ghCore.info(`"${Inputs.MANIFEST_DIRECTORY}" not provided. Using working directory "${process.cwd()}"`);
     }
-    const manifestDir = manifestDirInput || getEnvVariableValue("GITHUB_WORKSPACE");
+    const manifestDir = manifestDirInput || DEFAULT_MANIFEST_DIR;
 
     let manifestFilename;
     let resolvedManifestPath;
     let installType: DepsInstallType | undefined;
 
     if (manifestFileInput) {
-        ghCore.info(`Manifest directory is ${manifestDir}`);
         manifestFilename = manifestFileInput;
         resolvedManifestPath = path.join(manifestDir, manifestFilename);
     }
     else {
         ghCore.info(`"${Inputs.MANIFEST_FILE}" input not provided. Auto-detecting manifest file`);
-        ghCore.info(`🔍 Looking for manifest in ${manifestDir}`);
+        ghCore.info(`🔍 Looking for manifest in "${path.resolve(manifestDir)}"`);
 
         const autoDetectResult = await autoDetectInstall(manifestDir);
 
@@ -78,7 +79,7 @@ export async function findManifestAndInstallDeps(
     let didChangeWD = false;
 
     try {
-        if (manifestDir) {
+        if (path.resolve(manifestDir) !== process.cwd()) {
             let newWD;
             if (path.isAbsolute(manifestDir)) {
                 newWD = manifestDir;

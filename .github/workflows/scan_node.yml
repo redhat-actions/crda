@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ "macos-latest", "windows-latest", "ubuntu-20.04" ]
-        manifest_directory: [ "manifests/node/no-lockfile", "manifests/node/npm", "manifests/node/yarn/" ]
+        manifest_directory: [ "", "manifests/node/no-lockfile", "manifests/node/npm", "manifests/node/yarn/" ]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
