@@ -18,6 +18,8 @@ const ALL_MANIFESTS = [
     GO_MOD, POM_XML, PACKAGE_JSON, REQUIREMENTS_TXT,
 ];
 
+const DEFAULT_MANIFEST_DIR = ".";
+
 /**
  * @returns The resolved manifest path - the manifest path even if the input was empty.
  */
@@ -28,22 +30,21 @@ export async function findManifestAndInstallDeps(
 ): Promise<string> {
 
     if (!manifestDirInput) {
-        ghCore.info(`"${Inputs.MANIFEST_DIRECTORY}" not provided. Using working directory.`);
+        ghCore.info(`"${Inputs.MANIFEST_DIRECTORY}" not provided. Using working directory ${process.cwd()}`);
     }
-    const manifestDir = manifestDirInput || ".";
+    const manifestDir = manifestDirInput || DEFAULT_MANIFEST_DIR;
 
     let manifestFilename;
     let resolvedManifestPath;
     let installType: DepsInstallType | undefined;
 
     if (manifestFileInput) {
-        ghCore.info(`Manifest directory is ${manifestDir}`);
         manifestFilename = manifestFileInput;
         resolvedManifestPath = path.join(manifestDir, manifestFilename);
     }
     else {
         ghCore.info(`"${Inputs.MANIFEST_FILE}" input not provided. Auto-detecting manifest file`);
-        ghCore.info(`🔍 Looking for manifest in ${manifestDir}`);
+        ghCore.info(`🔍 Looking for manifest in ${path.resolve(manifestDir)}`);
 
         const autoDetectResult = await autoDetectInstall(manifestDir);
 

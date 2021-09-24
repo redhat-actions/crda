@@ -9,7 +9,6 @@ inputs:
     description: |
       Path to the directory containing the manifest_file.
     required: false
-    default: Working directory
   manifest_file:
     description: |
       Name (basename) of the manifest file to analyze. This file must exist in the manifest_directory.
