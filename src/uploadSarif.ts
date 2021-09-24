@@ -4,18 +4,20 @@ import * as zlib from "zlib";
 import * as ghCore from "@actions/core";
 import { URLSearchParams } from "url";
 import { promises as fs } from "fs";
-
 import { promisify } from "util";
+
 import * as utils from "./util/utils";
 
 export async function uploadSarifFile(
-    ghToken: string, sarifToUpload: string, /* resolvedManifestPath: string, */
-    analysisStartTime: string, sha: string, ref: string,
+    ghToken: string, sarifToUploadPath: string,
+    analysisStartTime: string,
+    sha: string, ref: string,
+    uploadToRepo: { owner: string, repo: string },
 ): Promise<void> {
-    const { owner, repo } = github.context.repo;
+    const { owner, repo } = uploadToRepo;
     ghCore.info(`⬆️ Uploading SARIF file to ${owner}/${repo}...`);
 
-    const sarifContents = await fs.readFile(sarifToUpload, "utf-8");
+    const sarifContents = await fs.readFile(sarifToUploadPath, "utf-8");
     ghCore.debug(`Raw upload size: ${utils.convertToHumanFileSize(sarifContents.length)}`);
     const zippedSarif = (await promisify(zlib.gzip)(sarifContents)).toString("base64");
     ghCore.info(`Zipped upload size: ${utils.convertToHumanFileSize(zippedSarif.length)}`);

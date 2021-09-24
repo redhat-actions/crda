@@ -2,16 +2,17 @@ import * as ghCore from "@actions/core";
 import * as github from "@actions/github";
 
 import * as utils from "./util/utils";
-import { CrdaLabels } from "./util/constants";
 import { crdaScan } from "./crdaScan";
-import { Inputs } from "./generated/inputs-outputs";
+import { Inputs, Outputs } from "./generated/inputs-outputs";
 import { findManifestAndInstallDeps } from "./installDeps";
 import * as prUtils from "./util/prUtils";
 import * as labels from "./util/labels";
 import Crda from "./crda";
+import { convertCRDAReportToSarif } from "./convert";
+import { uploadSarifFile } from "./uploadSarif";
+import { CrdaLabels } from "./util/labelUtils";
 
-let prNumber: number;
-let isPullRequest = false;
+let prData: prUtils.PrData | undefined;
 let origCheckoutBranch: string;
 
 async function run(): Promise<void> {
@@ -25,23 +26,12 @@ async function run(): Promise<void> {
 
     await Crda.exec(Crda.getCRDAExecutable(), [ Crda.Commands.Version ], { group: true });
 
-    const pullRequestData = JSON.stringify(github.context.payload.pull_request);
-    let sha;
-
-    if (pullRequestData) {
+    if (github.context.payload.pull_request != null) {
         ghCore.info(`Scan is running in a pull request, checking for approval label...`);
-
-        isPullRequest = true;
 
         // needed to checkout back to the original checkedout branch
         origCheckoutBranch = await prUtils.getOrigCheckoutBranch();
-        const prApprovalResult = await prUtils.isPrScanApproved(pullRequestData);
-        prNumber = prApprovalResult.prNumber;
-
-        sha = prApprovalResult.sha;
-        if (!sha) {
-            ghCore.warning(`No commit SHA found for pull request #${prNumber}`);
-        }
+        const prApprovalResult = await prUtils.isPrScanApproved();
 
         if (prApprovalResult.approved) {
             ghCore.info(`"${CrdaLabels.CRDA_SCAN_APPROVED}" label is present, scan is approved.`);
@@ -51,11 +41,22 @@ async function run(): Promise<void> {
             ghCore.error(`"${CrdaLabels.CRDA_SCAN_APPROVED}" label is needed to scan this PR with CRDA`);
             return;
         }
+
+        prData = prApprovalResult;
     }
 
-    if (!sha) {
-        sha = await utils.getCommitSha();
+    let sha;
+    let ref;
+
+    if (prData != null) {
+        ({ sha, ref } = prData);
     }
+    else {
+        sha = await utils.getCommitSha();
+        ref = utils.getEnvVariableValue("GITHUB_REF");
+    }
+
+    /* Install dependencies */
 
     const manifestDirInput = ghCore.getInput(Inputs.MANIFEST_DIRECTORY);
     if (manifestDirInput) {
@@ -76,21 +77,116 @@ async function run(): Promise<void> {
     const resolvedManifestPath = await findManifestAndInstallDeps(manifestDirInput, manifestFileInput, depsInstallCmd);
     // use the resolvedManifestPath from now on - not the manifestDir and manifestFile
     ghCore.debug(`Resolved manifest path is ${resolvedManifestPath}`);
-    await crdaScan(resolvedManifestPath, analysisStartTime, isPullRequest, prNumber, sha);
+
+    /* Run the scan */
+
+    const { vulSeverity, crdaReportJsonPath, reportLink } = await crdaScan(resolvedManifestPath);
+
+    ghCore.info(`✍️ Setting output "${Outputs.CRDA_REPORT_JSON}" to ${crdaReportJsonPath}`);
+    ghCore.setOutput(Outputs.CRDA_REPORT_JSON, utils.escapeWindowsPathForActionsOutput(crdaReportJsonPath));
+
+    ghCore.info(`✍️ Setting output "${Outputs.REPORT_LINK}" to ${reportLink}`);
+    ghCore.setOutput(Outputs.REPORT_LINK, reportLink);
+
+    if (vulSeverity == null) {
+        ghCore.error(
+            `Cannot retrieve vulnerability severity or detailed analysis. `
+            + `A Synk token or a CRDA key authenticated to Synk is required for detailed analysis and SARIF output.`
+            + `Use the "${Inputs.SNYK_TOKEN}" or "${Inputs.CRDA_KEY}" input.`
+            + `Refer to the README for more information.`
+        );
+        // EXIT EARLY since we do not know the vulnerability severity
+        // we cannot add labels or reasonably evaluate fail_on conditions
+        return;
+    }
+
+    /* Convert to SARIF and upload SARIF */
+
+    const crdaReportSarifPath = await convertCRDAReportToSarif(crdaReportJsonPath, resolvedManifestPath);
+
+    ghCore.info(`ℹ️ Successfully converted analysis JSON report to SARIF`);
+
+    ghCore.info(`✍️ Setting output "${Outputs.CRDA_REPORT_SARIF}" to ${crdaReportSarifPath}`);
+    ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, utils.escapeWindowsPathForActionsOutput(crdaReportSarifPath));
+
+    const githubToken = ghCore.getInput(Inputs.GITHUB_TOKEN);
+    const uploadSarif = ghCore.getInput(Inputs.UPLOAD_SARIF) === "true";
+
+    if (uploadSarif) {
+        // should it be uploaded to the base repo, or head repo? maybe even both?
+        const uploadToRepo = prData ? prData.headRepo : github.context.repo;
+
+        await uploadSarifFile(
+            githubToken, crdaReportSarifPath, analysisStartTime, sha, ref, uploadToRepo,
+        );
+    }
+    else {
+        ghCore.info(`⏩ Input "${Inputs.UPLOAD_SARIF}" is false, skipping SARIF upload.`);
+    }
+
+    /* Label the PR with the scan status, if applicable */
+
+    if (prData) {
+        let resultLabel: string;
+
+        switch (vulSeverity) {
+        case "error":
+            resultLabel = CrdaLabels.CRDA_FOUND_ERROR;
+            break;
+        case "warning":
+            resultLabel = CrdaLabels.CRDA_FOUND_WARNING;
+            break;
+        default:
+            resultLabel = CrdaLabels.CRDA_SCAN_PASSED;
+            break;
+        }
+
+        await labels.addLabelsToPr(prData.number, [ resultLabel ]);
+    }
+
+    /* Evaluate fail_on and set the workflow step exit code accordingly */
+
+    const failOn = ghCore.getInput(Inputs.FAIL_ON) || "error";
+
+    if (vulSeverity !== "none") {
+        ghCore.warning(`Found ${utils.capitalizeFirstLetter(vulSeverity)} level vulnerabilities`);
+
+        if (failOn !== "never") {
+            if (failOn === "warning") {
+                ghCore.info(
+                    `Input "${Inputs.FAIL_ON}" is "${failOn}", and at least one warning was found. Failing workflow.`
+                );
+                ghCore.setFailed(`Found vulnerabilities in the project.`);
+            }
+            else if (failOn === "error" && vulSeverity === "error") {
+                ghCore.info(
+                    `Input "${Inputs.FAIL_ON}" is "${failOn}", and at least one error was found. Failing workflow.`
+                );
+                ghCore.setFailed(`Found high severity vulnerabilities in the project.`);
+            }
+        }
+        else {
+            ghCore.info(`Input "${Inputs.FAIL_ON}" is "${failOn}". Not failing workflow.`);
+        }
+    }
+    else {
+        ghCore.info(`✅ No vulnerabilities were found`);
+    }
+
 }
 
 run()
     .then(() => {
-        ghCore.info("Success.");
+        // nothing
     })
     .catch(async (err) => {
-        if (isPullRequest) {
-            await labels.addLabelsToPr(prNumber, [ CrdaLabels.CRDA_SCAN_FAILED ]);
+        if (prData != null) {
+            await labels.addLabelsToPr(prData.number, [ CrdaLabels.CRDA_SCAN_FAILED ]);
         }
         ghCore.setFailed(err.message);
     })
     .finally(async () => {
-        if (isPullRequest) {
-            await prUtils.checkoutCleanup(prNumber, origCheckoutBranch);
+        if (prData != null) {
+            await prUtils.checkoutCleanup(prData.number, origCheckoutBranch);
         }
     });

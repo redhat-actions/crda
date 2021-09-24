@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import { promisify } from "util";
 import * as path from "path";
 import * as sarif from "sarif";
 import * as ghCore from "@actions/core";
@@ -323,21 +324,26 @@ function getSarif(crdaAnalysedData: string, manifestFile: string): sarif.Log {
  *
  * @returns The name of the newly written .sarif file
  */
-export function convertCRDAReportToSarif(
+export async function convertCRDAReportToSarif(
     crdaReportJson: string, manifestFile: string
-): string {
-    const crdaAnalysedData = fs.readFileSync(crdaReportJson, "utf-8");
+): Promise<string> {
+
+    ghCore.info(`🔁 Converting JSON analysed data to the SARIF format`);
+
+    const crdaAnalysedData = await promisify(fs.readFile)(crdaReportJson, "utf-8");
     const convertedSarif = getSarif(crdaAnalysedData, manifestFile);
+    if (!convertedSarif.$schema) {
+        throw new Error(`No $schema key for SARIF file, cannot proceed.`);
+    }
 
     const jsonExt = path.extname(crdaReportJson);
     const jsonBasename = path.basename(crdaReportJson);
 
+    const sarifName = jsonBasename.replace(jsonExt, ".sarif");
     // eg crda_analysis_report.json -> crda_analysis_report.sarif
-    const sarifFilename = jsonBasename.replace(jsonExt, ".sarif");
+    const sarifPath = path.resolve(".", sarifName);
 
-    if (convertedSarif.$schema) {
-        fs.writeFileSync(sarifFilename, JSON.stringify(convertedSarif, undefined, 4), "utf-8");
-    }
+    await promisify(fs.writeFile)(sarifPath, JSON.stringify(convertedSarif, undefined, 4), "utf-8");
 
-    return sarifFilename;
+    return sarifPath;
 }

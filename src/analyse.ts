@@ -1,9 +1,10 @@
 import { promises as fs } from "fs";
 import * as ghCore from "@actions/core";
 import Crda from "./crda";
-import { Inputs } from "./generated/inputs-outputs";
 
 namespace Analyse {
+
+    export type VulnerabilitySeverity = "none" | "warning" | "error";
 
     export async function configSet(configKey: string, configValue: string): Promise<void> {
         const crdaExecArgs = [
@@ -23,7 +24,7 @@ namespace Analyse {
 
     export async function analyse(
         manifestPath: string, analysisReportName: string,
-    ): Promise<"none" | "warning" | "error" | undefined> {
+    ): Promise<VulnerabilitySeverity | undefined> {
         const crdaOptions = Crda.getOptions({ verbose: "", client: "gh-actions" });
         const crdaExecArgs = [ Crda.Commands.Analyse, manifestPath, ...crdaOptions ];
 
@@ -43,13 +44,6 @@ namespace Analyse {
         await fs.writeFile(analysisReportName, analysisReportJson, "utf8");
 
         if (!crdaData.analysed_dependencies) {
-            ghCore.warning(
-                `Cannot retrieve detailed analysis and report in SARIF format. `
-                + `A Synk token or a CRDA key authenticated to Synk is required for detailed analysis and SARIF output.`
-                + `Use the "${Inputs.SNYK_TOKEN}" or "${Inputs.CRDA_KEY}" input.`
-                + `Refer to the README for more information.`
-            );
-
             return undefined;
         }
 
