@@ -332,6 +332,9 @@ export async function convertCRDAReportToSarif(
 
     const crdaAnalysedData = await promisify(fs.readFile)(crdaReportJson, "utf-8");
     const convertedSarif = getSarif(crdaAnalysedData, manifestFile);
+    if (!convertedSarif.$schema) {
+        throw new Error(`No $schema key for SARIF file, cannot proceed.`);
+    }
 
     const jsonExt = path.extname(crdaReportJson);
     const jsonBasename = path.basename(crdaReportJson);

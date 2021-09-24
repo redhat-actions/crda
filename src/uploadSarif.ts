@@ -28,7 +28,7 @@ export async function uploadSarifFile(
 
     const { owner, repo } = uploadToRepo;
 
-    ghCore.debug(`Uploading SARIF to ${owner}/${repo}`);
+    ghCore.info(`⬆️ Uploading SARIF to ${owner}/${repo}`);
     ghCore.debug(`Commit Sha: ${sha}`);
     ghCore.debug(`Ref: ${ref}`);
 
@@ -65,7 +65,7 @@ export async function uploadSarifFile(
     // Generally it takes less than a minute.
 
     try {
-        ghCore.startGroup(`⏳ Waiting for SARIF to upload to ${owner}/${repo}...`);
+        ghCore.startGroup(`⏳ Waiting for SARIF to upload...`);
         await waitForUploadToFinish(ghToken, sarifId);
     }
     finally {

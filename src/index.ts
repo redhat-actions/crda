@@ -26,7 +26,9 @@ async function run(): Promise<void> {
 
     await Crda.exec(Crda.getCRDAExecutable(), [ Crda.Commands.Version ], { group: true });
 
-    if (github.context.payload.pull_request != null) {
+    const prRawData = github.context.payload.pull_request;
+
+    if (prRawData != null) {
         ghCore.info(`Scan is running in a pull request, checking for approval label...`);
 
         // needed to checkout back to the original checkedout branch
