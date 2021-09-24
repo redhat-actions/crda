@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import { promises as fs } from "fs";
 import * as ghCore from "@actions/core";
 import Crda from "./crda";
 import { Inputs } from "./generated/inputs-outputs";
@@ -40,8 +40,7 @@ namespace Analyse {
             throw new Error("❌ No dependencies found to scan, make sure dependencies are installed correctly.");
         }
 
-        fs.writeFileSync(analysisReportName, analysisReportJson, "utf8");
-        ghCore.info(`ℹ️ Detailed analysis report is available at ${analysisReportName}`);
+        await fs.writeFile(analysisReportName, analysisReportJson, "utf8");
 
         if (!crdaData.analysed_dependencies) {
             ghCore.warning(

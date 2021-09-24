@@ -74,12 +74,14 @@ export async function crdaScan(
         }
     }
 
+    ghCore.info(`✍️ Setting output "${Outputs.CRDA_REPORT_JSON}" to ${crdaReportJson}`);
     ghCore.setOutput(Outputs.CRDA_REPORT_JSON, crdaReportJson);
 
     const crdaAnalysedData = await fs.readFile(crdaReportJson, "utf-8");
     const crdaData = JSON.parse(crdaAnalysedData);
 
     const reportLink = crdaData.report_link;
+    ghCore.info(`✍️ Setting output "${Outputs.REPORT_LINK}" to ${reportLink}`);
     ghCore.setOutput(Outputs.REPORT_LINK, reportLink);
 
     if (vulSeverity === undefined) {
@@ -90,10 +92,9 @@ export async function crdaScan(
     ghCore.info(`🔁 Converting JSON analysed data to the SARIF format`);
     const crdaReportSarif = convertCRDAReportToSarif(crdaReportJson, resolvedManifestPath);
 
-    ghCore.info(
-        `ℹ️ Successfully converted analysis JSON report to SARIF. SARIF file is available at ${crdaReportSarif}`
-    );
+    ghCore.info(`ℹ️ Successfully converted analysis JSON report to SARIF`);
 
+    ghCore.info(`✍️ Setting output "${Outputs.CRDA_REPORT_SARIF}" to ${crdaReportSarif}`);
     ghCore.setOutput(Outputs.CRDA_REPORT_SARIF, crdaReportSarif);
 
     if (uploadSarif) {
