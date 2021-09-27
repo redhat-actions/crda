@@ -3,12 +3,10 @@ import * as github from "@actions/github";
 import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { components } from "@octokit/openapi-types/dist-types/index";
 import * as ghCore from "@actions/core";
-import { getBetterHttpError } from "./utils";
-import { Inputs } from "../generated/inputs-outputs";
+import { getBetterHttpError, getGhToken } from "./utils";
 import * as LabelUtils from "./labelUtils";
 
 type Label = components["schemas"]["label"];
-let ghToken: string | undefined;
 
 // API documentation: https://docs.github.com/en/rest/reference/issues#add-labels-to-an-issue
 export async function addLabelsToPr(prNumber: number, labels: string[]): Promise<void> {
@@ -142,21 +140,4 @@ export function findLabelsToRemove(availableLabels: string[], labelsToCheck: str
     });
 
     return labelsToRemove;
-}
-
-/**
- *
- * @returns GitHub token provided by the user.
- * If no token is provided, returns the empty string.
- */
-function getGhToken(): string {
-    if (ghToken == null) {
-        ghToken = ghCore.getInput(Inputs.GITHUB_TOKEN);
-
-        // this to only solve the problem of local development
-        if (!ghToken && process.env.GITHUB_TOKEN) {
-            ghToken = process.env.GITHUB_TOKEN;
-        }
-    }
-    return ghToken;
 }

@@ -2,6 +2,7 @@ import * as ghCore from "@actions/core";
 import * as os from "os";
 import { promises as fs } from "fs";
 import Crda from "../crda";
+import { Inputs } from "../generated/inputs-outputs";
 
 type OS = "linux" | "macos" | "windows";
 
@@ -84,6 +85,24 @@ export function getGitExecutable(): string {
     return git;
 }
 
+let ghToken: string | undefined;
+/**
+ *
+ * @returns GitHub token provided by the user.
+ * If no token is provided, returns the empty string.
+ */
+export function getGhToken(): string {
+    if (ghToken == null) {
+        ghToken = ghCore.getInput(Inputs.GITHUB_TOKEN);
+
+        // this to only solve the problem of local development
+        if (!ghToken && process.env.GITHUB_TOKEN) {
+            ghToken = process.env.GITHUB_TOKEN;
+        }
+    }
+    return ghToken;
+}
+
 export async function getCommitSha(): Promise<string> {
     const commitSha = (await Crda.exec(getGitExecutable(), [ "rev-parse", "HEAD" ])).stdout;
     return commitSha.trim();
@@ -118,4 +137,8 @@ export function convertToHumanFileSize(size: number): string {
     catch (err) {
         return size.toString() + "B";
     }
+}
+
+export function escapeWindowsPathForActionsOutput(p: string): string {
+    return p.replace(/\\/g, "\\\\");
 }

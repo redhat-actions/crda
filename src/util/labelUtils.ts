@@ -1,4 +1,14 @@
-import { CrdaLabels } from "./constants";
+/**
+ * CRDA labels to be added to a PR
+ */
+export enum CrdaLabels {
+    CRDA_SCAN_PENDING = "CRDA Scan Pending",
+    CRDA_SCAN_APPROVED = "CRDA Scan Approved",
+    CRDA_SCAN_PASSED = "CRDA Scan Passed",
+    CRDA_SCAN_FAILED = "CRDA Scan Failed",
+    CRDA_FOUND_WARNING = "CRDA Found Warning",
+    CRDA_FOUND_ERROR = "CRDA Found Error"
+}
 
 export function getLabelColor(label: string): string {
     switch (label) {
@@ -29,11 +39,11 @@ export function getLabelDescription(label: string): string {
     case CrdaLabels.CRDA_SCAN_PASSED:
         return "CRDA found no vulnerabilities";
     case CrdaLabels.CRDA_SCAN_FAILED:
-        return "CRDA exited with an error code";
+        return "CRDA scan failed unexpectedly";
     case CrdaLabels.CRDA_FOUND_WARNING:
-        return "CRDA found vulnerabilities with warning level";
+        return `CRDA found vulnerabilities with "warning" level severity`;
     case CrdaLabels.CRDA_FOUND_ERROR:
-        return "CRDA found vulnerabilities with error level";
+        return `CRDA found vulnerabilities with "error" level severity`;
     default:
         return "";
     }

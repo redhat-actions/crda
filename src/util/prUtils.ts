@@ -1,12 +1,12 @@
 import * as ghCore from "@actions/core";
 import * as github from "@actions/github";
+import { components } from "@octokit/openapi-types";
 import { Octokit } from "@octokit/core";
 
 import Crda from "../crda";
-import { CrdaLabels } from "./constants";
 import * as labels from "./labels";
-import { Inputs } from "../generated/inputs-outputs";
-import { getBetterHttpError, getGitExecutable } from "./utils";
+import { getBetterHttpError, getGhToken, getGitExecutable } from "./utils";
+import { CrdaLabels } from "./labelUtils";
 
 const repoLabels = [
     CrdaLabels.CRDA_SCAN_PENDING, CrdaLabels.CRDA_SCAN_APPROVED,
@@ -20,28 +20,47 @@ const labelsToCheckForRemoval = [
     CrdaLabels.CRDA_FOUND_WARNING, CrdaLabels.CRDA_FOUND_ERROR,
 ];
 
-type PrApprovalResultYes = {
-    approved: true,
+export type PrData = {
+    author: string | undefined,
+    number: number,
     sha: string,
-    prNumber: number,
+    ref: string,
+    /**
+     * The forked repo that the PR is coming from
+     */
+    headRepo: {
+        owner: string,
+        repo: string,
+        htmlUrl: string,
+    },
+    /**
+     * The upstream repo that the PR wants to merge into
+     */
+    baseRepo: {
+        owner: string,
+        repo: string,
+        htmlUrl: string,
+    }
 };
 
-type PrApprovalResultNo = {
+export type PrScanApprovalResult = PrData & {
+    approved: true,
+};
+
+type PrScanDenyResult = {
     approved: false,
-    sha?: undefined,
-    prNumber: number,
 };
 
-export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalResultYes | PrApprovalResultNo> {
-
-    const prData = parsePrData(prDataStr);
+export async function isPrScanApproved(): Promise<PrScanApprovalResult | PrScanDenyResult> {
+    const prData = parsePrData();
     const prNumber = prData.number;
-    const remote = prData.remoteUrl;
-    const prAuthor = prData.user;
-    ghCore.debug(`PR number is ${prNumber}`);
-    ghCore.debug(`Remote is ${remote}`);
 
-    await checkoutPr(remote, prNumber);
+    ghCore.debug(`PR number is ${prNumber}`);
+    ghCore.info(
+        `PR authored by ${prData.author} is coming from ${prData.headRepo.htmlUrl} against ${prData.baseRepo.htmlUrl}`
+    );
+
+    await checkoutPr(prData.baseRepo.htmlUrl, prNumber);
 
     await labels.createLabels(repoLabels);
     const availableLabels = await labels.getLabelsFromPr(prNumber);
@@ -53,14 +72,17 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
     }
     ghCore.debug(`Action performed is "${github.context.payload.action}"`);
 
-    const isPrAuthorHasWriteAccess = await canPrAuthorWrite(prAuthor);
+    let doesPrAuthorHasWriteAccess = false;
+    if (prData.author) {
+        doesPrAuthorHasWriteAccess = await canPrAuthorWrite(prData);
+    }
 
     const prAction = github.context.payload.action;
     if (prAction === "edited" || prAction === "synchronize") {
         const labelsToRemove = labels.findLabelsToRemove(availableLabels, labelsToCheckForRemoval);
 
         // if pr author has write access do not remove approved label
-        if (isPrAuthorHasWriteAccess) {
+        if (doesPrAuthorHasWriteAccess) {
             const index = labelsToRemove.indexOf(CrdaLabels.CRDA_SCAN_APPROVED, 0);
             if (index > -1) {
                 labelsToRemove.splice(index, 1);
@@ -70,19 +92,17 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
         ghCore.info(`Code change detected, removing labels ${labelsToRemove.join(", ")}.`);
         await labels.removeLabelsFromPr(prNumber, labelsToRemove);
 
-        if (isPrAuthorHasWriteAccess) {
+        if (doesPrAuthorHasWriteAccess) {
             return {
                 approved: true,
-                sha: prData.sha,
-                prNumber,
+                ...prData,
             };
         }
         ghCore.info(`Adding "${CrdaLabels.CRDA_SCAN_PENDING}" label.`);
-        await labels.addLabelsToPr(prNumber, [ CrdaLabels.CRDA_SCAN_PENDING ]);
+        await labels.addLabelsToPr(prData.number, [ CrdaLabels.CRDA_SCAN_PENDING ]);
 
         return {
             approved: false,
-            prNumber,
         };
     }
 
@@ -93,40 +113,62 @@ export async function isPrScanApproved(prDataStr: string): Promise<PrApprovalRes
         }
         return {
             approved: true,
-            sha: prData.sha,
-            prNumber,
+            ...prData,
         };
     }
 
-    if (isPrAuthorHasWriteAccess) {
-        ghCore.info(`Since user "${prAuthor}" has write access to the repository, `
+    if (doesPrAuthorHasWriteAccess) {
+        ghCore.info(`Since user "${prData.author}" has write access to the repository, `
             + `adding "${CrdaLabels.CRDA_SCAN_APPROVED}" label`);
-        await labels.addLabelsToPr(prNumber, [ CrdaLabels.CRDA_SCAN_APPROVED ]);
+        await labels.addLabelsToPr(prData.number, [ CrdaLabels.CRDA_SCAN_APPROVED ]);
 
         return {
             approved: true,
-            sha: prData.sha,
-            prNumber,
+            ...prData,
         };
     }
 
     if (!availableLabels.includes(CrdaLabels.CRDA_SCAN_PENDING)) {
         ghCore.info(`Adding "${CrdaLabels.CRDA_SCAN_PENDING}" label`);
-        await labels.addLabelsToPr(prNumber, [ CrdaLabels.CRDA_SCAN_PENDING ]);
+        await labels.addLabelsToPr(prData.number, [ CrdaLabels.CRDA_SCAN_PENDING ]);
     }
+
     return {
         approved: false,
-        prNumber,
     };
 }
 
-function parsePrData(prData: string): { number: number, remoteUrl: string, sha: string, user: string } {
-    const prJson = JSON.parse(prData);
+function parsePrData(): PrData {
+    const pr = github.context.payload.pull_request as components["schemas"]["pull-request-simple"];
+    /*
+    if (!pr) {
+        throw new Error(`ParsePRData called but "github.context.payload.pull_request" is not set`);
+    }*/
+
+    const baseOwner = pr.base.repo.owner?.login;
+    if (!baseOwner) {
+        throw new Error(`Could not determine owner of pull request base repository`);
+    }
+    const headOwner = pr.head.repo.owner?.login;
+    if (!headOwner) {
+        throw new Error(`Could not determine owner of pull request head repository`);
+    }
+
     return {
-        number: prJson.number,
-        sha: prJson.head.sha,
-        remoteUrl: prJson.base.repo.html_url,
-        user: prJson.base.user.login,
+        author: pr.user?.login,
+        number: pr.number,
+        sha: pr.head.sha,
+        ref: `refs/pull/${pr.number}/head`,
+        baseRepo: {
+            htmlUrl: pr.base.repo.html_url,
+            owner: baseOwner,
+            repo: pr.base.repo.name,
+        },
+        headRepo: {
+            htmlUrl: pr.head.repo.html_url,
+            owner: headOwner,
+            repo: pr.head.repo.name,
+        },
     };
 }
 
@@ -164,7 +206,14 @@ export async function getOrigCheckoutBranch(): Promise<string> {
 }
 
 // API documentation: https://docs.github.com/en/rest/reference/repos#get-repository-permissions-for-a-user
-async function canPrAuthorWrite(prAuthor: string): Promise<boolean> {
+async function canPrAuthorWrite(pr: PrData): Promise<boolean> {
+    const prAuthor = pr.author;
+    ghCore.info(`Pull request author is "${prAuthor}"`);
+    if (!prAuthor) {
+        ghCore.warning(`Failed to determine pull request author`);
+        return false;
+    }
+
     const octokit = new Octokit({ auth: getGhToken() });
     const { owner, repo } = github.context.repo;
     let authorPermissionResponse;
@@ -185,29 +234,10 @@ async function canPrAuthorWrite(prAuthor: string): Promise<boolean> {
 
     const permission = authorPermissionResponse.data.permission;
     if (permission === "admin" || permission === "write") {
-        ghCore.debug(`User has write access to the repository`);
+        ghCore.info(`User has write access to the repository`);
         return true;
     }
     ghCore.debug(`User doesn't has write access to the repository`);
 
     return false;
-}
-
-let ghToken: string | undefined;
-
-/**
- *
- * @returns GitHub token provided by the user.
- * If no token is provided, returns the empty string.
- */
-function getGhToken(): string {
-    if (ghToken == null) {
-        ghToken = ghCore.getInput(Inputs.GITHUB_TOKEN);
-
-        // this to only solve the problem of local development
-        if (!ghToken && process.env.GITHUB_TOKEN) {
-            ghToken = process.env.GITHUB_TOKEN;
-        }
-    }
-    return ghToken;
 }
