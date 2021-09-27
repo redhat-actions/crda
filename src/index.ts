@@ -115,16 +115,17 @@ async function run(): Promise<void> {
     if (uploadSarif) {
         const sarifZippedPath = await zipFile(crdaReportSarifPath);
 
-        // In 'push' case, this is the only uplaod step
-        // in PR case, the SARIF is uploaded to both repos
-        // - the base repo here, so the scan results show up inline in the Files view
+        // In 'push' case, this is the only upload step
+        // in PR case, the SARIF is uploaded to both repos.
+        // - uploaded to base repo so that the scan results show inline in the Files view
+        // - uploaded the head (forked) repo below, so we can link to the report there
+        //      - and so the results show up in that repo's Security tab
         // note the report link is not printed on the base repo job since the branch doesn't exist there
         await uploadSarifFile(
             githubToken, sarifZippedPath, analysisStartTime, sha, ref, github.context.repo, !prData,
         );
 
         if (prData) {
-            // - the head (forked) repo here, so we can link to the report there
             await uploadSarifFile(
                 githubToken, sarifZippedPath, analysisStartTime, sha, ref, prData.headRepo, true,
             );
