@@ -23,7 +23,7 @@ export async function uploadSarifFile(
     analysisStartTime: string,
     sha: string, ref: string,
     uploadToRepo: { owner: string, repo: string },
-    printReportLink: boolean,
+    printSecurityTabLink: boolean,
 ): Promise<void> {
 
     const { owner, repo } = uploadToRepo;
@@ -74,7 +74,7 @@ export async function uploadSarifFile(
 
     ghCore.info(`✅ Successfully uploaded SARIF file`);
 
-    if (printReportLink) {
+    if (printSecurityTabLink) {
         ghCore.debug(`Printing report link`);
 
         let branch;
