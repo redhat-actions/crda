@@ -8,7 +8,7 @@ import { promisify } from "util";
 
 import * as utils from "./util/utils";
 
-export async function zipFile(file: string): Promise<string> {
+async function zipFile(file: string): Promise<string> {
     const fileContents = await fs.readFile(file, "utf-8");
     ghCore.debug(`Raw upload size: ${utils.convertToHumanFileSize(fileContents.length)}`);
     const zippedFile = (await promisify(zlib.gzip)(fileContents)).toString("base64");
@@ -19,12 +19,14 @@ export async function zipFile(file: string): Promise<string> {
 }
 
 export async function uploadSarifFile(
-    ghToken: string, sarifZipPath: string,
+    ghToken: string, sarifPath: string,
     analysisStartTime: string,
     sha: string, ref: string,
     uploadToRepo: { owner: string, repo: string },
     printSecurityTabLink: boolean,
 ): Promise<void> {
+
+    const sarifZipPath = await zipFile(sarifPath);
 
     const { owner, repo } = uploadToRepo;
 

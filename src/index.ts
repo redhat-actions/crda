@@ -9,7 +9,7 @@ import * as prUtils from "./util/prUtils";
 import * as labels from "./util/labels";
 import Crda from "./crda";
 import { convertCRDAReportToSarif } from "./convert";
-import { uploadSarifFile, zipFile } from "./uploadSarif";
+import { uploadSarifFile } from "./uploadSarif";
 import { CrdaLabels } from "./util/labelUtils";
 
 let prData: prUtils.PrData | undefined;
@@ -118,27 +118,14 @@ async function run(): Promise<void> {
     const uploadSarif = ghCore.getInput(Inputs.UPLOAD_SARIF) === "true";
 
     if (uploadSarif) {
-        const sarifZippedPath = await zipFile(crdaReportSarifPath);
+        // only print the security tab link if the PR head repo is also the base repo (ie, the PR is against itself)
+        // otherwise, the branch will not exist and the link will be useless.
+        const printSecurityTabLink = prData != null
+            && prData.baseRepo.owner === prData.headRepo.owner && prData.baseRepo.repo === prData.headRepo.repo;
 
-        // in the PR case, the SARIF is uploaded to both repos if they are different.
-        // - uploaded to base repo so that the scan results show inline in the Files view
-        // - uploaded the head (forked) repo below, so we can link to the report there
-        //      - and so the results show up in that repo's Security tab
-        // note the report link is not printed on the base repo job since the branch doesn't exist there.
-
-        const uploadToPRHead = prData != null
-            && (prData.baseRepo.owner !== prData.headRepo.owner || prData.baseRepo.repo !== prData.headRepo.repo);
-
-        // In 'push' case, this is the only upload step
         await uploadSarifFile(
-            githubToken, sarifZippedPath, analysisStartTime, sha, ref, github.context.repo, !uploadToPRHead,
+            githubToken, crdaReportSarifPath, analysisStartTime, sha, ref, github.context.repo, printSecurityTabLink,
         );
-
-        if (prData != null && uploadToPRHead) {
-            await uploadSarifFile(
-                githubToken, sarifZippedPath, analysisStartTime, sha, ref, prData.headRepo, true,
-            );
-        }
     }
     else {
         ghCore.info(`⏩ Input "${Inputs.UPLOAD_SARIF}" is false, skipping SARIF upload.`);
