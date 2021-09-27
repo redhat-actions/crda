@@ -14,7 +14,7 @@
 [![license badge](https://img.shields.io/github/license/redhat-actions/crda)](./LICENSE)
 [![size badge](https://img.shields.io/github/size/redhat-actions/crda/dist/index.js)](./dist)
 
-**crda** is a GitHub Action is an action which uses [**CodeReady Dependency Analytics**](https://github.com/fabric8-analytics/cli-tools/blob/main/docs/cli_README.md) to analyze vulnerabilities in a project's dependencies.
+**crda** is a GitHub Action which uses [**CodeReady Dependency Analytics**](https://github.com/fabric8-analytics/cli-tools/blob/main/docs/cli_README.md) to analyze vulnerabilities in a project's dependencies.
 
 The scan's result is uploaded to the GitHub repository as a [SARIF](https://sarifweb.azurewebsites.net/) file, and vulnerabilities found are reported to repository maintainers in the **Security** tab.
 
@@ -48,7 +48,7 @@ The project must have a dependencies manifest file which CRDA can read to instal
 
 By default, CRDA will install dependencies using a standard command for the project type as described in the table below. This can be overridden with the `deps_install_cmd` input.
 
-Use the `manifest_directory` input if your project is not in the default directory, the `GITHUB_WORKSPACE`. The install command will execute in this directory.
+Use the `manifest_directory` input if your project is not in the working directory. The install command will execute in this directory.
 
 Use the `manifest_file` input if your manifest file is named differently than the table below. The file must exist in the `manifest_directory`. If this input is omitted, the `manifest_directory` will be searched for the files in the table below.
 

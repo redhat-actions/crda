@@ -8,25 +8,29 @@ import { promisify } from "util";
 
 import * as utils from "./util/utils";
 
+export async function zipFile(file: string): Promise<string> {
+    const fileContents = await fs.readFile(file, "utf-8");
+    ghCore.debug(`Raw upload size: ${utils.convertToHumanFileSize(fileContents.length)}`);
+    const zippedFile = (await promisify(zlib.gzip)(fileContents)).toString("base64");
+    ghCore.debug(`Zipped file: ${zippedFile}`);
+    ghCore.info(`Zipped upload size: ${utils.convertToHumanFileSize(zippedFile.length)}`);
+
+    return zippedFile;
+}
+
 export async function uploadSarifFile(
-    ghToken: string, sarifToUploadPath: string,
+    ghToken: string, sarifZipPath: string,
     analysisStartTime: string,
     sha: string, ref: string,
     uploadToRepo: { owner: string, repo: string },
+    printReportLink: boolean,
 ): Promise<void> {
+
     const { owner, repo } = uploadToRepo;
-    ghCore.info(`⬆️ Uploading SARIF file to ${owner}/${repo}...`);
 
-    const sarifContents = await fs.readFile(sarifToUploadPath, "utf-8");
-    ghCore.debug(`Raw upload size: ${utils.convertToHumanFileSize(sarifContents.length)}`);
-    const zippedSarif = (await promisify(zlib.gzip)(sarifContents)).toString("base64");
-    ghCore.info(`Zipped upload size: ${utils.convertToHumanFileSize(zippedSarif.length)}`);
-
+    ghCore.debug(`Uploading SARIF to ${owner}/${repo}`);
     ghCore.debug(`Commit Sha: ${sha}`);
     ghCore.debug(`Ref: ${ref}`);
-
-    // const manifestDir = path.resolve(path.dirname(resolvedManifestPath));
-    // ghCore.debug(`Manifest directory for sarif upload is ${manifestDir}`);
 
     // API documentation: https://docs.github.com/en/rest/reference/code-scanning#update-a-code-scanning-alert
     const octokit = new Octokit({ auth: ghToken });
@@ -37,7 +41,7 @@ export async function uploadSarifFile(
             repo,
             ref,
             commit_sha: sha,
-            sarif: zippedSarif,
+            sarif: sarifZipPath,
             // checkout_uri: manifestDir,
             started_at: analysisStartTime,
             tool_name: "Code Ready Dependency Analytics",
@@ -61,7 +65,7 @@ export async function uploadSarifFile(
     // Generally it takes less than a minute.
 
     try {
-        ghCore.startGroup(`⏳ Waiting for SARIF upload...`);
+        ghCore.startGroup(`⏳ Waiting for SARIF to upload to ${owner}/${repo}...`);
         await waitForUploadToFinish(ghToken, sarifId);
     }
     finally {
@@ -70,20 +74,24 @@ export async function uploadSarifFile(
 
     ghCore.info(`✅ Successfully uploaded SARIF file`);
 
-    let branch;
-    const BRANCH_REF_PREFIX = "refs/heads/";
-    if (ref.startsWith(BRANCH_REF_PREFIX)) {
-        branch = ref.substring(BRANCH_REF_PREFIX.length);
+    if (printReportLink) {
+        ghCore.debug(`Printing report link`);
+
+        let branch;
+        const BRANCH_REF_PREFIX = "refs/heads/";
+        if (ref.startsWith(BRANCH_REF_PREFIX)) {
+            branch = ref.substring(BRANCH_REF_PREFIX.length);
+        }
+
+        const search: URLSearchParams = new URLSearchParams({
+            query: `is:open sort:created-desc${branch ? ` branch:${branch}` : ""}`,
+        });
+
+        const codeScanningUrl = utils.getEnvVariableValue("GITHUB_SERVER_URL")
+            + `/${owner}/${repo}/security/code-scanning?${search.toString()}`;
+
+        ghCore.info(`👀 Review the Code Scanning results in the Security tab: ${codeScanningUrl}`);
     }
-
-    const search: URLSearchParams = new URLSearchParams({
-        query: `is:open sort:created-desc${branch ? ` branch:${branch}` : ""}`,
-    });
-
-    const codeScanningUrl = utils.getEnvVariableValue("GITHUB_SERVER_URL")
-        + `/${owner}/${repo}/security/code-scanning?${search.toString()}`;
-
-    ghCore.info(`👀 Review the Code Scanning results in the Security tab: ${codeScanningUrl}`);
 }
 
 async function waitForUploadToFinish(ghToken: string, sarifId: string): Promise<void> {

@@ -9,7 +9,7 @@ import * as prUtils from "./util/prUtils";
 import * as labels from "./util/labels";
 import Crda from "./crda";
 import { convertCRDAReportToSarif } from "./convert";
-import { uploadSarifFile } from "./uploadSarif";
+import { uploadSarifFile, zipFile } from "./uploadSarif";
 import { CrdaLabels } from "./util/labelUtils";
 
 let prData: prUtils.PrData | undefined;
@@ -113,12 +113,22 @@ async function run(): Promise<void> {
     const uploadSarif = ghCore.getInput(Inputs.UPLOAD_SARIF) === "true";
 
     if (uploadSarif) {
-        // should it be uploaded to the base repo, or head repo? maybe even both?
-        const uploadToRepo = prData ? prData.headRepo : github.context.repo;
+        const sarifZippedPath = await zipFile(crdaReportSarifPath);
 
+        // In 'push' case, this is the only uplaod step
+        // in PR case, the SARIF is uploaded to both repos
+        // - the base repo here, so the scan results show up inline in the Files view
+        // note the report link is not printed on the base repo job since the branch doesn't exist there
         await uploadSarifFile(
-            githubToken, crdaReportSarifPath, analysisStartTime, sha, ref, uploadToRepo,
+            githubToken, sarifZippedPath, analysisStartTime, sha, ref, github.context.repo, !prData,
         );
+
+        if (prData) {
+            // - the head (forked) repo here, so we can link to the report there
+            await uploadSarifFile(
+                githubToken, sarifZippedPath, analysisStartTime, sha, ref, prData.headRepo, true,
+            );
+        }
     }
     else {
         ghCore.info(`⏩ Input "${Inputs.UPLOAD_SARIF}" is false, skipping SARIF upload.`);
