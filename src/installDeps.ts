@@ -109,7 +109,7 @@ export async function findManifestAndInstallDeps(
 
 function getUnknownManifestError(manifestDir: string): string {
     return `Failed to find a manifest file in ${manifestDir} matching one of the expected project types. `
-        + `Expected to find one of: ${ALL_MANIFESTS.join(", ")}`;
+        + `Expected to find one of: ${ALL_MANIFESTS.map((s) => `"${s}"`).join(", ")}`;
 }
 
 async function autoDetectInstall(manifestDir: string): Promise<{ filename: string, installType: DepsInstallType }> {

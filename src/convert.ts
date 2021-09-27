@@ -62,7 +62,7 @@ function fetchRules(
         let message = "";
         if (id in tranVulRuleIdsWithDepName) {
             const dependencyName: string[] = tranVulRuleIdsWithDepName[id];
-            message = `Introduced through ${dependencyName.join(", ")}. `;
+            message = `Introduced through ${dependencyName.map((s) => `"${s}"`).join(", ")}. `;
         }
         const cveIds: string[] = severity.cve_ids;
         const cvss: string = severity.cvss;
@@ -79,7 +79,7 @@ function fetchRules(
             text: `${capitalizeFirstLetter(severity.severity)} severity - ${severity.title} vulnerability`,
         };
         const fullDescription: sarif.MultiformatMessageString = {
-            text: `${cveIds.join(", ")}`,
+            text: `${cveIds.map((s) => `"${s}"`).join(", ")}`,
         };
         const help: sarif.MultiformatMessageString = {
             text: `${message}More details are available at ${severity.url}`,

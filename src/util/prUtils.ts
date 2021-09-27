@@ -65,7 +65,7 @@ export async function isPrScanApproved(): Promise<PrScanApprovalResult | PrScanD
     await labels.createLabels(repoLabels);
     const availableLabels = await labels.getLabelsFromPr(prNumber);
     if (availableLabels.length !== 0) {
-        ghCore.debug(`Available Labels are: ${availableLabels.join(", ")}`);
+        ghCore.debug(`Available Labels are: ${availableLabels.map((s) => `"${s}"`).join(", ")}`);
     }
     else {
         ghCore.debug("No labels found");
@@ -79,6 +79,8 @@ export async function isPrScanApproved(): Promise<PrScanApprovalResult | PrScanD
 
     const prAction = github.context.payload.action;
     if (prAction === "edited" || prAction === "synchronize") {
+        ghCore.info(`Code change detected`);
+
         const labelsToRemove = labels.findLabelsToRemove(availableLabels, labelsToCheckForRemoval);
 
         // if pr author has write access do not remove approved label
@@ -89,8 +91,10 @@ export async function isPrScanApproved(): Promise<PrScanApprovalResult | PrScanD
             }
         }
 
-        ghCore.info(`Code change detected, removing labels ${labelsToRemove.join(", ")}.`);
-        await labels.removeLabelsFromPr(prNumber, labelsToRemove);
+        if (labelsToRemove.length > 0) {
+            ghCore.info(`Removing labels ${labelsToRemove.map((s) => `"${s}"`).join(", ")}`);
+            await labels.removeLabelsFromPr(prNumber, labelsToRemove);
+        }
 
         if (doesPrAuthorHasWriteAccess) {
             return {
@@ -111,6 +115,7 @@ export async function isPrScanApproved(): Promise<PrScanApprovalResult | PrScanD
             ghCore.debug(`Removing "${CrdaLabels.CRDA_SCAN_PENDING}" label`);
             await labels.removeLabelsFromPr(prNumber, [ CrdaLabels.CRDA_SCAN_PENDING ]);
         }
+        ghCore.info(`"${CrdaLabels.CRDA_SCAN_APPROVED}" label is present`);
         return {
             approved: true,
             ...prData,

@@ -36,11 +36,14 @@ async function run(): Promise<void> {
         const prApprovalResult = await prUtils.isPrScanApproved();
 
         if (prApprovalResult.approved) {
-            ghCore.info(`"${CrdaLabels.CRDA_SCAN_APPROVED}" label is present, scan is approved.`);
+            ghCore.info(`✅ Pull request scan is approved`);
         }
         else {
             // no-throw so we don't add the failed label too.
-            ghCore.error(`"${CrdaLabels.CRDA_SCAN_APPROVED}" label is needed to scan this PR with CRDA`);
+            ghCore.error(
+                `"${CrdaLabels.CRDA_SCAN_APPROVED}" label is needed to scan this pull request with CRDA. `
+                + `Refer to https://github.com/redhat-actions/crda/#scanning-pull-requests`
+            );
             return;
         }
 
@@ -117,17 +120,21 @@ async function run(): Promise<void> {
     if (uploadSarif) {
         const sarifZippedPath = await zipFile(crdaReportSarifPath);
 
-        // In 'push' case, this is the only upload step
-        // in PR case, the SARIF is uploaded to both repos.
+        // in the PR case, the SARIF is uploaded to both repos if they are different.
         // - uploaded to base repo so that the scan results show inline in the Files view
         // - uploaded the head (forked) repo below, so we can link to the report there
         //      - and so the results show up in that repo's Security tab
-        // note the report link is not printed on the base repo job since the branch doesn't exist there
+        // note the report link is not printed on the base repo job since the branch doesn't exist there.
+
+        const uploadToPRHead = prData != null
+            && (prData.baseRepo.owner !== prData.headRepo.owner || prData.baseRepo.repo !== prData.headRepo.repo);
+
+        // In 'push' case, this is the only upload step
         await uploadSarifFile(
-            githubToken, sarifZippedPath, analysisStartTime, sha, ref, github.context.repo, !prData,
+            githubToken, sarifZippedPath, analysisStartTime, sha, ref, github.context.repo, !uploadToPRHead,
         );
 
-        if (prData) {
+        if (prData != null && uploadToPRHead) {
             await uploadSarifFile(
                 githubToken, sarifZippedPath, analysisStartTime, sha, ref, prData.headRepo, true,
             );

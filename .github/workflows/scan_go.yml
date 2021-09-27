@@ -4,8 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'  # every day at midnight
-  # pull_request_target:
-  #   types: [ assigned, opened, synchronize, reopened, labeled, edited ]
 
 jobs:
   test:
