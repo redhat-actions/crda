@@ -116,6 +116,9 @@ steps:
 - name: Print Report Link
   run: echo ${{ steps.crda_scan.outputs.report_link }}
 ```
+The following snapshot is an example of CRDA scan workflow run on a node project.
+
+![Workflow run](./images/workflow_run.png)
 
 <a id="action-inputs"></a>
 ## Action Inputs
@@ -150,6 +153,10 @@ Since the pull request's code will be checked out in order to install dependenci
 Each time a new commit is pushed to the pull request, the `Approved` label will be removed. A maintainer must review the code again and re-add the label, to prevent malicious code from executing due to the prior approval.
 
 After the CRDA scan is approved and the workflow runs, a label indicating the scan result will be added to the pull request.
+
+Following snapshot describes vulnerability details in the GitHub UI for a pull request.
+
+![PR vulnerability details](./images/vul_details.png)
 
 > **Note**: Pull requests authored by users with write access to the repository will automatically receive the `CRDA Scan Approved` label.
 
