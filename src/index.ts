@@ -122,8 +122,8 @@ async function run(): Promise<void> {
     if (uploadSarif) {
         // only print the security tab link if the PR head repo is also the base repo (ie, the PR is against itself)
         // otherwise, the branch will not exist and the link will be useless.
-        const printSecurityTabLink = prData != null
-            && prData.baseRepo.owner === prData.headRepo.owner && prData.baseRepo.repo === prData.headRepo.repo;
+        const printSecurityTabLink = prData == null
+            || (prData.baseRepo.owner === prData.headRepo.owner && prData.baseRepo.repo === prData.headRepo.repo);
 
         await uploadSarifFile(
             githubToken, crdaReportSarifPath, analysisStartTime, sha, ref, github.context.repo, printSecurityTabLink,
