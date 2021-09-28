@@ -62,8 +62,6 @@ export async function isPrScanApproved(): Promise<PrScanApprovalResult | PrScanD
         `PR authored by ${prData.author} is coming from ${prData.headRepo.htmlUrl} against ${prData.baseRepo.htmlUrl}`
     );
 
-    await checkoutPr(prData.baseRepo.htmlUrl, prNumber);
-
     await labels.createLabels(repoLabels);
     const availableLabels = await labels.getLabelsFromPr(prNumber);
     if (availableLabels.length !== 0) {
@@ -179,13 +177,15 @@ function parsePrData(): PrData {
     };
 }
 
-// Checkout PR code to run the CRDA Analysis on a PR,
-// After completion of the scan this created remote and branch
-// will be deleted and branch will be checkedout the present branch
-async function checkoutPr(remote: string, prNumber: number): Promise<void> {
-    ghCore.debug(`Adding remote ${remote}`);
+/**
+ * Checkout PR code to run the CRDA Analysis on a PR,
+ * After completion of the scan this created remote and branch
+ * will be deleted and branch will be checkedout the present branch
+ */
+export async function checkoutPr(baseRepoUrl: string, prNumber: number): Promise<void> {
+    ghCore.debug(`Adding remote ${baseRepoUrl}`);
     const remoteName = `remote-${prNumber}`;
-    await Crda.exec(getGitExecutable(), [ "remote", "add", remoteName, remote ]);
+    await Crda.exec(getGitExecutable(), [ "remote", "add", remoteName, baseRepoUrl ]);
     const localbranch = `pr-${prNumber}`;
     ghCore.info(`⬇️ Checking out PR #${prNumber} to run CRDA analysis.`);
     await Crda.exec(getGitExecutable(), [ "fetch", remoteName, `pull/${prNumber}/head:${localbranch}` ]);

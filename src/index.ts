@@ -34,6 +34,7 @@ async function run(): Promise<void> {
 
         if (prApprovalResult.approved) {
             ghCore.info(`✅ Pull request scan is approved`);
+            prData = prApprovalResult;
         }
         else {
             // no-throw so we don't add the failed label too.
@@ -44,8 +45,8 @@ async function run(): Promise<void> {
             return;
         }
 
+        await prUtils.checkoutPr(prData.baseRepo.htmlUrl, prData.number);
         origCheckoutBranch = await prUtils.getOrigCheckoutBranch();
-        prData = prApprovalResult;
     }
 
     let sha;
