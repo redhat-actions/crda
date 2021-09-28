@@ -177,6 +177,14 @@ function parsePrData(): PrData {
     };
 }
 
+function getPRRemoteName(prNumber: number): string {
+    return `remote-${prNumber}`;
+}
+
+function getPRBranchName(prNumber: number): string {
+    return `pr-${prNumber}`;
+}
+
 /**
  * Checkout PR code to run the CRDA Analysis on a PR,
  * After completion of the scan this created remote and branch
@@ -184,9 +192,9 @@ function parsePrData(): PrData {
  */
 export async function checkoutPr(baseRepoUrl: string, prNumber: number): Promise<void> {
     ghCore.debug(`Adding remote ${baseRepoUrl}`);
-    const remoteName = `remote-${prNumber}`;
+    const remoteName = getPRRemoteName(prNumber);
     await Crda.exec(getGitExecutable(), [ "remote", "add", remoteName, baseRepoUrl ]);
-    const localbranch = `pr-${prNumber}`;
+    const localbranch = getPRBranchName(prNumber);
     ghCore.info(`⬇️ Checking out PR #${prNumber} to run CRDA analysis.`);
     await Crda.exec(getGitExecutable(), [ "fetch", remoteName, `pull/${prNumber}/head:${localbranch}` ]);
     await Crda.exec(getGitExecutable(), [ "checkout", localbranch ]);
@@ -195,8 +203,8 @@ export async function checkoutPr(baseRepoUrl: string, prNumber: number): Promise
 // Do cleanup after the crda scan and checkout
 // back to the original branch
 export async function checkoutCleanup(prNumber: number, origCheckoutBranch: string): Promise<void> {
-    const remoteName = `remote-${prNumber}`;
-    const branchName = `pr-${prNumber}`;
+    const remoteName = getPRRemoteName(prNumber);
+    const branchName = getPRBranchName(prNumber);
     ghCore.debug(`Checking out back to ${origCheckoutBranch} branch.`);
     await Crda.exec(getGitExecutable(), [ "checkout", origCheckoutBranch ]);
 

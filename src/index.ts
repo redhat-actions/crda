@@ -45,8 +45,8 @@ async function run(): Promise<void> {
             return;
         }
 
-        await prUtils.checkoutPr(prData.baseRepo.htmlUrl, prData.number);
         origCheckoutBranch = await prUtils.getOrigCheckoutBranch();
+        await prUtils.checkoutPr(prData.baseRepo.htmlUrl, prData.number);
     }
 
     let sha;
