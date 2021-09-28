@@ -223,7 +223,8 @@ function fetchResults(
             text: textMessage,
         };
         const artifactLocation: sarif.ArtifactLocation = {
-            uri: manifestFile,
+            // GitHub seems to fail to find the file if windows paths are used
+            uri: manifestFile.split(path.sep).join(path.posix.sep),
             // uri: manifestFile.slice(manifestFile.lastIndexOf("/") + 1),
             // uriBaseId: manifestFile.slice(0, manifestFile.lastIndexOf("/")),
         };
