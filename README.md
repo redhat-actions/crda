@@ -116,7 +116,7 @@ steps:
 - name: Print Report Link
   run: echo ${{ steps.crda_scan.outputs.report_link }}
 ```
-The following snapshot is an example of CRDA scan workflow run on a node project.
+The following snapshot is an example of a CRDA run on a Node.js project.
 
 ![Workflow run](./images/workflow_run.png)
 
@@ -154,7 +154,7 @@ Each time a new commit is pushed to the pull request, the `Approved` label will 
 
 After the CRDA scan is approved and the workflow runs, a label indicating the scan result will be added to the pull request.
 
-Following snapshot describes vulnerability details in the GitHub UI for a pull request.
+The following snapshot shows vulnerability details in the GitHub UI for a pull request.
 
 ![PR vulnerability details](./images/vul_details.png)
 
