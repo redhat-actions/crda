@@ -202,9 +202,9 @@ function fetchResults(
     const ruleIds: string[] = [];
     publiclyAvailableVulnerabilities.forEach((publiclyAvailableVulnerability) => {
         const ruleId = publiclyAvailableVulnerability.id;
-        let textMessage = `This file introduces a ${publiclyAvailableVulnerability.title} vulnerability with `
+        let textMessage = `This line introduces a ${publiclyAvailableVulnerability.title} vulnerability with `
             + `${publiclyAvailableVulnerability.severity} severity.\n`
-            + `Vulnerable ${isDirect ? "" : "transitive"} dependency is ${dependencyName} ${dependencyVersion}.\n`;
+            + `Vulnerable${isDirect ? "" : " transitive"} dependency is ${dependencyName} ${dependencyVersion}.`;
 
         // TODO: Add message in markdown format
 
@@ -214,10 +214,10 @@ function fetchResults(
         // + `*Version*: ${dependencyVersion}\n`;
 
         if (recommendedVersion) {
-            textMessage = `${textMessage}Recommended Version: ${recommendedVersion}\n`;
+            textMessage = `${textMessage}\nRecommended Version: ${recommendedVersion}\n`;
         }
         if (latestVersion) {
-            textMessage = `${textMessage}Latest Version: ${latestVersion}`;
+            textMessage = `${textMessage}\nLatest Version: ${latestVersion}`;
         }
         const message: sarif.Message = {
             text: textMessage,

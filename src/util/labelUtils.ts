@@ -32,9 +32,9 @@ export function getLabelColor(label: string): string {
 export function getLabelDescription(label: string): string {
     switch (label) {
     case CrdaLabels.CRDA_SCAN_APPROVED:
-        return "CRDA Analysis approved by a collaborator";
+        return "CRDA scan approved by a collaborator";
     case CrdaLabels.CRDA_SCAN_PENDING:
-        return "CRDA Analysis pending approval from a collaborator";
+        return "CRDA scan waiting for approval";
     case CrdaLabels.CRDA_SCAN_PASSED:
         return "CRDA found no vulnerabilities";
     case CrdaLabels.CRDA_SCAN_FAILED:
