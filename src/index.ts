@@ -158,8 +158,6 @@ async function run(): Promise<void> {
     const failOn = ghCore.getInput(Inputs.FAIL_ON) || "error";
 
     if (vulSeverity !== "none") {
-        ghCore.warning(`Found ${utils.capitalizeFirstLetter(vulSeverity)} level vulnerabilities`);
-
         if (failOn !== "never") {
             if (failOn === "warning") {
                 ghCore.info(
@@ -175,6 +173,7 @@ async function run(): Promise<void> {
             }
         }
         else {
+            ghCore.warning(`Found ${utils.capitalizeFirstLetter(vulSeverity)} level vulnerabilities`);
             ghCore.info(`Input "${Inputs.FAIL_ON}" is "${failOn}". Not failing workflow.`);
         }
     }
