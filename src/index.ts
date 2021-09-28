@@ -29,10 +29,7 @@ async function run(): Promise<void> {
     const prRawData = github.context.payload.pull_request;
 
     if (prRawData != null) {
-        ghCore.info(`Scan is running in a pull request, checking for approval label...`);
-
         // needed to checkout back to the original checkedout branch
-        origCheckoutBranch = await prUtils.getOrigCheckoutBranch();
         const prApprovalResult = await prUtils.isPrScanApproved();
 
         if (prApprovalResult.approved) {
@@ -47,6 +44,7 @@ async function run(): Promise<void> {
             return;
         }
 
+        origCheckoutBranch = await prUtils.getOrigCheckoutBranch();
         prData = prApprovalResult;
     }
 
@@ -60,6 +58,9 @@ async function run(): Promise<void> {
         sha = await utils.getCommitSha();
         ref = utils.getEnvVariableValue("GITHUB_REF");
     }
+
+    ghCore.info(`Ref to analyze is "${ref}"`);
+    ghCore.info(`Commit to analyze is "${sha}"`);
 
     /* Install dependencies */
 

@@ -52,6 +52,8 @@ type PrScanDenyResult = {
 };
 
 export async function isPrScanApproved(): Promise<PrScanApprovalResult | PrScanDenyResult> {
+    ghCore.info(`Scan is running in a pull request, checking for approval label...`);
+
     const prData = parsePrData();
     const prNumber = prData.number;
 
