@@ -1,21 +1,25 @@
 import { Octokit } from "@octokit/core";
 import * as github from "@actions/github";
-import * as zlib from "zlib";
 import * as ghCore from "@actions/core";
+import * as zlib from "zlib";
 import { URLSearchParams } from "url";
 import { promises as fs } from "fs";
 import { promisify } from "util";
 
 import * as utils from "./util/utils";
 
+/**
+ *
+ * @returns The given file as a gzipped string.
+ */
 async function zipFile(file: string): Promise<string> {
     const fileContents = await fs.readFile(file, "utf-8");
     ghCore.debug(`Raw upload size: ${utils.convertToHumanFileSize(fileContents.length)}`);
-    const zippedFile = (await promisify(zlib.gzip)(fileContents)).toString("base64");
-    ghCore.debug(`Zipped file: ${zippedFile}`);
-    ghCore.info(`Zipped upload size: ${utils.convertToHumanFileSize(zippedFile.length)}`);
+    const zippedContents = (await promisify(zlib.gzip)(fileContents)).toString("base64");
+    // ghCore.debug(`Zipped file: ${zippedContents}`);
+    ghCore.info(`Zipped upload size: ${utils.convertToHumanFileSize(zippedContents.length)}`);
 
-    return zippedFile;
+    return zippedContents;
 }
 
 export async function uploadSarifFile(
@@ -26,7 +30,7 @@ export async function uploadSarifFile(
     printSecurityTabLink: boolean,
 ): Promise<void> {
 
-    const sarifZipPath = await zipFile(sarifPath);
+    const sarifZipped = await zipFile(sarifPath);
 
     const { owner, repo } = uploadToRepo;
 
@@ -43,7 +47,7 @@ export async function uploadSarifFile(
             repo,
             ref,
             commit_sha: sha,
-            sarif: sarifZipPath,
+            sarif: sarifZipped,
             // checkout_uri: manifestDir,
             started_at: analysisStartTime,
             tool_name: "Code Ready Dependency Analytics",
