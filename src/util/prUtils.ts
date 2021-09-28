@@ -65,7 +65,7 @@ export async function isPrScanApproved(): Promise<PrScanApprovalResult | PrScanD
     await labels.createLabels(repoLabels);
     const availableLabels = await labels.getLabelsFromPr(prNumber);
     if (availableLabels.length !== 0) {
-        ghCore.debug(`Available Labels are: ${availableLabels.map((s) => `"${s}"`).join(", ")}`);
+        ghCore.debug(`Pull request labels are: ${availableLabels.map((s) => `"${s}"`).join(", ")}`);
     }
     else {
         ghCore.debug("No labels found");
@@ -92,7 +92,6 @@ export async function isPrScanApproved(): Promise<PrScanApprovalResult | PrScanD
         }
 
         if (labelsToRemove.length > 0) {
-            ghCore.info(`Removing labels ${labelsToRemove.map((s) => `"${s}"`).join(", ")}`);
             await labels.removeLabelsFromPr(prNumber, labelsToRemove);
         }
 
@@ -112,7 +111,6 @@ export async function isPrScanApproved(): Promise<PrScanApprovalResult | PrScanD
 
     if (availableLabels.includes(CrdaLabels.CRDA_SCAN_APPROVED)) {
         if (availableLabels.includes(CrdaLabels.CRDA_SCAN_PENDING)) {
-            ghCore.debug(`Removing "${CrdaLabels.CRDA_SCAN_PENDING}" label`);
             await labels.removeLabelsFromPr(prNumber, [ CrdaLabels.CRDA_SCAN_PENDING ]);
         }
         ghCore.info(`"${CrdaLabels.CRDA_SCAN_APPROVED}" label is present`);
@@ -123,8 +121,6 @@ export async function isPrScanApproved(): Promise<PrScanApprovalResult | PrScanD
     }
 
     if (doesPrAuthorHasWriteAccess) {
-        ghCore.info(`Since user "${prData.author}" has write access to the repository, `
-            + `adding "${CrdaLabels.CRDA_SCAN_APPROVED}" label`);
         await labels.addLabelsToPr(prData.number, [ CrdaLabels.CRDA_SCAN_APPROVED ]);
 
         return {
@@ -134,7 +130,6 @@ export async function isPrScanApproved(): Promise<PrScanApprovalResult | PrScanD
     }
 
     if (!availableLabels.includes(CrdaLabels.CRDA_SCAN_PENDING)) {
-        ghCore.info(`Adding "${CrdaLabels.CRDA_SCAN_PENDING}" label`);
         await labels.addLabelsToPr(prData.number, [ CrdaLabels.CRDA_SCAN_PENDING ]);
     }
 

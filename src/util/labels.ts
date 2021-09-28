@@ -10,6 +10,8 @@ type Label = components["schemas"]["label"];
 
 // API documentation: https://docs.github.com/en/rest/reference/issues#add-labels-to-an-issue
 export async function addLabelsToPr(prNumber: number, labels: string[]): Promise<void> {
+    ghCore.info(`Adding labels ${labels.map((s) => `"${s}"`).join(", ")} to pull request`);
+
     const octokit = new Octokit({ auth: getGhToken() });
     try {
         await octokit.request("POST /repos/{owner}/{repo}/issues/{issue_number}/labels", {
@@ -48,6 +50,8 @@ export async function getLabelsFromPr(prNumber: number): Promise<string[]> {
 
 // API documentation: https://docs.github.com/en/rest/reference/issues#remove-a-label-from-an-issue
 export async function removeLabelsFromPr(prNumber: number, labels: string[]): Promise<void> {
+    ghCore.info(`Removing labels ${labels.map((s) => `"${s}"`).join(", ")} from pull request`);
+
     const octokit = new Octokit({ auth: getGhToken() });
     labels.forEach(async (label) => {
         try {
