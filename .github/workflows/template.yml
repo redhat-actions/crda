@@ -5,9 +5,6 @@ name: CRDA Scan
 on:
   push:
     branches: [ "n/a" ]
-  # pull_request_target:
-    # These types are all required for CRDA to scan pull requests correctly and securely.
-    # types: [ opened, synchronize, reopened, labeled, edited ]
 
 jobs:
   crda-scan:
@@ -15,7 +12,9 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    # INSERT setup-[go|java|node|python] here
+    # May replace with setup-[go|java|node|python]
+    - name: Set up environment
+      uses: setup-node@v2
 
     - name: Install CRDA
       uses: redhat-actions/openshift-tools-installer@v1
