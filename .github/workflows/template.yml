@@ -1,21 +1,24 @@
 # Template workflow for OpenShift GitHub Connector
 
-name: CRDA Scan
+name: Scan with CodeReady Dependency Analytics
 
 on:
   push:
     branches: [ "n/a" ]
+  # https://github.com/redhat-actions/crda/#scanning-pull-requests
 
 jobs:
   crda-scan:
-    name: CRDA Scan
+    name: Scan with CodeReady Dependency Analytics
     runs-on: ubuntu-20.04
 
     steps:
-    # May replace with setup-[go|java|node|python]
+
+      # May use setup-[go|java|node|python]
     - name: Set up environment
       uses: setup-node@v2
 
+      # https://github.com/redhat-actions/openshift-tools-installer
     - name: Install CRDA
       uses: redhat-actions/openshift-tools-installer@v1
       with:
@@ -23,10 +26,9 @@ jobs:
         github_pat: ${{ github.token }}
         crda: latest
 
+      # https://github.com/redhat-actions/crda/
     - name: CRDA Scan
       # TODO - v1
       uses: redhat-actions/crda@main
       with:
         crda_key: ${{ secrets.CRDA_KEY }}
-        # snyk_token: ${{ secrets.SNYK_TOKEN }}
-        # manifest_directory: ""

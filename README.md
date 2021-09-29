@@ -42,6 +42,14 @@ Refer to the setup actions for:
 ### 2. Install the CRDA command line interface
 Use the [**OpenShift Tools Installer**](https://github.com/redhat-actions/openshift-tools-installer) to install the CRDA CLI from GitHub.
 
+```yaml
+- name: Install CRDA
+  uses: redhat-actions/openshift-tools-installer@v1
+  with:
+    source: github
+    crda: latest
+```
+
 <a id="installing-dependencies"></a>
 ### 3. Installing Dependencies
 The project must have a dependencies manifest file which CRDA can read to install and analyze dependencies.
