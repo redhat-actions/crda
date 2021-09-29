@@ -41,8 +41,8 @@ jobs:
         with:
           manifest_directory: manifests/golang/
           manifest_file: ${{ matrix.manifest_file }}
-          # crda_key: ${{ secrets.CRDA_KEY }}
-          snyk_token: ${{ secrets.SNYK_TOKEN }}
+          crda_key: ${{ secrets.CRDA_KEY }}
+          #snyk_token: ${{ secrets.SNYK_TOKEN }}
           fail_on: never
 
       - name: Print JSON analysis report
