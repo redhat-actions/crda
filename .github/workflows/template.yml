@@ -3,9 +3,9 @@
 name: Scan with CodeReady Dependency Analytics
 
 on:
+  # https://github.com/redhat-actions/crda/#scanning-pull-requests
   push:
     branches: [ "n/a" ]
-  # https://github.com/redhat-actions/crda/#scanning-pull-requests
 
 jobs:
   crda-scan:
@@ -13,10 +13,9 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-
-      # May use setup-[go|java|node|python]
     - name: Set up environment
-      uses: setup-node@v2
+      # May use setup-[go|java|node|python]
+      uses: actions/setup-node@v2
 
       # https://github.com/redhat-actions/openshift-tools-installer
     - name: Install CRDA
