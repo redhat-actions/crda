@@ -34,6 +34,10 @@ jobs:
           source: github
           github_pat: ${{ github.token }}
           crda: "latest"
+          
+      - name: Run Go mod Tidy
+        id: tidy 
+        run: cd ./manifests/golang/ && go mod tidy
 
       - name: CRDA Scan
         id: scan
