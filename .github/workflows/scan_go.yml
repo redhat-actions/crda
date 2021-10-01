@@ -33,7 +33,7 @@ jobs:
         with:
           source: github
           github_pat: ${{ github.token }}
-          crda: "0.2.3"
+          crda: "latest"
           
       #- name: Run Go mod Tidy
       #  id: tidy 
