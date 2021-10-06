@@ -1,4 +1,4 @@
-name: 'CRDA'
+name: 'CodeReady Dependency Analytics'
 description: 'Analyse vulnerabilities in application dependencies'
 author: 'Red Hat'
 branding:
