@@ -28,6 +28,6 @@ jobs:
       # https://github.com/redhat-actions/crda/
     - name: CRDA Scan
       # TODO - v1
-      uses: redhat-actions/crda@main
+      uses: redhat-actions/crda@v1
       with:
         crda_key: ${{ secrets.CRDA_KEY }}
