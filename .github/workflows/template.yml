@@ -3,9 +3,11 @@
 name: Scan with CodeReady Dependency Analytics
 
 on:
-  # https://github.com/redhat-actions/crda/#scanning-pull-requests
   push:
     branches: [ "n/a" ]
+  pull_request_target:
+    # https://github.com/redhat-actions/crda/#scanning-pull-requests
+    types: [ "n/a" ]
 
 jobs:
   crda-scan:
@@ -17,7 +19,9 @@ jobs:
       # May use setup-[go|java|node|python]
       uses: actions/setup-node@v2
 
-      # https://github.com/redhat-actions/openshift-tools-installer
+    - uses: actions/checkout@v2
+
+    # https://github.com/redhat-actions/openshift-tools-installer
     - name: Install CRDA
       uses: redhat-actions/openshift-tools-installer@v1
       with:
@@ -25,9 +29,8 @@ jobs:
         github_pat: ${{ github.token }}
         crda: latest
 
-      # https://github.com/redhat-actions/crda/
+    # https://github.com/redhat-actions/crda/
     - name: CRDA Scan
-      # TODO - v1
       uses: redhat-actions/crda@v1
       with:
         crda_key: ${{ secrets.CRDA_KEY }}
