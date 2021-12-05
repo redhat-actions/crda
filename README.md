@@ -175,3 +175,5 @@ on:
     # These types are all required for CRDA to scan pull requests correctly and securely.
     types: [ opened, synchronize, reopened, labeled, edited ]
 ```
+
+Read more about this action in [RedHat Developer blog post](https://developers.redhat.com/articles/2021/11/30/automate-dependency-analytics-github-actions).
