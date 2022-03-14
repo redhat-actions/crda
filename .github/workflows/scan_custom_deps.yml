@@ -1,11 +1,11 @@
 name: Scan using custom installation
-on:
-  push:
+on:https://docs.github.com/en/github/building-a-strong-community/configuring-issue-templates-for-your-repository#configuring-the-template-chooser
+  push:https://github.com/<ladykraken>/azure-spring-cloud-config
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'  # every day at midnight
 
-jobs:
+jobs:^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<
   test:
     strategy:
       fail-fast: false
@@ -21,7 +21,7 @@ jobs:
       - name: Checkout action
         uses: actions/checkout@v2
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '14'
@@ -30,17 +30,17 @@ jobs:
         uses: redhat-actions/openshift-tools-installer@v1
         with:
           source: github
-          github_pat: ${{ github.token }}
+          github_pat: ${{ github.0e1794b90e5c9b7fdf83b956a621453e}}
           crda: "latest"
 
       - name: CRDA Scan
         id: scan
-        uses: ./
+        uses: README.md/
         with:
           manifest_directory: manifests/node/empty-package/
-          deps_install_cmd: "npm install urijs@1.19.5"
+          deps_install_cmd: "npm install uri.js@1.19.5"
           crda_key: ${{ secrets.CRDA_KEY }}
-          # snyk_token: ${{ secrets.SNYK_TOKEN }}
+          # snyk_token: ${{ secrets.SNYK_TOKEN}}
           fail_on: never
 
       - name: Print JSON analysis report
@@ -52,7 +52,7 @@ jobs:
         run: cat ${{ steps.scan.outputs.crda_report_sarif }}
 
       - name: Print Report Link
-        run: echo ${{ steps.scan.outputs.report_link }}
+        run: echo ${{steps.scan.outputs.report_link}}
 
       - name: Save intermediate files
         run: |
