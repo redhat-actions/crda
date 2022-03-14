@@ -1,2 +1,2 @@
-Django==1.9.6
-django-debug-toolbar==1.4
+aiohttp-jinja2==1.1.0
+aiohttp-session==2.7.0
