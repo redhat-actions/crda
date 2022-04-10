@@ -175,7 +175,7 @@ async function installDeps(
 }
 
 async function installGoDeps(): Promise<void> {
-    await Crda.exec("go", [ "mod", "vendor" ], { group: true });
+    await Crda.exec("go", [ "mod", "tidy" ], { group: true });
 }
 
 async function installMavenDeps(): Promise<void> {
