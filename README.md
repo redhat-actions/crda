@@ -64,7 +64,7 @@ Refer to the [Action Inputs](#action-inputs) section for more information.
 
 | Project Type   | Default `manifest_file` | Default Install Command |
 | -------------- | --------------------- | ---------------------------- |
-| Go             | `go.mod`            | `go mod vendor`              |
+| Go             | `go.mod`            | `go mod tidy`              |
 | Java           | `pom.xml`           | `mvn -ntp -B package`     |
 | Node.js (npm)  | `package.json`, `package-lock.json` | `npm ci` |
 | Node.js (yarn) | `package.json`, `yarn.lock` | `yarn install --frozen-lockfile` |
