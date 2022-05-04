@@ -75,7 +75,7 @@ Refer to the [Action Inputs](#action-inputs) section for more information.
 
 For authentication, you must provide either a CRDA Key or a Synk Token.
 
-The token must be stored in a [repository secret](https://docs.github.com/en/actions/reference/encrypted-secrets).
+<!-- markdown-link-check-disable-line --> The token must be stored in a [repository secret](https://docs.github.com/en/actions/reference/encrypted-secrets).
 
 #### Snyk Token
 1. [Sign up for Synk](https://app.snyk.io/login?utm_campaign=Code-Ready-Analytics-2020&utm_source=code_ready&code_ready=FF1B53D9-57BE-4613-96D7-1D06066C38C9).
@@ -139,7 +139,7 @@ The following snapshot is an example of a CRDA run on a Node.js project.
 | consent_telemetry | CRDA collects anonymous usage data. Enable this to help make CRDA better for our users. Refer to the [privacy statement](https://developers.redhat.com/article/tool-data-collection) for more details. | `false`
 | deps_install_cmd | Command to use for the dependencies installation instead of using the default. | [View defaults](#installing-dependencies)
 | fail_on | Configure if the workflow should fail if a vulnerability of this level or higher is found in the project. This can be `error` to fail only on errors, `warning` to fail on warnings or errors, or `never` to always pass the step.| `error`
-| github_token | GitHub token used to upload the SARIF report to GitHub. The token must have `security_events` write permission. | [`${{ github.token }}`](https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret)
+| github_token | GitHub token used to upload the SARIF report to GitHub. The token must have `security_events` write permission. | [`${{ github.token }}`](https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret) <!-- markdown-link-check-disable-line -->
 | manifest_directory | Path to the directory where the project's manifest is. | Working directory
 | manifest_file | File name (basename) of the manifest file to use for analysis. This file must exist in the `manifest_directory`. If not specified, the action will scan the `manifest_directory` for any of the expected manifest files. | [View defaults](#installing-dependencies) |
 | upload_sarif | Whether or not to upload the generated SARIF file. If this is disabled, vulnerabilities will not be reported in the Security tab. | `true`
@@ -154,7 +154,7 @@ The following snapshot is an example of a CRDA run on a Node.js project.
 
 ## Scanning Pull Requests
 
-This action can run CRDA scans on pull requests. Because the action must check out the pull request's code in order to scan it, the [`pull_request_target` trigger](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target) must be used.
+This action can run CRDA scans on pull requests. Because the action must check out the pull request's code in order to scan it, the [`pull_request_target` trigger](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target) must be used. <!-- markdown-link-check-disable-line -->
 
 Since the pull request's code will be checked out in order to install dependencies, repository maintainers must **manually verify** that the pull request does not include any malicious code before the scan can run. Maintainers can approve the CRDA scan by adding the `CRDA Scan Approved` label.
 
