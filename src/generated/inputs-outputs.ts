@@ -7,6 +7,13 @@ export enum Inputs {
      */
     ANALYSIS_REPORT_NAME = "analysis_report_name",
     /**
+     * File name of the artifact to upload.
+     * By default it is named as 'crda_report'
+     * Required: false
+     * Default: "crda_report"
+     */
+    ARTIFACT_FILENAME = "artifact_filename",
+    /**
      * CRDA collects anonymous usage data, and is disabled by default.
      * If you want this behaviour set this to "true"
      * Required: false
@@ -28,7 +35,7 @@ export enum Inputs {
     DEPS_INSTALL_CMD = "deps_install_cmd",
     /**
      * Fail the workflow if vulnerability is found in the project.
-     * This will lead to workflow failure and sarif file would not be uploaded.
+     * This will lead to workflow failure and SARIF file would not be uploaded.
      * To set failure when vulnerability severity level is either "error" or "warning" set this input to "warning".
      * By default it is set to fail when severity level is "error",
      * or if you don't want to fail the action set this input to "never"
@@ -37,7 +44,7 @@ export enum Inputs {
      */
     FAIL_ON = "fail_on",
     /**
-     * Github token to upload sarif file to the GitHub
+     * Github token to upload SARIF file to the GitHub
      * Required: false
      * Default: "${{ github.token }}"
      */
@@ -61,8 +68,14 @@ export enum Inputs {
      */
     SNYK_TOKEN = "snyk_token",
     /**
-     * Upload the generated sarif file, by default it is set to "true".
-     * If you don't want to upload sarif file set this input to "false"
+     * Upload the generated SARIF and JSON file as an artifact.
+     * Required: false
+     * Default: "true"
+     */
+    UPLOAD_ARTIFACT = "upload_artifact",
+    /**
+     * Upload the generated SARIF file, by default it is set to "true".
+     * If you don't want to upload SARIF file set this input to "false"
      * Required: false
      * Default: "true"
      */
@@ -71,13 +84,19 @@ export enum Inputs {
 
 export enum Outputs {
     /**
+     * Name of the uploaded artifact
+     * Required: false
+     * Default: None.
+     */
+    ARTIFACT_NAME = "artifact_name",
+    /**
      * Generated CRDA Analysis Report in JSON format
      * Required: false
      * Default: None.
      */
     CRDA_REPORT_JSON = "crda_report_json",
     /**
-     * Generated CRDA Analysis Report in Sarif format
+     * Generated CRDA Analysis Report in SARIF format
      * Required: false
      * Default: None.
      */

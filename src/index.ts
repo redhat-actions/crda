@@ -11,6 +11,7 @@ import Crda from "./crda";
 import { convertCRDAReportToSarif } from "./convert";
 import { uploadSarifFile } from "./uploadSarif";
 import { CrdaLabels } from "./util/labelUtils";
+import { uploadSarifJsonArtifact } from "./uploadArtifact";
 
 let prData: prUtils.PrData | undefined;
 let origCheckoutBranch: string;
@@ -181,6 +182,18 @@ async function run(): Promise<void> {
         ghCore.info(`✅ No vulnerabilities were found`);
     }
 
+    const uploadArtifact = ghCore.getBooleanInput(Inputs.UPLOAD_ARTIFACT);
+    const artifactName = ghCore.getInput(Inputs.ARTIFACT_FILENAME) || "crda_report";
+    const files = [ crdaReportSarifPath, crdaReportJsonPath ];
+    let uploadedArtifact: string[] = [];
+    ghCore.info(`⏳ Uploading JSON and SARIF file as an artifact...`);
+    if (uploadArtifact) {
+        uploadedArtifact = await uploadSarifJsonArtifact(artifactName, files);
+    }
+
+    ghCore.info(`✅ Successfully uploaded files: ${uploadedArtifact.join(", ")}`);
+    ghCore.info(`✍️ Setting output "${Outputs.ARTIFACT_NAME}" to ${artifactName}`);
+    ghCore.setOutput(Outputs.ARTIFACT_NAME, artifactName);
 }
 
 run()

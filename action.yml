@@ -29,15 +29,26 @@ inputs:
     description: Existing CRDA key to identify the existing user
     required: false
   github_token:
-    description: Github token to upload sarif file to the GitHub
+    description: Github token to upload SARIF file to the GitHub
     required: false
     default: ${{ github.token }}
   upload_sarif:
     description: |
-      Upload the generated sarif file, by default it is set to "true".
-      If you don't want to upload sarif file set this input to "false"
+      Upload the generated SARIF file, by default it is set to "true".
+      If you don't want to upload SARIF file set this input to "false"
     required: false
     default: "true"
+  upload_artifact:
+    description: |
+      Upload the generated SARIF and JSON file as an artifact.
+    required: false
+    default: "true"
+  artifact_filename:
+    description: |
+      File name of the artifact to upload.
+      By default it is named as 'crda_report'
+    required: false
+    default: "crda_report"
   consent_telemetry:
     description: |
       CRDA collects anonymous usage data, and is disabled by default.
@@ -47,7 +58,7 @@ inputs:
   fail_on:
     description: |
       Fail the workflow if vulnerability is found in the project.
-      This will lead to workflow failure and sarif file would not be uploaded.
+      This will lead to workflow failure and SARIF file would not be uploaded.
       To set failure when vulnerability severity level is either "error" or "warning" set this input to "warning".
       By default it is set to fail when severity level is "error",
       or if you don't want to fail the action set this input to "never"
@@ -58,9 +69,11 @@ outputs:
   crda_report_json:
     description: "Generated CRDA Analysis Report in JSON format"
   crda_report_sarif:
-    description: "Generated CRDA Analysis Report in Sarif format"
+    description: "Generated CRDA Analysis Report in SARIF format"
   report_link:
     description: "CRDA analysis report link"
+  artifact_name:
+    description: "Name of the uploaded artifact"
 
 runs:
   using: 'node12'
