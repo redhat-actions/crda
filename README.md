@@ -143,12 +143,15 @@ The following snapshot is an example of a CRDA run on a Node.js project.
 | manifest_directory | Path to the directory where the project's manifest is. | Working directory
 | manifest_file | File name (basename) of the manifest file to use for analysis. This file must exist in the `manifest_directory`. If not specified, the action will scan the `manifest_directory` for any of the expected manifest files. | [View defaults](#installing-dependencies) |
 | upload_sarif | Whether or not to upload the generated SARIF file. If this is disabled, vulnerabilities will not be reported in the Security tab. | `true`
+| upload_artifact | Upload the generated SARIF and JSON file as an artifact. | `true`
+| artifact_name | File name of the artifact to upload. By default it is named as 'crda_report' | `crda_report`
 
 ## Action Outputs
 
 - **crda_report_json**: Path to generated CRDA analysis report in JSON format.
 - **crda_report_sarif**: Path to generated CRDA analysis report in SARIF format.
 - **report_link**: CRDA Analysis report link.
+- **artifact_name**: Name of the uploaded artifact.
 
 <a id="pr-support"></a>
 

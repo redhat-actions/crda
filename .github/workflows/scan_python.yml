@@ -55,14 +55,5 @@ jobs:
       - name: Print Report Link
         run: echo ${{ steps.scan.outputs.report_link }}
 
-      - name: Save intermediate files
-        run: |
-          mkdir -p uploads
-          mv ${{ steps.scan.outputs.crda_report_json }} uploads
-          mv ${{ steps.scan.outputs.crda_report_sarif }} uploads
-
-      - name: Upload merged Results
-        uses: actions/upload-artifact@v2
-        with:
-          name: scan_result_python.zip
-          path: ./uploads
+      - name: Print Artifact Name
+        run: echo ${{ steps.scan.outputs.artifact_name }}
