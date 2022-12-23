@@ -76,5 +76,5 @@ outputs:
     description: "Name of the uploaded artifact"
 
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'

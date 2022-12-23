@@ -2,7 +2,7 @@
   "name": "crda",
   "version": "1.0.0",
   "engines": {
-    "node": "12"
+    "node": "16"
   },
   "description": "Analyse Vulnerabilities in application dependencies",
   "repository": {
